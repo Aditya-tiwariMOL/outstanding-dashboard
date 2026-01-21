@@ -7,129 +7,85 @@
 
 <style>
 :root {
-  --brand: #0B419B;
-  --bg: #f4f6fa;
-  --border: #e2e6ef;
+  --brand:#0B419B;
+  --bg:#f4f6fa;
+  --border:#e3e8f2;
 }
 
 body {
-  margin: 0;
-  font-family: Inter, Arial, sans-serif;
-  background: var(--bg);
+  margin:0;
+  font-family:Inter, Arial, sans-serif;
+  background:var(--bg);
 }
 
 .container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 16px;
+  max-width:1200px;
+  margin:auto;
+  padding:16px;
 }
 
-h1 {
-  color: var(--brand);
-  margin-bottom: 6px;
-}
+h1 { color:var(--brand); }
+.total { font-size:36px; font-weight:700; }
+.updated { color:#555; margin-bottom:16px; }
 
-.total {
-  font-size: 36px;
-  font-weight: 700;
-}
-
-.updated {
-  color: #555;
-  margin-bottom: 16px;
-}
-
-/* ---------- TABLE (DESKTOP) ---------- */
 .table-wrap {
-  overflow-x: auto;
-  background: #fff;
-  border-radius: 10px;
+  background:#fff;
+  border-radius:10px;
+  overflow-x:auto;
 }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 900px;
+  width:100%;
+  border-collapse:collapse;
+  min-width:900px;
 }
 
 th {
-  background: #eef3fb;
-  color: var(--brand);
-  text-align: left;
-  padding: 12px;
-  font-weight: 600;
+  background:#eef3fb;
+  color:var(--brand);
+  padding:12px;
+  text-align:left;
 }
 
 td {
-  padding: 12px;
-  border-top: 1px solid var(--border);
+  padding:12px;
+  border-top:1px solid var(--border);
 }
 
 .pic {
-  font-weight: 700;
-  cursor: pointer;
-  border-left: 4px solid var(--brand);
+  font-weight:700;
+  cursor:pointer;
+  border-left:4px solid var(--brand);
 }
 
 .customer {
-  background: #fafbfd;
-  cursor: pointer;
+  background:#fafbfd;
+  cursor:pointer;
 }
 
 .invoice {
-  color: #555;
-  font-style: italic;
+  font-style:italic;
+  color:#555;
 }
 
-.bad {
-  color: #d92d20;
-  font-weight: 700;
-}
+.bad { color:#d92d20; font-weight:700; }
 
-.click {
-  user-select: none;
-}
-
-/* ---------- MOBILE CARDS ---------- */
-.mobile {
-  display: none;
-}
-
+/* MOBILE */
+.mobile { display:none; }
 .card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 12px;
-  border-left: 5px solid var(--brand);
+  background:#fff;
+  border-radius:10px;
+  padding:14px;
+  margin-bottom:12px;
+  border-left:5px solid var(--brand);
 }
+.row { display:flex; justify-content:space-between; margin:4px 0; }
+.sub { background:#f7f9fc; margin-top:10px; padding:10px; border-radius:8px; }
+.inv { font-size:13px; margin-left:8px; }
 
-.card h3 {
-  margin: 0 0 8px;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  margin: 4px 0;
-}
-
-.sub {
-  background: #f7f9fc;
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.inv {
-  font-size: 13px;
-  color: #444;
-  margin-left: 8px;
-}
-
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 768px) {
-  .table-wrap { display: none; }
-  .mobile { display: block; }
+@media(max-width:768px){
+  .table-wrap { display:none; }
+  .mobile { display:block; }
 }
 </style>
 </head>
@@ -147,13 +103,13 @@ td {
         <tr>
           <th>Sales PIC</th>
           <th>Total</th>
-          <th>90+ Days</th>
-          <th>61–90 Days</th>
-          <th>31–60 Days</th>
-          <th>1–30 Days</th>
+          <th>90+</th>
+          <th>61–90</th>
+          <th>31–60</th>
+          <th>1–30</th>
         </tr>
       </thead>
-      <tbody id="tableBody"></tbody>
+      <tbody id="tbody"></tbody>
     </table>
   </div>
 
@@ -162,109 +118,98 @@ td {
 </div>
 
 <script>
-const API = "YOUR_APPS_SCRIPT_URL_HERE";
+const API_URL = "PASTE_YOUR_APPS_SCRIPT_URL";
 
-let openPIC = null;
-let openCustomer = null;
+fetch(API_URL)
+.then(r=>r.json())
+.then(data=>{
+  document.getElementById("grandTotal").innerText =
+    "₹ " + data.grandTotal.toLocaleString("en-IN");
+  document.getElementById("updated").innerText =
+    "Last updated: " + new Date(data.lastUpdated).toLocaleString();
 
-fetch(API)
-  .then(r => r.json())
-  .then(data => {
-    document.getElementById("grandTotal").innerText =
-      "₹ " + data.grandTotal.toLocaleString("en-IN");
-    document.getElementById("updated").innerText =
-      "Last updated: " + new Date(data.lastUpdated).toLocaleString();
+  renderDesktop(data.salesPICs);
+  renderMobile(data.salesPICs);
+});
 
-    renderDesktop(data.salesPICs);
-    renderMobile(data.salesPICs);
-  });
+function clearNonPICRows() {
+  document.querySelectorAll("tr[data-type]").forEach(r=>r.remove());
+}
 
-/* ---------- DESKTOP ---------- */
 function renderDesktop(pics) {
-  const tb = document.getElementById("tableBody");
+  const tb = document.getElementById("tbody");
   tb.innerHTML = "";
 
-  Object.entries(pics).forEach(([pic, p]) => {
-    const r = row("pic", pic, p);
-    r.onclick = () => togglePIC(r, p.customers);
-    tb.appendChild(r);
+  Object.entries(pics).forEach(([pic,p])=>{
+    const tr = document.createElement("tr");
+    tr.className="pic";
+    tr.dataset.pic=pic;
+    tr.innerHTML = rowHTML("▶ "+pic,p);
+    tr.onclick = ()=>togglePIC(tr,p.customers);
+    tb.appendChild(tr);
   });
 }
 
-function togglePIC(rowEl, customers) {
-  closeAll();
-  openPIC = rowEl;
+function togglePIC(picRow, customers) {
+  clearNonPICRows();
 
-  let ref = rowEl;
-  Object.entries(customers).forEach(([c, cObj]) => {
-    const r = row("customer", c, cObj, 20);
-    r.onclick = e => {
+  Object.entries(customers).forEach(([c,cObj])=>{
+    const tr = document.createElement("tr");
+    tr.className="customer";
+    tr.dataset.type="customer";
+    tr.dataset.parent=picRow.dataset.pic;
+    tr.innerHTML = rowHTML("▶ "+c,cObj,20);
+    tr.onclick = e=>{
       e.stopPropagation();
-      toggleCustomer(r, cObj.invoices);
+      toggleCustomer(tr,cObj.invoices);
     };
-    ref.after(r);
-    ref = r;
+    picRow.after(tr);
+    picRow = tr;
   });
 }
 
-function toggleCustomer(rowEl, invoices) {
-  removeType("invoice");
-  openCustomer = rowEl;
+function toggleCustomer(customerRow, invoices) {
+  document.querySelectorAll("tr[data-type='invoice']").forEach(r=>r.remove());
 
-  let ref = rowEl;
-  invoices.forEach(i => {
-    const r = row("invoice", i.invoiceNo, i, 40);
-    ref.after(r);
-    ref = r;
+  invoices.forEach(inv=>{
+    const tr = document.createElement("tr");
+    tr.className="invoice";
+    tr.dataset.type="invoice";
+    tr.innerHTML = rowHTML(inv.invoiceNo,inv,40);
+    customerRow.after(tr);
+    customerRow = tr;
   });
 }
 
-function closeAll() {
-  removeType("customer");
-  removeType("invoice");
-  openPIC = null;
-  openCustomer = null;
-}
-
-function removeType(cls) {
-  document.querySelectorAll("." + cls).forEach(r => r.remove());
-}
-
-function row(cls, name, o, pad = 0) {
-  const tr = document.createElement("tr");
-  tr.className = cls + " click";
-  tr.innerHTML = `
-    <td style="padding-left:${pad}px">▶ ${name}</td>
+function rowHTML(label,o,pad=0){
+  return `
+    <td style="padding-left:${pad}px">${label}</td>
     <td>${fmt(o.total)}</td>
-    <td class="${o.d90 ? 'bad':''}">${fmt(o.d90)}</td>
+    <td class="${o.d90?'bad':''}">${fmt(o.d90)}</td>
     <td>${fmt(o.d61_90)}</td>
     <td>${fmt(o.d31_60)}</td>
     <td>${fmt(o.d1_30)}</td>`;
-  return tr;
 }
 
-/* ---------- MOBILE ---------- */
-function renderMobile(pics) {
-  const box = document.getElementById("mobile");
-  box.innerHTML = "";
-
-  Object.entries(pics).forEach(([pic, p]) => {
-    const c = document.createElement("div");
-    c.className = "card";
-    c.innerHTML = `
-      <h3>${pic}</h3>
+/* MOBILE */
+function renderMobile(pics){
+  const box=document.getElementById("mobile");
+  box.innerHTML="";
+  Object.entries(pics).forEach(([pic,p])=>{
+    const c=document.createElement("div");
+    c.className="card";
+    c.innerHTML=`
+      <b>${pic}</b>
       <div class="row"><span>Total</span><b>${fmt(p.total)}</b></div>
-      <div class="row"><span>90+</span><b class="bad">${fmt(p.d90)}</b></div>
-    `;
-
-    c.onclick = () => {
-      c.querySelectorAll(".sub").forEach(e => e.remove());
-      Object.entries(p.customers).forEach(([cn, co]) => {
-        const s = document.createElement("div");
-        s.className = "sub";
-        s.innerHTML = `<b>${cn}</b>`;
-        co.invoices.forEach(i => {
-          s.innerHTML += `<div class="inv">${i.invoiceNo} – ₹ ${fmt(i.total)}</div>`;
+      <div class="row"><span>90+</span><b class="bad">${fmt(p.d90)}</b></div>`;
+    c.onclick=()=>{
+      c.querySelectorAll(".sub").forEach(e=>e.remove());
+      Object.entries(p.customers).forEach(([cn,co])=>{
+        const s=document.createElement("div");
+        s.className="sub";
+        s.innerHTML="<b>"+cn+"</b>";
+        co.invoices.forEach(i=>{
+          s.innerHTML+=`<div class="inv">${i.invoiceNo} – ₹ ${fmt(i.total)}</div>`;
         });
         c.appendChild(s);
       });
@@ -273,9 +218,7 @@ function renderMobile(pics) {
   });
 }
 
-function fmt(v) {
-  return v ? v.toLocaleString("en-IN") : "–";
-}
+function fmt(v){ return v ? v.toLocaleString("en-IN") : "–"; }
 </script>
 </body>
 </html>
