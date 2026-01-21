@@ -97,6 +97,9 @@
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
+let openPICRow = null;
+let openCustomerRow = null;
+
 function fmt(n) {
   return n ? Number(n).toLocaleString("en-IN") : "–";
 }
@@ -121,6 +124,7 @@ function renderPICs(pics) {
     const picRow = document.createElement("tr");
     picRow.className = "clickable";
     picRow.dataset.type = "pic";
+    picRow.dataset.open = "false";
 
     picRow.innerHTML = `
       <td><b>▶ ${picName}</b></td>
@@ -137,19 +141,32 @@ function renderPICs(pics) {
 }
 
 function toggleCustomers(picRow, customers) {
+  // Close previously open PIC
+  if (openPICRow && openPICRow !== picRow) {
+    removeBelow(openPICRow, "customer");
+    openPICRow.dataset.open = "false";
+  }
+
+  // Toggle same PIC
   if (picRow.dataset.open === "true") {
     removeBelow(picRow, "customer");
     picRow.dataset.open = "false";
+    openPICRow = null;
+    openCustomerRow = null;
     return;
   }
 
   picRow.dataset.open = "true";
+  openPICRow = picRow;
+  openCustomerRow = null;
+
   let ref = picRow;
 
   Object.entries(customers).forEach(([custName, cust]) => {
     const row = document.createElement("tr");
     row.className = "customer clickable";
     row.dataset.type = "customer";
+    row.dataset.open = "false";
 
     row.innerHTML = `
       <td style="padding-left:30px;">▶ ${custName}</td>
@@ -171,18 +188,29 @@ function toggleCustomers(picRow, customers) {
 }
 
 function toggleInvoices(custRow, invoices) {
+  // Close previously open customer
+  if (openCustomerRow && openCustomerRow !== custRow) {
+    removeBelow(openCustomerRow, "invoice");
+    openCustomerRow.dataset.open = "false";
+  }
+
+  // Toggle same customer
   if (custRow.dataset.open === "true") {
     removeBelow(custRow, "invoice");
     custRow.dataset.open = "false";
+    openCustomerRow = null;
     return;
   }
 
   custRow.dataset.open = "true";
+  openCustomerRow = custRow;
+
   let ref = custRow;
 
   invoices.forEach(inv => {
     const row = document.createElement("tr");
     row.className = "invoice";
+    row.dataset.type = "invoice";
 
     row.innerHTML = `
       <td style="padding-left:60px;">${inv.invoiceNo}</td>
