@@ -97,46 +97,109 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-    function formatNumber(num) {
-      return Number(num).toLocaleString("en-IN");
+  function formatNumber(num) {
+    return Number(num).toLocaleString("en-IN");
+  }
+
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("totalOutstanding").innerText =
+        "₹ " + formatNumber(data.grandTotal);
+
+      document.getElementById("lastUpdated").innerText =
+        "Last updated: " + new Date(data.lastUpdated).toLocaleString();
+
+      renderSalesPICs(data.salesPICs);
+    });
+
+  function renderSalesPICs(salesPICs) {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    Object.entries(salesPICs).forEach(([pic, picObj]) => {
+      const tr = document.createElement("tr");
+      tr.style.cursor = "pointer";
+      tr.innerHTML = `
+        <td><b>▶ ${pic}</b></td>
+        <td><b>${formatNumber(picObj.total)}</b></td>
+        <td class="risk">${picObj.d90 ? formatNumber(picObj.d90) : "–"}</td>
+        <td>${picObj.d61_90 ? formatNumber(picObj.d61_90) : "–"}</td>
+        <td>${picObj.d31_60 ? formatNumber(picObj.d31_60) : "–"}</td>
+        <td>${picObj.d1_30 ? formatNumber(picObj.d1_30) : "–"}</td>
+      `;
+
+      tr.addEventListener("click", () => toggleCustomers(tr, picObj.customers));
+      tbody.appendChild(tr);
+    });
+  }
+
+  function toggleCustomers(parentRow, customers) {
+    if (parentRow.nextSibling?.classList?.contains("customer-row")) {
+      removeRows(parentRow, "customer-row");
+      return;
     }
 
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => {
-        // Header
-        document.getElementById("totalOutstanding").innerText =
-          "₹ " + formatNumber(data.grandTotal);
+    Object.entries(customers).forEach(([cust, custObj]) => {
+      const tr = document.createElement("tr");
+      tr.classList.add("customer-row");
+      tr.style.background = "#fafafa";
+      tr.style.cursor = "pointer";
 
-        document.getElementById("lastUpdated").innerText =
-          "Last updated: " + new Date(data.lastUpdated).toLocaleString();
+      tr.innerHTML = `
+        <td style="padding-left:30px;">▶ ${cust}</td>
+        <td>${formatNumber(custObj.total)}</td>
+        <td>${custObj.d90 ? formatNumber(custObj.d90) : "–"}</td>
+        <td>${custObj.d61_90 ? formatNumber(custObj.d61_90) : "–"}</td>
+        <td>${custObj.d31_60 ? formatNumber(custObj.d31_60) : "–"}</td>
+        <td>${custObj.d1_30 ? formatNumber(custObj.d1_30) : "–"}</td>
+      `;
 
-        // Table
-        const tbody = document.getElementById("tableBody");
-        tbody.innerHTML = "";
-
-        Object.entries(data.salesPICs).forEach(([pic, obj]) => {
-          const tr = document.createElement("tr");
-
-          tr.innerHTML = `
-            <td>${pic}</td>
-            <td><b>${formatNumber(obj.total)}</b></td>
-            <td class="risk">${obj.d90 ? formatNumber(obj.d90) : "–"}</td>
-            <td>${obj.d61_90 ? formatNumber(obj.d61_90) : "–"}</td>
-            <td>${obj.d31_60 ? formatNumber(obj.d31_60) : "–"}</td>
-            <td>${obj.d1_30 ? formatNumber(obj.d1_30) : "–"}</td>
-          `;
-
-          tbody.appendChild(tr);
-        });
-      })
-      .catch(err => {
-        document.getElementById("tableBody").innerHTML =
-          "<tr><td colspan='6'>Error loading data</td></tr>";
-        console.error(err);
+      tr.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleInvoices(tr, custObj.invoices);
       });
-  </script>
+
+      parentRow.after(tr);
+      parentRow = tr;
+    });
+  }
+
+  function toggleInvoices(parentRow, invoices) {
+    if (parentRow.nextSibling?.classList?.contains("invoice-row")) {
+      removeRows(parentRow, "invoice-row");
+      return;
+    }
+
+    invoices.forEach(inv => {
+      const tr = document.createElement("tr");
+      tr.classList.add("invoice-row");
+      tr.style.background = "#fdfdfd";
+
+      tr.innerHTML = `
+        <td style="padding-left:60px;">${inv.invoiceNo}</td>
+        <td>${formatNumber(inv.total)}</td>
+        <td>${inv.d90 ? formatNumber(inv.d90) : "–"}</td>
+        <td>${inv.d61_90 ? formatNumber(inv.d61_90) : "–"}</td>
+        <td>${inv.d31_60 ? formatNumber(inv.d31_60) : "–"}</td>
+        <td>${inv.d1_30 ? formatNumber(inv.d1_30) : "–"}</td>
+      `;
+
+      parentRow.after(tr);
+      parentRow = tr;
+    });
+  }
+
+  function removeRows(startRow, className) {
+    let next = startRow.nextSibling;
+    while (next && next.classList.contains(className)) {
+      const toRemove = next;
+      next = next.nextSibling;
+      toRemove.remove();
+    }
+  }
+</script>
 </body>
 </html>
