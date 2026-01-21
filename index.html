@@ -3,38 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <title>Outstanding Receivables Dashboard</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f7f7f7;
       margin: 0;
       padding: 20px;
-      color: #222;
     }
 
     .container {
-      max-width: 1100px;
-      margin: auto;
       background: #fff;
       padding: 20px 24px 30px;
-      border-radius: 6px;
     }
 
     .logo {
       font-size: 22px;
       font-weight: bold;
-      margin-bottom: 6px;
     }
 
     .total {
-      font-size: 28px;
+      font-size: 30px;
       font-weight: bold;
       margin-top: 10px;
     }
 
     .updated {
-      color: #666;
       font-size: 13px;
+      color: #666;
       margin-bottom: 20px;
     }
 
@@ -56,16 +52,23 @@
 
     th {
       background: #f0f0f0;
-      font-weight: 600;
+    }
+
+    tr.clickable {
+      cursor: pointer;
+    }
+
+    tr.customer {
+      background: #fafafa;
+    }
+
+    tr.invoice {
+      background: #fcfcfc;
     }
 
     .risk {
       color: #c0392b;
-      font-weight: 600;
-    }
-
-    .muted {
-      color: #999;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -73,8 +76,7 @@
 <body>
   <div class="container">
     <div class="logo">Outstanding Receivables Dashboard</div>
-
-    <div class="total" id="totalOutstanding">Loading...</div>
+    <div class="total" id="totalOutstanding">Loading…</div>
     <div class="updated" id="lastUpdated"></div>
 
     <table>
@@ -88,118 +90,122 @@
           <th>1–30 Days</th>
         </tr>
       </thead>
-      <tbody id="tableBody">
-        <tr>
-          <td colspan="6" class="muted">Loading data...</td>
-        </tr>
-      </tbody>
+      <tbody id="tableBody"></tbody>
     </table>
   </div>
 
-  <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-  function formatNumber(num) {
-    return Number(num).toLocaleString("en-IN");
+function fmt(n) {
+  return n ? Number(n).toLocaleString("en-IN") : "–";
+}
+
+fetch(API_URL)
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("totalOutstanding").innerText =
+      "₹ " + Number(data.grandTotal).toLocaleString("en-IN");
+
+    document.getElementById("lastUpdated").innerText =
+      "Last updated: " + new Date(data.lastUpdated).toLocaleString();
+
+    renderPICs(data.salesPICs);
+  });
+
+function renderPICs(pics) {
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  Object.entries(pics).forEach(([picName, pic]) => {
+    const picRow = document.createElement("tr");
+    picRow.className = "clickable";
+    picRow.dataset.type = "pic";
+
+    picRow.innerHTML = `
+      <td><b>▶ ${picName}</b></td>
+      <td><b>${fmt(pic.total)}</b></td>
+      <td class="risk">${fmt(pic.d90)}</td>
+      <td>${fmt(pic.d61_90)}</td>
+      <td>${fmt(pic.d31_60)}</td>
+      <td>${fmt(pic.d1_30)}</td>
+    `;
+
+    picRow.onclick = () => toggleCustomers(picRow, pic.customers);
+    tbody.appendChild(picRow);
+  });
+}
+
+function toggleCustomers(picRow, customers) {
+  if (picRow.dataset.open === "true") {
+    removeBelow(picRow, "customer");
+    picRow.dataset.open = "false";
+    return;
   }
 
-  fetch(API_URL)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("totalOutstanding").innerText =
-        "₹ " + formatNumber(data.grandTotal);
+  picRow.dataset.open = "true";
+  let ref = picRow;
 
-      document.getElementById("lastUpdated").innerText =
-        "Last updated: " + new Date(data.lastUpdated).toLocaleString();
+  Object.entries(customers).forEach(([custName, cust]) => {
+    const row = document.createElement("tr");
+    row.className = "customer clickable";
+    row.dataset.type = "customer";
 
-      renderSalesPICs(data.salesPICs);
-    });
+    row.innerHTML = `
+      <td style="padding-left:30px;">▶ ${custName}</td>
+      <td>${fmt(cust.total)}</td>
+      <td>${fmt(cust.d90)}</td>
+      <td>${fmt(cust.d61_90)}</td>
+      <td>${fmt(cust.d31_60)}</td>
+      <td>${fmt(cust.d1_30)}</td>
+    `;
 
-  function renderSalesPICs(salesPICs) {
-    const tbody = document.getElementById("tableBody");
-    tbody.innerHTML = "";
+    row.onclick = (e) => {
+      e.stopPropagation();
+      toggleInvoices(row, cust.invoices);
+    };
 
-    Object.entries(salesPICs).forEach(([pic, picObj]) => {
-      const tr = document.createElement("tr");
-      tr.style.cursor = "pointer";
-      tr.innerHTML = `
-        <td><b>▶ ${pic}</b></td>
-        <td><b>${formatNumber(picObj.total)}</b></td>
-        <td class="risk">${picObj.d90 ? formatNumber(picObj.d90) : "–"}</td>
-        <td>${picObj.d61_90 ? formatNumber(picObj.d61_90) : "–"}</td>
-        <td>${picObj.d31_60 ? formatNumber(picObj.d31_60) : "–"}</td>
-        <td>${picObj.d1_30 ? formatNumber(picObj.d1_30) : "–"}</td>
-      `;
+    ref.after(row);
+    ref = row;
+  });
+}
 
-      tr.addEventListener("click", () => toggleCustomers(tr, picObj.customers));
-      tbody.appendChild(tr);
-    });
+function toggleInvoices(custRow, invoices) {
+  if (custRow.dataset.open === "true") {
+    removeBelow(custRow, "invoice");
+    custRow.dataset.open = "false";
+    return;
   }
 
-  function toggleCustomers(parentRow, customers) {
-    if (parentRow.nextSibling?.classList?.contains("customer-row")) {
-      removeRows(parentRow, "customer-row");
-      return;
-    }
+  custRow.dataset.open = "true";
+  let ref = custRow;
 
-    Object.entries(customers).forEach(([cust, custObj]) => {
-      const tr = document.createElement("tr");
-      tr.classList.add("customer-row");
-      tr.style.background = "#fafafa";
-      tr.style.cursor = "pointer";
+  invoices.forEach(inv => {
+    const row = document.createElement("tr");
+    row.className = "invoice";
 
-      tr.innerHTML = `
-        <td style="padding-left:30px;">▶ ${cust}</td>
-        <td>${formatNumber(custObj.total)}</td>
-        <td>${custObj.d90 ? formatNumber(custObj.d90) : "–"}</td>
-        <td>${custObj.d61_90 ? formatNumber(custObj.d61_90) : "–"}</td>
-        <td>${custObj.d31_60 ? formatNumber(custObj.d31_60) : "–"}</td>
-        <td>${custObj.d1_30 ? formatNumber(custObj.d1_30) : "–"}</td>
-      `;
+    row.innerHTML = `
+      <td style="padding-left:60px;">${inv.invoiceNo}</td>
+      <td>${fmt(inv.total)}</td>
+      <td>${fmt(inv.d90)}</td>
+      <td>${fmt(inv.d61_90)}</td>
+      <td>${fmt(inv.d31_60)}</td>
+      <td>${fmt(inv.d1_30)}</td>
+    `;
 
-      tr.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleInvoices(tr, custObj.invoices);
-      });
+    ref.after(row);
+    ref = row;
+  });
+}
 
-      parentRow.after(tr);
-      parentRow = tr;
-    });
+function removeBelow(startRow, type) {
+  let next = startRow.nextSibling;
+  while (next && next.dataset.type === type) {
+    const remove = next;
+    next = next.nextSibling;
+    remove.remove();
   }
-
-  function toggleInvoices(parentRow, invoices) {
-    if (parentRow.nextSibling?.classList?.contains("invoice-row")) {
-      removeRows(parentRow, "invoice-row");
-      return;
-    }
-
-    invoices.forEach(inv => {
-      const tr = document.createElement("tr");
-      tr.classList.add("invoice-row");
-      tr.style.background = "#fdfdfd";
-
-      tr.innerHTML = `
-        <td style="padding-left:60px;">${inv.invoiceNo}</td>
-        <td>${formatNumber(inv.total)}</td>
-        <td>${inv.d90 ? formatNumber(inv.d90) : "–"}</td>
-        <td>${inv.d61_90 ? formatNumber(inv.d61_90) : "–"}</td>
-        <td>${inv.d31_60 ? formatNumber(inv.d31_60) : "–"}</td>
-        <td>${inv.d1_30 ? formatNumber(inv.d1_30) : "–"}</td>
-      `;
-
-      parentRow.after(tr);
-      parentRow = tr;
-    });
-  }
-
-  function removeRows(startRow, className) {
-    let next = startRow.nextSibling;
-    while (next && next.classList.contains(className)) {
-      const toRemove = next;
-      next = next.nextSibling;
-      toRemove.remove();
-    }
-  }
+}
 </script>
 </body>
 </html>
