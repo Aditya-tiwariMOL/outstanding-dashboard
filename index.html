@@ -2,178 +2,177 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Outstanding Receivables Dashboard</title>
 
 <style>
 :root {
   --brand: #0B419B;
-  --danger: #c0392b;
-  --bg: #f5f7fb;
-  --border: #e3e6ee;
+  --bg: #f4f6fa;
+  --border: #e2e6ef;
 }
 
 body {
   margin: 0;
-  padding: 14px;
-  font-family: Arial, sans-serif;
+  font-family: Inter, Arial, sans-serif;
   background: var(--bg);
 }
 
 .container {
-  background: #fff;
+  max-width: 1200px;
+  margin: auto;
   padding: 16px;
-  border-radius: 8px;
 }
 
-/* HEADER */
-.logo {
-  font-size: 20px;
-  font-weight: 700;
+h1 {
   color: var(--brand);
+  margin-bottom: 6px;
 }
 
 .total {
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 700;
-  margin-top: 6px;
 }
 
 .updated {
-  font-size: 13px;
-  color: #666;
+  color: #555;
   margin-bottom: 16px;
 }
 
-/* DESKTOP TABLE */
-.table-wrapper {
+/* ---------- TABLE (DESKTOP) ---------- */
+.table-wrap {
   overflow-x: auto;
+  background: #fff;
+  border-radius: 10px;
 }
 
 table {
   width: 100%;
-  min-width: 900px;
   border-collapse: collapse;
-  font-size: 14px;
-}
-
-th, td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  text-align: right;
-  white-space: nowrap;
-}
-
-th:first-child, td:first-child {
-  text-align: left;
+  min-width: 900px;
 }
 
 th {
-  background: #eef2fb;
+  background: #eef3fb;
   color: var(--brand);
+  text-align: left;
+  padding: 12px;
+  font-weight: 600;
 }
 
-/* ROW TYPES */
-tr.pic { font-weight: 600; cursor: pointer; }
-tr.pic td:first-child { border-left: 4px solid var(--brand); }
+td {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
 
-tr.customer {
-  background: #f9fafc;
+.pic {
+  font-weight: 700;
+  cursor: pointer;
+  border-left: 4px solid var(--brand);
+}
+
+.customer {
+  background: #fafbfd;
   cursor: pointer;
 }
-tr.customer td:first-child {
-  padding-left: 32px;
-  font-weight: 500;
-}
 
-tr.invoice {
-  background: #fff;
+.invoice {
   color: #555;
-  font-size: 13px;
-}
-tr.invoice td:first-child {
-  padding-left: 56px;
   font-style: italic;
 }
 
-.risk { color: var(--danger); font-weight: 700; }
+.bad {
+  color: #d92d20;
+  font-weight: 700;
+}
 
-/* MOBILE CARD VIEW */
-.mobile-view { display: none; }
+.click {
+  user-select: none;
+}
+
+/* ---------- MOBILE CARDS ---------- */
+.mobile {
+  display: none;
+}
 
 .card {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
   margin-bottom: 12px;
+  border-left: 5px solid var(--brand);
 }
 
 .card h3 {
-  margin: 0 0 6px;
-  color: var(--brand);
-  font-size: 16px;
+  margin: 0 0 8px;
 }
 
-.kv {
+.row {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
-  padding: 4px 0;
+  margin: 4px 0;
 }
 
-.kv strong { color: #000; }
+.sub {
+  background: #f7f9fc;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+}
 
-/* RESPONSIVE SWITCH */
+.inv {
+  font-size: 13px;
+  color: #444;
+  margin-left: 8px;
+}
+
+/* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
-  .table-wrapper { display: none; }
-  .mobile-view { display: block; }
+  .table-wrap { display: none; }
+  .mobile { display: block; }
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-  <div class="logo">Outstanding Receivables Dashboard</div>
-  <div class="total" id="totalOutstanding">Loading…</div>
-  <div class="updated" id="lastUpdated"></div>
+  <h1>Outstanding Receivables Dashboard</h1>
+  <div class="total" id="grandTotal">₹ 0</div>
+  <div class="updated" id="updated"></div>
 
-  <!-- DESKTOP TABLE -->
-  <div class="table-wrapper">
+  <!-- DESKTOP -->
+  <div class="table-wrap">
     <table>
       <thead>
         <tr>
           <th>Sales PIC</th>
           <th>Total</th>
-          <th>90+</th>
-          <th>61–90</th>
-          <th>31–60</th>
-          <th>1–30</th>
+          <th>90+ Days</th>
+          <th>61–90 Days</th>
+          <th>31–60 Days</th>
+          <th>1–30 Days</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
   </div>
 
-  <!-- MOBILE CARDS -->
-  <div class="mobile-view" id="mobileCards"></div>
+  <!-- MOBILE -->
+  <div class="mobile" id="mobile"></div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+const API = "YOUR_APPS_SCRIPT_URL_HERE";
 
-let openPICRow = null;
-let openCustomerRow = null;
+let openPIC = null;
+let openCustomer = null;
 
-const fmt = n => n ? Number(n).toLocaleString("en-IN") : "–";
-
-fetch(API_URL)
+fetch(API)
   .then(r => r.json())
   .then(data => {
-    document.getElementById("totalOutstanding").innerText =
-      "₹ " + fmt(data.grandTotal);
-
-    document.getElementById("lastUpdated").innerText =
+    document.getElementById("grandTotal").innerText =
+      "₹ " + data.grandTotal.toLocaleString("en-IN");
+    document.getElementById("updated").innerText =
       "Last updated: " + new Date(data.lastUpdated).toLocaleString();
 
     renderDesktop(data.salesPICs);
@@ -182,137 +181,100 @@ fetch(API_URL)
 
 /* ---------- DESKTOP ---------- */
 function renderDesktop(pics) {
-  const tbody = document.getElementById("tableBody");
-  tbody.innerHTML = "";
+  const tb = document.getElementById("tableBody");
+  tb.innerHTML = "";
 
-  Object.entries(pics).forEach(([picName, pic]) => {
-    const picRow = document.createElement("tr");
-    picRow.className = "pic";
-    picRow.dataset.type = "pic";
-    picRow.dataset.open = "false";
-
-    picRow.innerHTML = `
-      <td>▶ ${picName}</td>
-      <td>${fmt(pic.total)}</td>
-      <td class="risk">${fmt(pic.d90)}</td>
-      <td>${fmt(pic.d61_90)}</td>
-      <td>${fmt(pic.d31_60)}</td>
-      <td>${fmt(pic.d1_30)}</td>
-    `;
-
-    picRow.onclick = () => toggleCustomers(picRow, pic.customers);
-    tbody.appendChild(picRow);
+  Object.entries(pics).forEach(([pic, p]) => {
+    const r = row("pic", pic, p);
+    r.onclick = () => togglePIC(r, p.customers);
+    tb.appendChild(r);
   });
 }
 
-function toggleCustomers(picRow, customers) {
-  if (openPICRow && openPICRow !== picRow) {
-    removeBelow(openPICRow, "customer");
-    removeBelow(openPICRow, "invoice");
-    openPICRow.dataset.open = "false";
-    openCustomerRow = null;
-  }
+function togglePIC(rowEl, customers) {
+  closeAll();
+  openPIC = rowEl;
 
-  if (picRow.dataset.open === "true") {
-    removeBelow(picRow, "customer");
-    removeBelow(picRow, "invoice");
-    picRow.dataset.open = "false";
-    openPICRow = null;
-    openCustomerRow = null;
-    return;
-  }
-
-  picRow.dataset.open = "true";
-  openPICRow = picRow;
-
-  let ref = picRow;
-  Object.entries(customers).forEach(([custName, cust]) => {
-    const row = document.createElement("tr");
-    row.className = "customer";
-    row.dataset.type = "customer";
-    row.dataset.open = "false";
-
-    row.innerHTML = `
-      <td>▶ ${custName}</td>
-      <td>${fmt(cust.total)}</td>
-      <td>${fmt(cust.d90)}</td>
-      <td>${fmt(cust.d61_90)}</td>
-      <td>${fmt(cust.d31_60)}</td>
-      <td>${fmt(cust.d1_30)}</td>
-    `;
-
-    row.onclick = e => {
+  let ref = rowEl;
+  Object.entries(customers).forEach(([c, cObj]) => {
+    const r = row("customer", c, cObj, 20);
+    r.onclick = e => {
       e.stopPropagation();
-      toggleInvoices(row, cust.invoices);
+      toggleCustomer(r, cObj.invoices);
     };
-
-    ref.after(row);
-    ref = row;
+    ref.after(r);
+    ref = r;
   });
 }
 
-function toggleInvoices(custRow, invoices) {
-  if (openCustomerRow && openCustomerRow !== custRow) {
-    removeBelow(openCustomerRow, "invoice");
-    openCustomerRow.dataset.open = "false";
-  }
+function toggleCustomer(rowEl, invoices) {
+  removeType("invoice");
+  openCustomer = rowEl;
 
-  if (custRow.dataset.open === "true") {
-    removeBelow(custRow, "invoice");
-    custRow.dataset.open = "false";
-    openCustomerRow = null;
-    return;
-  }
-
-  custRow.dataset.open = "true";
-  openCustomerRow = custRow;
-
-  let ref = custRow;
-  invoices.forEach(inv => {
-    const row = document.createElement("tr");
-    row.className = "invoice";
-    row.dataset.type = "invoice";
-    row.innerHTML = `
-      <td>${inv.invoiceNo}</td>
-      <td>${fmt(inv.total)}</td>
-      <td>${fmt(inv.d90)}</td>
-      <td>${fmt(inv.d61_90)}</td>
-      <td>${fmt(inv.d31_60)}</td>
-      <td>${fmt(inv.d1_30)}</td>
-    `;
-    ref.after(row);
-    ref = row;
+  let ref = rowEl;
+  invoices.forEach(i => {
+    const r = row("invoice", i.invoiceNo, i, 40);
+    ref.after(r);
+    ref = r;
   });
 }
 
-function removeBelow(start, type) {
-  let n = start.nextSibling;
-  while (n && n.dataset.type === type) {
-    const r = n;
-    n = n.nextSibling;
-    r.remove();
-  }
+function closeAll() {
+  removeType("customer");
+  removeType("invoice");
+  openPIC = null;
+  openCustomer = null;
+}
+
+function removeType(cls) {
+  document.querySelectorAll("." + cls).forEach(r => r.remove());
+}
+
+function row(cls, name, o, pad = 0) {
+  const tr = document.createElement("tr");
+  tr.className = cls + " click";
+  tr.innerHTML = `
+    <td style="padding-left:${pad}px">▶ ${name}</td>
+    <td>${fmt(o.total)}</td>
+    <td class="${o.d90 ? 'bad':''}">${fmt(o.d90)}</td>
+    <td>${fmt(o.d61_90)}</td>
+    <td>${fmt(o.d31_60)}</td>
+    <td>${fmt(o.d1_30)}</td>`;
+  return tr;
 }
 
 /* ---------- MOBILE ---------- */
 function renderMobile(pics) {
-  const box = document.getElementById("mobileCards");
+  const box = document.getElementById("mobile");
   box.innerHTML = "";
 
-  Object.entries(pics).forEach(([name, pic]) => {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
-      <h3>${name}</h3>
-      <div class="kv"><span>Total</span><strong>₹ ${fmt(pic.total)}</strong></div>
-      <div class="kv"><span>90+</span><span class="risk">${fmt(pic.d90)}</span></div>
-      <div class="kv"><span>61–90</span><span>${fmt(pic.d61_90)}</span></div>
-      <div class="kv"><span>31–60</span><span>${fmt(pic.d31_60)}</span></div>
-      <div class="kv"><span>1–30</span><span>${fmt(pic.d1_30)}</span></div>
+  Object.entries(pics).forEach(([pic, p]) => {
+    const c = document.createElement("div");
+    c.className = "card";
+    c.innerHTML = `
+      <h3>${pic}</h3>
+      <div class="row"><span>Total</span><b>${fmt(p.total)}</b></div>
+      <div class="row"><span>90+</span><b class="bad">${fmt(p.d90)}</b></div>
     `;
-    box.appendChild(card);
+
+    c.onclick = () => {
+      c.querySelectorAll(".sub").forEach(e => e.remove());
+      Object.entries(p.customers).forEach(([cn, co]) => {
+        const s = document.createElement("div");
+        s.className = "sub";
+        s.innerHTML = `<b>${cn}</b>`;
+        co.invoices.forEach(i => {
+          s.innerHTML += `<div class="inv">${i.invoiceNo} – ₹ ${fmt(i.total)}</div>`;
+        });
+        c.appendChild(s);
+      });
+    };
+    box.appendChild(c);
   });
+}
+
+function fmt(v) {
+  return v ? v.toLocaleString("en-IN") : "–";
 }
 </script>
 </body>
