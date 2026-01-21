@@ -1,84 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Outstanding Receivables Dashboard</title>
+<meta charset="UTF-8" />
+<title>Outstanding Receivables Dashboard</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f7f7;
-      margin: 0;
-      padding: 20px;
-    }
+<style>
+:root {
+  --brand: #0B419B;
+  --light-bg: #f5f7fb;
+  --row-border: #e3e6ee;
+}
 
-    .container {
-      background: #fff;
-      padding: 20px 24px 30px;
-    }
+body {
+  font-family: Inter, Arial, sans-serif;
+  background: var(--light-bg);
+  margin: 0;
+  padding: 16px;
+}
 
-    .logo {
-      font-size: 22px;
-      font-weight: bold;
-    }
+.container {
+  background: #fff;
+  padding: 18px 20px 24px;
+  border-radius: 8px;
+}
 
-    .total {
-      font-size: 30px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
+/* Header */
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brand);
+}
 
-    .updated {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 20px;
-    }
+.total {
+  font-size: 30px;
+  font-weight: 700;
+  margin-top: 6px;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
+.updated {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 16px;
+}
 
-    th, td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #ddd;
-      text-align: right;
-    }
+/* Scroll container (MOBILE SAFE) */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
-    th:first-child, td:first-child {
-      text-align: left;
-    }
+table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
 
-    th {
-      background: #f0f0f0;
-    }
+th, td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--row-border);
+  text-align: right;
+  white-space: nowrap;
+}
 
-    tr.clickable {
-      cursor: pointer;
-    }
+th:first-child, td:first-child {
+  text-align: left;
+}
 
-    tr.customer {
-      background: #fafafa;
-    }
+th {
+  background: #eef2fb;
+  color: var(--brand);
+  font-weight: 600;
+}
 
-    tr.invoice {
-      background: #fcfcfc;
-    }
+/* Sales PIC */
+tr.pic {
+  font-weight: 600;
+  cursor: pointer;
+}
 
-    .risk {
-      color: #c0392b;
-      font-weight: bold;
-    }
-  </style>
+tr.pic td:first-child {
+  border-left: 4px solid var(--brand);
+}
+
+/* Customer */
+tr.customer {
+  background: #f9fafc;
+  cursor: pointer;
+}
+
+tr.customer td:first-child {
+  padding-left: 34px;
+  font-weight: 500;
+}
+
+/* Invoice */
+tr.invoice {
+  background: #ffffff;
+  color: #555;
+  font-size: 13px;
+}
+
+tr.invoice td:first-child {
+  padding-left: 60px;
+  font-style: italic;
+}
+
+/* Risk highlight */
+.risk {
+  color: #c0392b;
+  font-weight: 700;
+}
+</style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="logo">Outstanding Receivables Dashboard</div>
-    <div class="total" id="totalOutstanding">Loading…</div>
-    <div class="updated" id="lastUpdated"></div>
+<div class="container">
+  <div class="logo">Outstanding Receivables Dashboard</div>
+  <div class="total" id="totalOutstanding">Loading…</div>
+  <div class="updated" id="lastUpdated"></div>
 
+  <div class="table-wrapper">
     <table>
       <thead>
         <tr>
@@ -93,6 +135,7 @@
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+</div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
@@ -100,15 +143,13 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRu
 let openPICRow = null;
 let openCustomerRow = null;
 
-function fmt(n) {
-  return n ? Number(n).toLocaleString("en-IN") : "–";
-}
+const fmt = n => n ? Number(n).toLocaleString("en-IN") : "–";
 
 fetch(API_URL)
   .then(r => r.json())
   .then(data => {
     document.getElementById("totalOutstanding").innerText =
-      "₹ " + Number(data.grandTotal).toLocaleString("en-IN");
+      "₹ " + fmt(data.grandTotal);
 
     document.getElementById("lastUpdated").innerText =
       "Last updated: " + new Date(data.lastUpdated).toLocaleString();
@@ -120,34 +161,32 @@ function renderPICs(pics) {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
 
-  Object.entries(pics).forEach(([picName, pic]) => {
-    const picRow = document.createElement("tr");
-    picRow.className = "clickable";
-    picRow.dataset.type = "pic";
-    picRow.dataset.open = "false";
+  Object.entries(pics).forEach(([name, pic]) => {
+    const row = document.createElement("tr");
+    row.className = "pic";
+    row.dataset.type = "pic";
+    row.dataset.open = "false";
 
-    picRow.innerHTML = `
-      <td><b>▶ ${picName}</b></td>
-      <td><b>${fmt(pic.total)}</b></td>
+    row.innerHTML = `
+      <td>▶ ${name}</td>
+      <td>${fmt(pic.total)}</td>
       <td class="risk">${fmt(pic.d90)}</td>
       <td>${fmt(pic.d61_90)}</td>
       <td>${fmt(pic.d31_60)}</td>
       <td>${fmt(pic.d1_30)}</td>
     `;
 
-    picRow.onclick = () => toggleCustomers(picRow, pic.customers);
-    tbody.appendChild(picRow);
+    row.onclick = () => toggleCustomers(row, pic.customers);
+    tbody.appendChild(row);
   });
 }
 
 function toggleCustomers(picRow, customers) {
-  // Close previously open PIC
   if (openPICRow && openPICRow !== picRow) {
     removeBelow(openPICRow, "customer");
     openPICRow.dataset.open = "false";
   }
 
-  // Toggle same PIC
   if (picRow.dataset.open === "true") {
     removeBelow(picRow, "customer");
     picRow.dataset.open = "false";
@@ -162,14 +201,14 @@ function toggleCustomers(picRow, customers) {
 
   let ref = picRow;
 
-  Object.entries(customers).forEach(([custName, cust]) => {
+  Object.entries(customers).forEach(([name, cust]) => {
     const row = document.createElement("tr");
-    row.className = "customer clickable";
+    row.className = "customer";
     row.dataset.type = "customer";
     row.dataset.open = "false";
 
     row.innerHTML = `
-      <td style="padding-left:30px;">▶ ${custName}</td>
+      <td>▶ ${name}</td>
       <td>${fmt(cust.total)}</td>
       <td>${fmt(cust.d90)}</td>
       <td>${fmt(cust.d61_90)}</td>
@@ -177,7 +216,7 @@ function toggleCustomers(picRow, customers) {
       <td>${fmt(cust.d1_30)}</td>
     `;
 
-    row.onclick = (e) => {
+    row.onclick = e => {
       e.stopPropagation();
       toggleInvoices(row, cust.invoices);
     };
@@ -188,13 +227,11 @@ function toggleCustomers(picRow, customers) {
 }
 
 function toggleInvoices(custRow, invoices) {
-  // Close previously open customer
   if (openCustomerRow && openCustomerRow !== custRow) {
     removeBelow(openCustomerRow, "invoice");
     openCustomerRow.dataset.open = "false";
   }
 
-  // Toggle same customer
   if (custRow.dataset.open === "true") {
     removeBelow(custRow, "invoice");
     custRow.dataset.open = "false";
@@ -213,7 +250,7 @@ function toggleInvoices(custRow, invoices) {
     row.dataset.type = "invoice";
 
     row.innerHTML = `
-      <td style="padding-left:60px;">${inv.invoiceNo}</td>
+      <td>${inv.invoiceNo}</td>
       <td>${fmt(inv.total)}</td>
       <td>${fmt(inv.d90)}</td>
       <td>${fmt(inv.d61_90)}</td>
@@ -226,12 +263,12 @@ function toggleInvoices(custRow, invoices) {
   });
 }
 
-function removeBelow(startRow, type) {
-  let next = startRow.nextSibling;
-  while (next && next.dataset.type === type) {
-    const remove = next;
-    next = next.nextSibling;
-    remove.remove();
+function removeBelow(start, type) {
+  let n = start.nextSibling;
+  while (n && n.dataset.type === type) {
+    const r = n;
+    n = n.nextSibling;
+    r.remove();
   }
 }
 </script>
