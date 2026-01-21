@@ -9,32 +9,33 @@
 <style>
 :root {
   --brand: #0B419B;
-  --light-bg: #f5f7fb;
-  --row-border: #e3e6ee;
+  --danger: #c0392b;
+  --bg: #f5f7fb;
+  --border: #e3e6ee;
 }
 
 body {
-  font-family: Inter, Arial, sans-serif;
-  background: var(--light-bg);
   margin: 0;
-  padding: 16px;
+  padding: 14px;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
 }
 
 .container {
   background: #fff;
-  padding: 18px 20px 24px;
+  padding: 16px;
   border-radius: 8px;
 }
 
 /* HEADER */
 .logo {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--brand);
 }
 
 .total {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 700;
   margin-top: 6px;
 }
@@ -45,13 +46,11 @@ body {
   margin-bottom: 16px;
 }
 
-/* TABLE WRAPPER (HORIZONTAL SCROLL ONLY) */
+/* DESKTOP TABLE */
 .table-wrapper {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
-/* TABLE */
 table {
   width: 100%;
   min-width: 900px;
@@ -61,107 +60,74 @@ table {
 
 th, td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--row-border);
+  border-bottom: 1px solid var(--border);
   text-align: right;
   white-space: nowrap;
 }
 
-th:first-child,
-td:first-child {
+th:first-child, td:first-child {
   text-align: left;
 }
 
 th {
   background: #eef2fb;
   color: var(--brand);
-  font-weight: 600;
 }
 
-/* SALES PIC */
-tr.pic {
-  font-weight: 600;
-  cursor: pointer;
-}
+/* ROW TYPES */
+tr.pic { font-weight: 600; cursor: pointer; }
+tr.pic td:first-child { border-left: 4px solid var(--brand); }
 
-tr.pic td:first-child {
-  border-left: 4px solid var(--brand);
-}
-
-/* CUSTOMER */
 tr.customer {
   background: #f9fafc;
   cursor: pointer;
 }
-
 tr.customer td:first-child {
-  padding-left: 34px;
+  padding-left: 32px;
   font-weight: 500;
 }
 
-/* INVOICE */
 tr.invoice {
-  background: #ffffff;
+  background: #fff;
   color: #555;
   font-size: 13px;
 }
-
 tr.invoice td:first-child {
-  padding-left: 60px;
+  padding-left: 56px;
   font-style: italic;
 }
 
-/* RISK */
-.risk {
-  color: #c0392b;
-  font-weight: 700;
+.risk { color: var(--danger); font-weight: 700; }
+
+/* MOBILE CARD VIEW */
+.mobile-view { display: none; }
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
 }
 
-/* MOBILE OPTIMIZATION */
+.card h3 {
+  margin: 0 0 6px;
+  color: var(--brand);
+  font-size: 16px;
+}
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.kv strong { color: #000; }
+
+/* RESPONSIVE SWITCH */
 @media (max-width: 768px) {
-
-  body {
-    padding: 10px;
-  }
-
-  .container {
-    padding: 14px 12px 18px;
-    border-radius: 6px;
-  }
-
-  .logo {
-    font-size: 18px;
-  }
-
-  .total {
-    font-size: 24px;
-  }
-
-  table {
-    font-size: 13px;
-    min-width: 760px;
-  }
-
-  th, td {
-    padding: 8px 10px;
-  }
-
-  /* Sticky first column */
-  th:first-child,
-  td:first-child {
-    position: sticky;
-    left: 0;
-    background: #fff;
-    z-index: 2;
-  }
-
-  th:first-child {
-    background: #eef2fb;
-  }
-
-  tr.customer td:first-child,
-  tr.invoice td:first-child {
-    background: #fff;
-  }
+  .table-wrapper { display: none; }
+  .mobile-view { display: block; }
 }
 </style>
 </head>
@@ -172,21 +138,25 @@ tr.invoice td:first-child {
   <div class="total" id="totalOutstanding">Loading…</div>
   <div class="updated" id="lastUpdated"></div>
 
+  <!-- DESKTOP TABLE -->
   <div class="table-wrapper">
     <table>
       <thead>
         <tr>
           <th>Sales PIC</th>
           <th>Total</th>
-          <th>90+ Days</th>
-          <th>61–90 Days</th>
-          <th>31–60 Days</th>
-          <th>1–30 Days</th>
+          <th>90+</th>
+          <th>61–90</th>
+          <th>31–60</th>
+          <th>1–30</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
   </div>
+
+  <!-- MOBILE CARDS -->
+  <div class="mobile-view" id="mobileCards"></div>
 </div>
 
 <script>
@@ -206,21 +176,23 @@ fetch(API_URL)
     document.getElementById("lastUpdated").innerText =
       "Last updated: " + new Date(data.lastUpdated).toLocaleString();
 
-    renderPICs(data.salesPICs);
+    renderDesktop(data.salesPICs);
+    renderMobile(data.salesPICs);
   });
 
-function renderPICs(pics) {
+/* ---------- DESKTOP ---------- */
+function renderDesktop(pics) {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
 
-  Object.entries(pics).forEach(([name, pic]) => {
-    const row = document.createElement("tr");
-    row.className = "pic";
-    row.dataset.type = "pic";
-    row.dataset.open = "false";
+  Object.entries(pics).forEach(([picName, pic]) => {
+    const picRow = document.createElement("tr");
+    picRow.className = "pic";
+    picRow.dataset.type = "pic";
+    picRow.dataset.open = "false";
 
-    row.innerHTML = `
-      <td>▶ ${name}</td>
+    picRow.innerHTML = `
+      <td>▶ ${picName}</td>
       <td>${fmt(pic.total)}</td>
       <td class="risk">${fmt(pic.d90)}</td>
       <td>${fmt(pic.d61_90)}</td>
@@ -228,19 +200,22 @@ function renderPICs(pics) {
       <td>${fmt(pic.d1_30)}</td>
     `;
 
-    row.onclick = () => toggleCustomers(row, pic.customers);
-    tbody.appendChild(row);
+    picRow.onclick = () => toggleCustomers(picRow, pic.customers);
+    tbody.appendChild(picRow);
   });
 }
 
 function toggleCustomers(picRow, customers) {
   if (openPICRow && openPICRow !== picRow) {
     removeBelow(openPICRow, "customer");
+    removeBelow(openPICRow, "invoice");
     openPICRow.dataset.open = "false";
+    openCustomerRow = null;
   }
 
   if (picRow.dataset.open === "true") {
     removeBelow(picRow, "customer");
+    removeBelow(picRow, "invoice");
     picRow.dataset.open = "false";
     openPICRow = null;
     openCustomerRow = null;
@@ -249,18 +224,16 @@ function toggleCustomers(picRow, customers) {
 
   picRow.dataset.open = "true";
   openPICRow = picRow;
-  openCustomerRow = null;
 
   let ref = picRow;
-
-  Object.entries(customers).forEach(([name, cust]) => {
+  Object.entries(customers).forEach(([custName, cust]) => {
     const row = document.createElement("tr");
     row.className = "customer";
     row.dataset.type = "customer";
     row.dataset.open = "false";
 
     row.innerHTML = `
-      <td>▶ ${name}</td>
+      <td>▶ ${custName}</td>
       <td>${fmt(cust.total)}</td>
       <td>${fmt(cust.d90)}</td>
       <td>${fmt(cust.d61_90)}</td>
@@ -295,12 +268,10 @@ function toggleInvoices(custRow, invoices) {
   openCustomerRow = custRow;
 
   let ref = custRow;
-
   invoices.forEach(inv => {
     const row = document.createElement("tr");
     row.className = "invoice";
     row.dataset.type = "invoice";
-
     row.innerHTML = `
       <td>${inv.invoiceNo}</td>
       <td>${fmt(inv.total)}</td>
@@ -309,7 +280,6 @@ function toggleInvoices(custRow, invoices) {
       <td>${fmt(inv.d31_60)}</td>
       <td>${fmt(inv.d1_30)}</td>
     `;
-
     ref.after(row);
     ref = row;
   });
@@ -322,6 +292,27 @@ function removeBelow(start, type) {
     n = n.nextSibling;
     r.remove();
   }
+}
+
+/* ---------- MOBILE ---------- */
+function renderMobile(pics) {
+  const box = document.getElementById("mobileCards");
+  box.innerHTML = "";
+
+  Object.entries(pics).forEach(([name, pic]) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <h3>${name}</h3>
+      <div class="kv"><span>Total</span><strong>₹ ${fmt(pic.total)}</strong></div>
+      <div class="kv"><span>90+</span><span class="risk">${fmt(pic.d90)}</span></div>
+      <div class="kv"><span>61–90</span><span>${fmt(pic.d61_90)}</span></div>
+      <div class="kv"><span>31–60</span><span>${fmt(pic.d31_60)}</span></div>
+      <div class="kv"><span>1–30</span><span>${fmt(pic.d1_30)}</span></div>
+    `;
+    box.appendChild(card);
+  });
 }
 </script>
 </body>
