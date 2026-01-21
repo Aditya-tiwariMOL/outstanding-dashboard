@@ -1,10 +1,142 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Outstanding Dashboard</title>
+  <meta charset="UTF-8" />
+  <title>Outstanding Receivables Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: #fff;
+      padding: 20px 24px 30px;
+      border-radius: 6px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .total {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .updated {
+      color: #666;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: right;
+    }
+
+    th:first-child, td:first-child {
+      text-align: left;
+    }
+
+    th {
+      background: #f0f0f0;
+      font-weight: 600;
+    }
+
+    .risk {
+      color: #c0392b;
+      font-weight: 600;
+    }
+
+    .muted {
+      color: #999;
+    }
+  </style>
 </head>
+
 <body>
-  <h2>Outstanding Dashboard</h2>
-  <p>GitHub Pages is working.</p>
+  <div class="container">
+    <div class="logo">Outstanding Receivables Dashboard</div>
+
+    <div class="total" id="totalOutstanding">Loading...</div>
+    <div class="updated" id="lastUpdated"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Sales PIC</th>
+          <th>Total</th>
+          <th>90+ Days</th>
+          <th>61–90 Days</th>
+          <th>31–60 Days</th>
+          <th>1–30 Days</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr>
+          <td colspan="6" class="muted">Loading data...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+
+    function formatNumber(num) {
+      return Number(num).toLocaleString("en-IN");
+    }
+
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => {
+        // Header
+        document.getElementById("totalOutstanding").innerText =
+          "₹ " + formatNumber(data.grandTotal);
+
+        document.getElementById("lastUpdated").innerText =
+          "Last updated: " + new Date(data.lastUpdated).toLocaleString();
+
+        // Table
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+
+        Object.entries(data.salesPICs).forEach(([pic, obj]) => {
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = `
+            <td>${pic}</td>
+            <td><b>${formatNumber(obj.total)}</b></td>
+            <td class="risk">${obj.d90 ? formatNumber(obj.d90) : "–"}</td>
+            <td>${obj.d61_90 ? formatNumber(obj.d61_90) : "–"}</td>
+            <td>${obj.d31_60 ? formatNumber(obj.d31_60) : "–"}</td>
+            <td>${obj.d1_30 ? formatNumber(obj.d1_30) : "–"}</td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => {
+        document.getElementById("tableBody").innerHTML =
+          "<tr><td colspan='6'>Error loading data</td></tr>";
+        console.error(err);
+      });
+  </script>
 </body>
 </html>
