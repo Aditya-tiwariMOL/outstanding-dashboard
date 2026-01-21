@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 <title>Outstanding Receivables Dashboard</title>
 
 <style>
@@ -24,7 +26,7 @@ body {
   border-radius: 8px;
 }
 
-/* Header */
+/* HEADER */
 .logo {
   font-size: 22px;
   font-weight: 700;
@@ -43,12 +45,13 @@ body {
   margin-bottom: 16px;
 }
 
-/* Scroll container (MOBILE SAFE) */
+/* TABLE WRAPPER (HORIZONTAL SCROLL ONLY) */
 .table-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
+/* TABLE */
 table {
   width: 100%;
   min-width: 900px;
@@ -63,7 +66,8 @@ th, td {
   white-space: nowrap;
 }
 
-th:first-child, td:first-child {
+th:first-child,
+td:first-child {
   text-align: left;
 }
 
@@ -73,7 +77,7 @@ th {
   font-weight: 600;
 }
 
-/* Sales PIC */
+/* SALES PIC */
 tr.pic {
   font-weight: 600;
   cursor: pointer;
@@ -83,7 +87,7 @@ tr.pic td:first-child {
   border-left: 4px solid var(--brand);
 }
 
-/* Customer */
+/* CUSTOMER */
 tr.customer {
   background: #f9fafc;
   cursor: pointer;
@@ -94,7 +98,7 @@ tr.customer td:first-child {
   font-weight: 500;
 }
 
-/* Invoice */
+/* INVOICE */
 tr.invoice {
   background: #ffffff;
   color: #555;
@@ -106,10 +110,58 @@ tr.invoice td:first-child {
   font-style: italic;
 }
 
-/* Risk highlight */
+/* RISK */
 .risk {
   color: #c0392b;
   font-weight: 700;
+}
+
+/* MOBILE OPTIMIZATION */
+@media (max-width: 768px) {
+
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    padding: 14px 12px 18px;
+    border-radius: 6px;
+  }
+
+  .logo {
+    font-size: 18px;
+  }
+
+  .total {
+    font-size: 24px;
+  }
+
+  table {
+    font-size: 13px;
+    min-width: 760px;
+  }
+
+  th, td {
+    padding: 8px 10px;
+  }
+
+  /* Sticky first column */
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    background: #fff;
+    z-index: 2;
+  }
+
+  th:first-child {
+    background: #eef2fb;
+  }
+
+  tr.customer td:first-child,
+  tr.invoice td:first-child {
+    background: #fff;
+  }
 }
 </style>
 </head>
