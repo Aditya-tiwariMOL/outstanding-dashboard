@@ -2,90 +2,104 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Outstanding Receivables Dashboard</title>
 
 <style>
 :root {
-  --brand:#0B419B;
-  --bg:#f4f6fa;
-  --border:#e3e8f2;
+  --brand: #0B419B;
+  --light: #f4f7fb;
+  --border: #e1e6ef;
 }
 
 body {
-  margin:0;
-  font-family:Inter, Arial, sans-serif;
-  background:var(--bg);
+  font-family: Arial, sans-serif;
+  background: var(--light);
+  margin: 0;
+  padding: 16px;
 }
 
 .container {
-  max-width:1200px;
-  margin:auto;
-  padding:16px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
 }
 
-h1 { color:var(--brand); }
-.total { font-size:36px; font-weight:700; }
-.updated { color:#555; margin-bottom:16px; }
+h1 {
+  color: var(--brand);
+  margin: 0;
+}
+
+.total {
+  font-size: 32px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.updated {
+  color: #666;
+  margin-bottom: 16px;
+}
 
 .table-wrap {
-  background:#fff;
-  border-radius:10px;
-  overflow-x:auto;
+  overflow-x: auto;
 }
 
 table {
-  width:100%;
-  border-collapse:collapse;
-  min-width:900px;
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 850px;
 }
 
-th {
-  background:#eef3fb;
-  color:var(--brand);
-  padding:12px;
-  text-align:left;
+thead {
+  background: #eef3fb;
 }
 
-td {
-  padding:12px;
-  border-top:1px solid var(--border);
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  white-space: nowrap;
 }
 
-.pic {
-  font-weight:700;
-  cursor:pointer;
-  border-left:4px solid var(--brand);
+th:first-child, td:first-child {
+  text-align: left;
+}
+
+.sales {
+  font-weight: bold;
+  cursor: pointer;
+  border-left: 4px solid var(--brand);
 }
 
 .customer {
-  background:#fafbfd;
-  cursor:pointer;
+  background: #fafbff;
+  cursor: pointer;
 }
 
 .invoice {
-  font-style:italic;
-  color:#555;
+  font-style: italic;
+  color: #555;
 }
 
-.bad { color:#d92d20; font-weight:700; }
-
-/* MOBILE */
-.mobile { display:none; }
-.card {
-  background:#fff;
-  border-radius:10px;
-  padding:14px;
-  margin-bottom:12px;
-  border-left:5px solid var(--brand);
+.hidden {
+  display: none;
 }
-.row { display:flex; justify-content:space-between; margin:4px 0; }
-.sub { background:#f7f9fc; margin-top:10px; padding:10px; border-radius:8px; }
-.inv { font-size:13px; margin-left:8px; }
 
-@media(max-width:768px){
-  .table-wrap { display:none; }
-  .mobile { display:block; }
+.toggle {
+  margin-right: 6px;
+  font-weight: bold;
+}
+
+.red {
+  color: #d93025;
+}
+
+/* Mobile polish */
+@media (max-width: 600px) {
+  body { padding: 8px; }
+  h1 { font-size: 20px; }
+  .total { font-size: 26px; }
 }
 </style>
 </head>
@@ -93,10 +107,9 @@ td {
 <body>
 <div class="container">
   <h1>Outstanding Receivables Dashboard</h1>
-  <div class="total" id="grandTotal">₹ 0</div>
-  <div class="updated" id="updated"></div>
+  <div class="total">₹ 7,74,000</div>
+  <div class="updated">Last updated: 21 Jan 2026</div>
 
-  <!-- DESKTOP -->
   <div class="table-wrap">
     <table>
       <thead>
@@ -109,116 +122,135 @@ td {
           <th>1–30</th>
         </tr>
       </thead>
-      <tbody id="tbody"></tbody>
+      <tbody id="tableBody"></tbody>
     </table>
   </div>
-
-  <!-- MOBILE -->
-  <div class="mobile" id="mobile"></div>
 </div>
 
 <script>
-const API_URL = "PASTE_YOUR_APPS_SCRIPT_URL";
+const data = [
+  {
+    name: "Bharat San",
+    total: "1,23,000",
+    buckets: ["–", "78,000", "–", "45,000"],
+    customers: [
+      {
+        name: "ABC Traders",
+        total: "45,000",
+        buckets: ["–", "–", "–", "45,000"],
+        invoices: [{ no: "INV-1001", total: "45,000" }]
+      },
+      {
+        name: "XYZ Industries",
+        total: "78,000",
+        buckets: ["–", "78,000", "–", "–"],
+        invoices: []
+      }
+    ]
+  },
+  {
+    name: "Amit Verma",
+    total: "2,82,000",
+    buckets: ["1,25,000", "–", "1,02,000", "55,000"],
+    customers: [
+      { name: "ABC Traders", total: "60,000", buckets: ["–", "–", "60,000", "–"], invoices: [] },
+      { name: "Sunrise Distributors", total: "97,000", buckets: ["–", "–", "42,000", "55,000"], invoices: [] },
+      { name: "Apex Manufacturing", total: "1,25,000", buckets: ["1,25,000", "–", "–", "–"], invoices: [] }
+    ]
+  },
+  {
+    name: "Neha Kapoor",
+    total: "2,19,000",
+    buckets: ["90,000", "91,000", "–", "38,000"],
+    customers: []
+  },
+  {
+    name: "Rahul Sharma",
+    total: "1,50,000",
+    buckets: ["1,50,000", "–", "–", "–"],
+    customers: []
+  }
+];
 
-fetch(API_URL)
-.then(r=>r.json())
-.then(data=>{
-  document.getElementById("grandTotal").innerText =
-    "₹ " + data.grandTotal.toLocaleString("en-IN");
-  document.getElementById("updated").innerText =
-    "Last updated: " + new Date(data.lastUpdated).toLocaleString();
+const body = document.getElementById("tableBody");
+let openSales = null;
+let openCustomer = null;
 
-  renderDesktop(data.salesPICs);
-  renderMobile(data.salesPICs);
-});
-
-function clearNonPICRows() {
-  document.querySelectorAll("tr[data-type]").forEach(r=>r.remove());
+function closeAll() {
+  document.querySelectorAll(".customer, .invoice").forEach(r => r.remove());
 }
 
-function renderDesktop(pics) {
-  const tb = document.getElementById("tbody");
-  tb.innerHTML = "";
-
-  Object.entries(pics).forEach(([pic,p])=>{
+function render() {
+  body.innerHTML = "";
+  data.forEach((s, i) => {
     const tr = document.createElement("tr");
-    tr.className="pic";
-    tr.dataset.pic=pic;
-    tr.innerHTML = rowHTML("▶ "+pic,p);
-    tr.onclick = ()=>togglePIC(tr,p.customers);
-    tb.appendChild(tr);
+    tr.className = "sales";
+    tr.innerHTML = `
+      <td><span class="toggle">▶</span>${s.name}</td>
+      <td>${s.total}</td>
+      <td class="red">${s.buckets[0]}</td>
+      <td>${s.buckets[1]}</td>
+      <td>${s.buckets[2]}</td>
+      <td>${s.buckets[3]}</td>
+    `;
+    tr.onclick = () => toggleSales(i, tr);
+    body.appendChild(tr);
   });
 }
 
-function togglePIC(picRow, customers) {
-  clearNonPICRows();
+function toggleSales(index, row) {
+  closeAll();
+  openCustomer = null;
 
-  Object.entries(customers).forEach(([c,cObj])=>{
-    const tr = document.createElement("tr");
-    tr.className="customer";
-    tr.dataset.type="customer";
-    tr.dataset.parent=picRow.dataset.pic;
-    tr.innerHTML = rowHTML("▶ "+c,cObj,20);
-    tr.onclick = e=>{
+  if (openSales === index) {
+    openSales = null;
+    return;
+  }
+
+  openSales = index;
+  const sales = data[index];
+
+  sales.customers.forEach(c => {
+    const ctr = document.createElement("tr");
+    ctr.className = "customer";
+    ctr.innerHTML = `
+      <td>&nbsp;&nbsp;<span class="toggle">▶</span>${c.name}</td>
+      <td>${c.total}</td>
+      <td>${c.buckets[0]}</td>
+      <td>${c.buckets[1]}</td>
+      <td>${c.buckets[2]}</td>
+      <td>${c.buckets[3]}</td>
+    `;
+    ctr.onclick = (e) => {
       e.stopPropagation();
-      toggleCustomer(tr,cObj.invoices);
+      toggleCustomer(c, ctr);
     };
-    picRow.after(tr);
-    picRow = tr;
+    row.after(ctr);
   });
 }
 
-function toggleCustomer(customerRow, invoices) {
-  document.querySelectorAll("tr[data-type='invoice']").forEach(r=>r.remove());
+function toggleCustomer(customer, row) {
+  document.querySelectorAll(".invoice").forEach(r => r.remove());
 
-  invoices.forEach(inv=>{
-    const tr = document.createElement("tr");
-    tr.className="invoice";
-    tr.dataset.type="invoice";
-    tr.innerHTML = rowHTML(inv.invoiceNo,inv,40);
-    customerRow.after(tr);
-    customerRow = tr;
+  if (openCustomer === customer) {
+    openCustomer = null;
+    return;
+  }
+
+  openCustomer = customer;
+  customer.invoices.forEach(inv => {
+    const itr = document.createElement("tr");
+    itr.className = "invoice";
+    itr.innerHTML = `
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;${inv.no}</td>
+      <td>${inv.total}</td>
+      <td>–</td><td>–</td><td>–</td><td>${inv.total}</td>
+    `;
+    row.after(itr);
   });
 }
 
-function rowHTML(label,o,pad=0){
-  return `
-    <td style="padding-left:${pad}px">${label}</td>
-    <td>${fmt(o.total)}</td>
-    <td class="${o.d90?'bad':''}">${fmt(o.d90)}</td>
-    <td>${fmt(o.d61_90)}</td>
-    <td>${fmt(o.d31_60)}</td>
-    <td>${fmt(o.d1_30)}</td>`;
-}
-
-/* MOBILE */
-function renderMobile(pics){
-  const box=document.getElementById("mobile");
-  box.innerHTML="";
-  Object.entries(pics).forEach(([pic,p])=>{
-    const c=document.createElement("div");
-    c.className="card";
-    c.innerHTML=`
-      <b>${pic}</b>
-      <div class="row"><span>Total</span><b>${fmt(p.total)}</b></div>
-      <div class="row"><span>90+</span><b class="bad">${fmt(p.d90)}</b></div>`;
-    c.onclick=()=>{
-      c.querySelectorAll(".sub").forEach(e=>e.remove());
-      Object.entries(p.customers).forEach(([cn,co])=>{
-        const s=document.createElement("div");
-        s.className="sub";
-        s.innerHTML="<b>"+cn+"</b>";
-        co.invoices.forEach(i=>{
-          s.innerHTML+=`<div class="inv">${i.invoiceNo} – ₹ ${fmt(i.total)}</div>`;
-        });
-        c.appendChild(s);
-      });
-    };
-    box.appendChild(c);
-  });
-}
-
-function fmt(v){ return v ? v.toLocaleString("en-IN") : "–"; }
+render();
 </script>
 </body>
 </html>
