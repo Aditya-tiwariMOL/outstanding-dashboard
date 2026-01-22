@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Outstanding Receivables Dashboard</title>
 
 <style>
@@ -52,7 +52,7 @@ h1{
 
 table{
   width:100%;
-  min-width:1000px;
+  min-width:1100px;
   border-collapse:collapse;
 }
 
@@ -114,6 +114,7 @@ td{
       <thead>
         <tr>
           <th>Sales PIC</th>
+          <th>Invoice / Ref</th>
           <th>Total</th>
           <th>On Account</th>
           <th>90+</th>
@@ -131,17 +132,19 @@ td{
 const API_URL =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
+const body = document.getElementById("body");
 let DATA = {};
 let activeSales = null;
+let activeCustomer = null;
 
 fetch(API_URL)
-  .then(r=>r.json())
-  .then(useData)
-  .catch(()=>{
-    document.getElementById("loader").textContent="Failed to load data";
+  .then(r => r.json())
+  .then(init)
+  .catch(() => {
+    document.getElementById("loader").textContent = "Failed to load data";
   });
 
-function useData(json){
+function init(json){
   DATA = json.salesPICs;
 
   document.getElementById("grandTotal").textContent =
@@ -151,45 +154,51 @@ function useData(json){
     "Last updated: " + new Date(json.lastUpdated).toLocaleString();
 
   renderSales();
-  document.getElementById("loader").style.display="none";
+  document.getElementById("loader").style.display = "none";
 }
 
-function clearBody(){ body.innerHTML="" }
+function clearBody(){ body.innerHTML=""; }
 
 function renderSales(){
   clearBody();
   activeSales=null;
+  activeCustomer=null;
 
-  for(const [name,s] of Object.entries(DATA)){
+  Object.entries(DATA).forEach(([name,s])=>{
     addRow({
       label:"▶ "+name,
+      ref:"",
       cls:"sales click",
       values:s,
       onClick:()=>openSales(name)
     });
-  }
+  });
 }
 
 function openSales(name){
   clearBody();
   activeSales=name;
+  activeCustomer=null;
+
   const s=DATA[name];
 
   addRow({
     label:"▼ "+name,
+    ref:"",
     cls:"sales click",
     values:s,
     onClick:renderSales
   });
 
-  for(const [cust,c] of Object.entries(s.customers)){
+  Object.entries(s.customers).forEach(([cust,c])=>{
     addRow({
       label:"▶ "+cust,
+      ref:"",
       cls:"customer click",
       values:c,
       onClick:()=>openCustomer(cust)
     });
-  }
+  });
 }
 
 function openCustomer(custName){
@@ -198,15 +207,17 @@ function openCustomer(custName){
 
   addRow({
     label:"▼ "+activeSales,
+    ref:"",
     cls:"sales click",
     values:s,
     onClick:renderSales
   });
 
-  for(const [name,c] of Object.entries(s.customers)){
+  Object.entries(s.customers).forEach(([name,c])=>{
     if(name!==custName){
       addRow({
         label:"▶ "+name,
+        ref:"",
         cls:"customer click",
         values:c,
         onClick:()=>openCustomer(name)
@@ -214,6 +225,7 @@ function openCustomer(custName){
     }else{
       addRow({
         label:"▼ "+name,
+        ref:"",
         cls:"customer click",
         values:c,
         onClick:()=>openSales(activeSales)
@@ -221,27 +233,27 @@ function openCustomer(custName){
 
       c.invoices.forEach(inv=>{
         addRow({
-          label:inv.invoiceNo,
+          label:"",
+          ref:inv.invoiceNo,
           cls:"invoice",
           values:inv
         });
       });
     }
-  }
+  });
 }
 
-function addRow({label,cls,values,onClick}){
+function addRow({label,ref,cls,values,onClick}){
   const tr=document.createElement("tr");
 
-  const td0=document.createElement("td");
-  td0.textContent=label;
-  td0.className=cls;
+  const td0=td(label,cls);
   if(onClick) td0.onclick=onClick;
   tr.appendChild(td0);
 
+  tr.appendChild(td(ref));
   tr.appendChild(td(values.total));
-  tr.appendChild(td(values.onAccount,true));
-  tr.appendChild(td(values.d90,true));
+  tr.appendChild(td(values.onAccount,"green"));
+  tr.appendChild(td(values.d90,"red"));
   tr.appendChild(td(values.d61_90));
   tr.appendChild(td(values.d31_60));
   tr.appendChild(td(values.d1_30));
@@ -249,11 +261,11 @@ function addRow({label,cls,values,onClick}){
   body.appendChild(tr);
 }
 
-function td(val,isGreen=false){
-  const td=document.createElement("td");
-  td.textContent = val ? val.toLocaleString("en-IN") : "–";
-  if(isGreen && val) td.className="green";
-  return td;
+function td(val,cls=""){
+  const t=document.createElement("td");
+  t.textContent = val ? val.toLocaleString("en-IN") : "–";
+  if(cls) t.className=cls;
+  return t;
 }
 </script>
 
