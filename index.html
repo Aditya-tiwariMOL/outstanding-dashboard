@@ -11,49 +11,49 @@
   --bg:#f4f7fb;
   --border:#e2e6ef;
   --red:#d93025;
-  --green:#188038;
+  --green:#1e8e3e;
 }
 
-*{ box-sizing:border-box }
+/* Base */
+*{box-sizing:border-box}
 
 body{
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   background:var(--bg);
-  font-size:110%; /* 🔼 overall font +10% */
+  color:#000;
 }
 
-/* HEADER */
-.header{
-  text-align:center;
-  padding:16px 8px;
-}
-
-.header h1{
-  margin:0;
-  font-size:18px;
-  font-weight:700;
-  color:var(--brand);
-}
-
-.amount{
-  font-size:24px;
-  font-weight:800;
-}
-
-.updated{
-  font-size:13px;
-  color:#666;
-}
-
-/* CONTAINER */
 .container{
   max-width:1200px;
   margin:auto;
-  padding:14px;
+  padding:16px;
 }
 
-/* TABLE */
+/* Header */
+.header{
+  text-align:center;
+  margin-bottom:16px;
+}
+
+.header h1{
+  color:var(--brand);
+  margin:0 0 6px;
+  font-size:20px;
+  font-weight:600;
+}
+
+.amount{
+  font-size:28px;
+  font-weight:700;
+}
+
+.updated{
+  color:#666;
+  font-size:13px;
+}
+
+/* Table */
 .table-wrap{
   background:#fff;
   border-radius:14px;
@@ -69,72 +69,56 @@ table{
 th{
   background:#eef3ff;
   color:var(--brand);
-  padding:12px 16px; /* 🔼 more spacing */
-  font-size:14px;
+  padding:12px 16px;
   text-align:left;
+  font-weight:600;
   white-space:nowrap;
 }
 
 td{
-  padding:12px 16px; /* 🔼 more spacing */
+  padding:12px 16px;
   border-top:1px solid var(--border);
   vertical-align:top;
   text-align:left;
 }
 
-/* ROW TYPES */
-.click{ cursor:pointer }
-
-/* Sales PIC */
+/* Rows */
 .sales{
-  font-size:15px;
-  font-weight:800;
-  white-space:nowrap;
+  font-weight:600;
 }
 
-/* CUSTOMER */
 .customer{
-  font-size:13px;
-  font-weight:400;
-  padding-left:28px;
-  background:#fafcff;
+  font-size:14px;
+  font-weight:500;
+  max-width:220px;
   white-space:normal;
   word-break:break-word;
-  max-width:200px;
+  line-height:1.3;
 }
 
-/* INVOICE */
 .invoice{
-  font-size:12px;
+  padding-left:24px;
+  font-size:13px;
   font-style:italic;
-  color:#444;
-  padding-left:48px;
-  white-space:nowrap;
+  color:#555;
 }
 
-/* AMOUNTS */
-.amount-cell{
-  font-size:14px;
-  white-space:nowrap;
-  min-width:90px; /* 🔼 wider numeric columns */
-}
-
+/* Amount styling */
 .total{
-  font-weight:800;
-  color:#000;
+  font-weight:700;
 }
 
 .green{
   color:var(--green);
-  font-weight:700;
+  font-weight:600;
 }
 
 .red{
   color:var(--red);
-  font-weight:700;
+  font-weight:600;
 }
 
-/* LOADER */
+/* Loader */
 .loader{
   position:fixed;
   inset:0;
@@ -143,9 +127,45 @@ td{
   align-items:center;
   justify-content:center;
   font-size:18px;
-  font-weight:700;
+  font-weight:600;
   color:var(--brand);
   z-index:9999;
+}
+
+/* ===========================
+   DESKTOP ONLY IMPROVEMENTS
+   =========================== */
+@media (min-width:1024px){
+
+  body{font-size:115%}
+
+  th{
+    font-size:15px;
+    padding:14px 20px;
+  }
+
+  td{
+    padding:14px 20px;
+  }
+
+  .sales{
+    font-size:16px;
+    font-weight:600;
+  }
+
+  .customer{
+    font-size:14px;
+    font-weight:500;
+    max-width:260px;
+  }
+
+  .invoice{
+    font-size:13px;
+  }
+
+  .amount{
+    font-size:30px;
+  }
 }
 </style>
 </head>
@@ -154,13 +174,13 @@ td{
 
 <div id="loader" class="loader">Loading outstanding data…</div>
 
-<div class="header">
-  <h1>Outstanding Receivables Dashboard</h1>
-  <div class="amount" id="grandTotal">₹ 0</div>
-  <div class="updated" id="updated"></div>
-</div>
-
 <div class="container">
+  <div class="header">
+    <h1>Outstanding Receivables Dashboard</h1>
+    <div class="amount" id="grandTotal">₹ 0</div>
+    <div class="updated" id="updated"></div>
+  </div>
+
   <div class="table-wrap">
     <table>
       <thead>
@@ -183,16 +203,20 @@ td{
 const API_URL =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-let DATA={}, activeSales=null;
+let DATA = {};
+let activeSales = null;
+let activeCustomer = null;
 
 fetch(API_URL)
-.then(r=>r.json())
-.then(init);
+  .then(r => r.json())
+  .then(init)
+  .catch(()=>{
+    document.getElementById("loader").textContent="Failed to load data";
+  });
 
 function init(json){
-  DATA=json.salesPICs;
+  DATA = json.salesPICs;
 
-  /* FULL NUMBER in heading */
   document.getElementById("grandTotal").textContent =
     "₹ " + json.grandTotal.toLocaleString("en-IN");
 
@@ -203,71 +227,121 @@ function init(json){
   document.getElementById("loader").style.display="none";
 }
 
-function clearBody(){ body.innerHTML=""; }
+function clearBody(){
+  document.getElementById("body").innerHTML="";
+}
 
 function renderSales(){
-  clearBody(); activeSales=null;
-  Object.entries(DATA).forEach(([n,s])=>{
-    addRow(n,"sales click",s,()=>openSales(n),"sales");
-  });
+  clearBody();
+  activeSales=null;
+
+  for(const [name,s] of Object.entries(DATA)){
+    addRow({
+      label:name,
+      cls:"sales",
+      values:s,
+      onClick:()=>openSales(name)
+    });
+  }
 }
 
 function openSales(name){
-  clearBody(); activeSales=name;
+  clearBody();
+  activeSales=name;
   const s=DATA[name];
-  addRow(name,"sales click",s,renderSales,"sales");
 
-  Object.entries(s.customers).forEach(([c,v])=>{
-    addRow(c,"customer click",v,()=>openCustomer(c),"customer");
+  addRow({
+    label:name,
+    cls:"sales",
+    values:s,
+    onClick:renderSales
   });
+
+  for(const [cust,c] of Object.entries(s.customers)){
+    addRow({
+      label:cust,
+      cls:"customer",
+      values:c,
+      onClick:()=>openCustomer(cust)
+    });
+  }
 }
 
-function openCustomer(cust){
+function openCustomer(custName){
   clearBody();
   const s=DATA[activeSales];
-  addRow(activeSales,"sales click",s,renderSales,"sales");
 
-  Object.entries(s.customers).forEach(([c,v])=>{
-    if(c!==cust){
-      addRow(c,"customer click",v,()=>openCustomer(c),"customer");
+  addRow({
+    label:activeSales,
+    cls:"sales",
+    values:s,
+    onClick:renderSales
+  });
+
+  for(const [name,c] of Object.entries(s.customers)){
+    if(name!==custName){
+      addRow({
+        label:name,
+        cls:"customer",
+        values:c,
+        onClick:()=>openCustomer(name)
+      });
     }else{
-      addRow(c,"customer click",v,()=>openSales(activeSales),"customer");
-      v.invoices.forEach(inv=>{
-        addRow(inv.invoiceNo,"invoice",inv,null,"invoice");
+      addRow({
+        label:name,
+        cls:"customer",
+        values:c,
+        onClick:()=>openSales(activeSales)
+      });
+
+      c.invoices.forEach(inv=>{
+        addRow({
+          label:inv.invoiceNo,
+          cls:"invoice",
+          values:inv
+        });
       });
     }
-  });
+  }
 }
 
-function addRow(label,cls,val,click,type){
+/* Helpers */
+function addRow({label,cls,values,onClick}){
   const tr=document.createElement("tr");
+
   const td0=document.createElement("td");
   td0.textContent=label;
   td0.className=cls;
-  if(click) td0.onclick=click;
+  if(onClick) td0.onclick=onClick;
   tr.appendChild(td0);
 
-  tr.appendChild(makeTD(val.total,"total"));
-  tr.appendChild(makeTD(type==="customer"?val.onAccount:0,"green"));
-  tr.appendChild(makeTD(val.d90,"red"));
-  tr.appendChild(makeTD(val.d61_90));
-  tr.appendChild(makeTD(val.d31_60));
-  tr.appendChild(makeTD(val.d1_30));
+  tr.appendChild(tdAmt(values.total,true));
+  tr.appendChild(tdAmt(values.onAccount,false,true));
+  tr.appendChild(tdAmt(values.d90,false,false,true));
+  tr.appendChild(tdAmt(values.d61_90));
+  tr.appendChild(tdAmt(values.d31_60));
+  tr.appendChild(tdAmt(values.d1_30));
 
-  body.appendChild(tr);
+  document.getElementById("body").appendChild(tr);
 }
 
-function makeTD(v,cls=""){
+function tdAmt(val,isTotal=false,isGreen=false,isRed=false){
   const td=document.createElement("td");
-  td.className="amount-cell "+cls;
-  td.textContent=v?formatAmount(v):"–";
+  if(!val){
+    td.textContent="–";
+    return td;
+  }
+  td.textContent=formatAmt(val);
+  if(isTotal) td.classList.add("total");
+  if(isGreen) td.classList.add("green");
+  if(isRed) td.classList.add("red");
   return td;
 }
 
-function formatAmount(v){
-  if(v>=100000) return "₹"+(v/100000).toFixed(1).replace(".0","")+"L";
-  if(v>=1000) return "₹"+Math.round(v/1000)+"k";
-  return "₹"+v;
+function formatAmt(n){
+  if(n>=100000) return "₹"+(n/100000).toFixed(1)+"L";
+  if(n>=1000) return "₹"+Math.round(n/1000)+"k";
+  return "₹"+n;
 }
 </script>
 
