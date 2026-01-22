@@ -7,99 +7,70 @@
 
 <style>
 :root {
-  --brand: #0B419B;
-  --light: #f4f7fb;
-  --border: #e1e6ef;
+  --brand:#0B419B;
+  --border:#e3e7ef;
+  --light:#f5f7fb;
 }
 
-body {
-  font-family: Arial, sans-serif;
-  background: var(--light);
-  margin: 0;
-  padding: 16px;
+body{
+  font-family:Arial, sans-serif;
+  background:var(--light);
+  margin:0;
+  padding:16px;
 }
 
-.container {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
+.container{
+  background:#fff;
+  border-radius:12px;
+  padding:20px;
 }
 
-h1 {
-  color: var(--brand);
-  margin: 0;
+h1{color:var(--brand);margin:0}
+.total{font-size:32px;font-weight:bold;margin:6px 0}
+.updated{color:#666;margin-bottom:16px}
+
+.table-wrap{overflow-x:auto}
+
+table{
+  border-collapse:collapse;
+  min-width:850px;
+  width:100%;
 }
 
-.total {
-  font-size: 32px;
-  font-weight: bold;
-  margin-top: 8px;
+th,td{
+  padding:12px;
+  border-bottom:1px solid var(--border);
+  text-align:right;
 }
 
-.updated {
-  color: #666;
-  margin-bottom: 16px;
+th:first-child,td:first-child{text-align:left}
+
+thead{background:#eef3fb;color:var(--brand)}
+
+.sales{
+  font-weight:bold;
+  cursor:pointer;
+  border-left:4px solid var(--brand);
 }
 
-.table-wrap {
-  overflow-x: auto;
+.customer{
+  background:#fafbff;
+  cursor:pointer;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 850px;
+.invoice{
+  font-style:italic;
+  color:#555;
 }
 
-thead {
-  background: #eef3fb;
-}
+.toggle{margin-right:6px}
 
-th, td {
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
-  text-align: right;
-  white-space: nowrap;
-}
+.red{color:#d93025}
 
-th:first-child, td:first-child {
-  text-align: left;
-}
-
-.sales {
-  font-weight: bold;
-  cursor: pointer;
-  border-left: 4px solid var(--brand);
-}
-
-.customer {
-  background: #fafbff;
-  cursor: pointer;
-}
-
-.invoice {
-  font-style: italic;
-  color: #555;
-}
-
-.hidden {
-  display: none;
-}
-
-.toggle {
-  margin-right: 6px;
-  font-weight: bold;
-}
-
-.red {
-  color: #d93025;
-}
-
-/* Mobile polish */
-@media (max-width: 600px) {
-  body { padding: 8px; }
-  h1 { font-size: 20px; }
-  .total { font-size: 26px; }
+@media(max-width:600px){
+  body{padding:8px}
+  h1{font-size:20px}
+  .total{font-size:26px}
 }
 </style>
 </head>
@@ -122,7 +93,7 @@ th:first-child, td:first-child {
           <th>1–30</th>
         </tr>
       </thead>
-      <tbody id="tableBody"></tbody>
+      <tbody id="tbody"></tbody>
     </table>
   </div>
 </div>
@@ -130,123 +101,127 @@ th:first-child, td:first-child {
 <script>
 const data = [
   {
-    name: "Bharat San",
-    total: "1,23,000",
-    buckets: ["–", "78,000", "–", "45,000"],
-    customers: [
+    name:"Bharat San",
+    total:"1,23,000",
+    buckets:["–","78,000","–","45,000"],
+    customers:[
       {
-        name: "ABC Traders",
-        total: "45,000",
-        buckets: ["–", "–", "–", "45,000"],
-        invoices: [{ no: "INV-1001", total: "45,000" }]
+        name:"ABC Traders",
+        total:"45,000",
+        buckets:["–","–","–","45,000"],
+        invoices:[
+          {no:"INV-1001",total:"45,000"}
+        ]
       },
       {
-        name: "XYZ Industries",
-        total: "78,000",
-        buckets: ["–", "78,000", "–", "–"],
-        invoices: []
+        name:"XYZ Industries",
+        total:"78,000",
+        buckets:["–","78,000","–","–"],
+        invoices:[]
       }
     ]
   },
   {
-    name: "Amit Verma",
-    total: "2,82,000",
-    buckets: ["1,25,000", "–", "1,02,000", "55,000"],
-    customers: [
-      { name: "ABC Traders", total: "60,000", buckets: ["–", "–", "60,000", "–"], invoices: [] },
-      { name: "Sunrise Distributors", total: "97,000", buckets: ["–", "–", "42,000", "55,000"], invoices: [] },
-      { name: "Apex Manufacturing", total: "1,25,000", buckets: ["1,25,000", "–", "–", "–"], invoices: [] }
+    name:"Amit Verma",
+    total:"2,82,000",
+    buckets:["1,25,000","–","1,02,000","55,000"],
+    customers:[
+      {
+        name:"ABC Traders",
+        total:"60,000",
+        buckets:["–","–","60,000","–"],
+        invoices:[
+          {no:"INV-2001",total:"60,000"}
+        ]
+      }
     ]
-  },
-  {
-    name: "Neha Kapoor",
-    total: "2,19,000",
-    buckets: ["90,000", "91,000", "–", "38,000"],
-    customers: []
-  },
-  {
-    name: "Rahul Sharma",
-    total: "1,50,000",
-    buckets: ["1,50,000", "–", "–", "–"],
-    customers: []
   }
 ];
 
-const body = document.getElementById("tableBody");
-let openSales = null;
-let openCustomer = null;
+const tbody=document.getElementById("tbody");
+let openSales=null;
+let openCustomer=null;
 
-function closeAll() {
-  document.querySelectorAll(".customer, .invoice").forEach(r => r.remove());
+function clearBelow(row){
+  let next=row.nextSibling;
+  while(next && !next.classList.contains("sales")){
+    let temp=next.nextSibling;
+    next.remove();
+    next=temp;
+  }
 }
 
-function render() {
-  body.innerHTML = "";
-  data.forEach((s, i) => {
-    const tr = document.createElement("tr");
-    tr.className = "sales";
-    tr.innerHTML = `
+function render(){
+  tbody.innerHTML="";
+  data.forEach((s,si)=>{
+    const tr=document.createElement("tr");
+    tr.className="sales";
+    tr.innerHTML=`
       <td><span class="toggle">▶</span>${s.name}</td>
       <td>${s.total}</td>
       <td class="red">${s.buckets[0]}</td>
       <td>${s.buckets[1]}</td>
       <td>${s.buckets[2]}</td>
-      <td>${s.buckets[3]}</td>
-    `;
-    tr.onclick = () => toggleSales(i, tr);
-    body.appendChild(tr);
+      <td>${s.buckets[3]}</td>`;
+    tr.onclick=()=>toggleSales(tr,si);
+    tbody.appendChild(tr);
   });
 }
 
-function toggleSales(index, row) {
-  closeAll();
-  openCustomer = null;
+function toggleSales(row,si){
+  if(openSales!==null){
+    const prev=tbody.children[openSales];
+    clearBelow(prev);
+  }
+  openCustomer=null;
 
-  if (openSales === index) {
-    openSales = null;
+  if(openSales===si){
+    openSales=null;
     return;
   }
 
-  openSales = index;
-  const sales = data[index];
+  openSales=si;
+  const sales=data[si];
 
-  sales.customers.forEach(c => {
-    const ctr = document.createElement("tr");
-    ctr.className = "customer";
-    ctr.innerHTML = `
+  sales.customers.forEach((c,ci)=>{
+    const tr=document.createElement("tr");
+    tr.className="customer";
+    tr.innerHTML=`
       <td>&nbsp;&nbsp;<span class="toggle">▶</span>${c.name}</td>
       <td>${c.total}</td>
       <td>${c.buckets[0]}</td>
       <td>${c.buckets[1]}</td>
       <td>${c.buckets[2]}</td>
-      <td>${c.buckets[3]}</td>
-    `;
-    ctr.onclick = (e) => {
-      e.stopPropagation();
-      toggleCustomer(c, ctr);
-    };
-    row.after(ctr);
+      <td>${c.buckets[3]}</td>`;
+    tr.onclick=(e)=>{e.stopPropagation();toggleCustomer(tr,c)};
+    row.after(tr);
+    row=tr;
   });
 }
 
-function toggleCustomer(customer, row) {
-  document.querySelectorAll(".invoice").forEach(r => r.remove());
+function toggleCustomer(row,customer){
+  let next=row.nextSibling;
+  while(next && next.classList.contains("invoice")){
+    let temp=next.nextSibling;
+    next.remove();
+    next=temp;
+  }
 
-  if (openCustomer === customer) {
-    openCustomer = null;
+  if(openCustomer===row){
+    openCustomer=null;
     return;
   }
 
-  openCustomer = customer;
-  customer.invoices.forEach(inv => {
-    const itr = document.createElement("tr");
-    itr.className = "invoice";
-    itr.innerHTML = `
+  openCustomer=row;
+  customer.invoices.forEach(inv=>{
+    const tr=document.createElement("tr");
+    tr.className="invoice";
+    tr.innerHTML=`
       <td>&nbsp;&nbsp;&nbsp;&nbsp;${inv.no}</td>
       <td>${inv.total}</td>
-      <td>–</td><td>–</td><td>–</td><td>${inv.total}</td>
-    `;
-    row.after(itr);
+      <td>–</td><td>–</td><td>–</td><td>${inv.total}</td>`;
+    row.after(tr);
+    row=tr;
   });
 }
 
