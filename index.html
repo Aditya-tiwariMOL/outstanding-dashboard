@@ -20,28 +20,29 @@ body{
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   background:var(--bg);
+  font-size:110%; /* 🔼 overall font +10% */
 }
 
 /* HEADER */
 .header{
   text-align:center;
-  padding:14px 8px;
+  padding:16px 8px;
 }
 
 .header h1{
   margin:0;
-  font-size:17px;
+  font-size:18px;
   font-weight:700;
   color:var(--brand);
 }
 
 .amount{
-  font-size:22px;
+  font-size:24px;
   font-weight:800;
 }
 
 .updated{
-  font-size:12px;
+  font-size:13px;
   color:#666;
 }
 
@@ -49,7 +50,7 @@ body{
 .container{
   max-width:1200px;
   margin:auto;
-  padding:12px;
+  padding:14px;
 }
 
 /* TABLE */
@@ -68,16 +69,17 @@ table{
 th{
   background:#eef3ff;
   color:var(--brand);
-  padding:10px;
-  font-size:13px;
+  padding:12px 16px; /* 🔼 more spacing */
+  font-size:14px;
   text-align:left;
+  white-space:nowrap;
 }
 
 td{
-  padding:10px;
+  padding:12px 16px; /* 🔼 more spacing */
   border-top:1px solid var(--border);
   vertical-align:top;
-  text-align:left; /* ✅ FORCE LEFT ALIGN */
+  text-align:left;
 }
 
 /* ROW TYPES */
@@ -85,8 +87,8 @@ td{
 
 /* Sales PIC */
 .sales{
-  font-size:14px;
-  font-weight:700;
+  font-size:15px;
+  font-weight:800;
   white-space:nowrap;
 }
 
@@ -98,7 +100,7 @@ td{
   background:#fafcff;
   white-space:normal;
   word-break:break-word;
-  max-width:180px;
+  max-width:200px;
 }
 
 /* INVOICE */
@@ -112,9 +114,9 @@ td{
 
 /* AMOUNTS */
 .amount-cell{
-  font-size:13px;
+  font-size:14px;
   white-space:nowrap;
-  text-align:left; /* ✅ LEFT aligned numbers */
+  min-width:90px; /* 🔼 wider numeric columns */
 }
 
 .total{
@@ -189,8 +191,14 @@ fetch(API_URL)
 
 function init(json){
   DATA=json.salesPICs;
-  document.getElementById("grandTotal").textContent=formatAmount(json.grandTotal);
-  document.getElementById("updated").textContent="Last updated: "+new Date(json.lastUpdated).toLocaleString();
+
+  /* FULL NUMBER in heading */
+  document.getElementById("grandTotal").textContent =
+    "₹ " + json.grandTotal.toLocaleString("en-IN");
+
+  document.getElementById("updated").textContent =
+    "Last updated: " + new Date(json.lastUpdated).toLocaleString();
+
   renderSales();
   document.getElementById("loader").style.display="none";
 }
@@ -200,14 +208,14 @@ function clearBody(){ body.innerHTML=""; }
 function renderSales(){
   clearBody(); activeSales=null;
   Object.entries(DATA).forEach(([n,s])=>{
-    addRow("▶ "+n,"sales click",s,()=>openSales(n),"sales");
+    addRow(n,"sales click",s,()=>openSales(n),"sales");
   });
 }
 
 function openSales(name){
   clearBody(); activeSales=name;
   const s=DATA[name];
-  addRow("▼ "+name,"sales click",s,renderSales,"sales");
+  addRow(name,"sales click",s,renderSales,"sales");
 
   Object.entries(s.customers).forEach(([c,v])=>{
     addRow(c,"customer click",v,()=>openCustomer(c),"customer");
@@ -217,7 +225,7 @@ function openSales(name){
 function openCustomer(cust){
   clearBody();
   const s=DATA[activeSales];
-  addRow("▼ "+activeSales,"sales click",s,renderSales,"sales");
+  addRow(activeSales,"sales click",s,renderSales,"sales");
 
   Object.entries(s.customers).forEach(([c,v])=>{
     if(c!==cust){
