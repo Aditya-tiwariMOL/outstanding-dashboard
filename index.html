@@ -22,15 +22,15 @@ body{
   background:var(--bg);
 }
 
-/* ---------- HEADER ---------- */
+/* HEADER */
 .header{
   text-align:center;
-  padding:16px 8px 10px;
+  padding:14px 8px;
 }
 
 .header h1{
   margin:0;
-  font-size:18px;
+  font-size:17px;
   font-weight:700;
   color:var(--brand);
 }
@@ -38,23 +38,21 @@ body{
 .amount{
   font-size:22px;
   font-weight:800;
-  margin-top:4px;
 }
 
 .updated{
   font-size:12px;
   color:#666;
-  margin-top:2px;
 }
 
-/* ---------- CONTAINER ---------- */
+/* CONTAINER */
 .container{
   max-width:1200px;
   margin:auto;
   padding:12px;
 }
 
-/* ---------- TABLE ---------- */
+/* TABLE */
 .table-wrap{
   background:#fff;
   border-radius:14px;
@@ -65,56 +63,58 @@ body{
 table{
   width:100%;
   border-collapse:collapse;
-  table-layout:auto;
 }
 
 th{
   background:#eef3ff;
   color:var(--brand);
   padding:10px;
-  text-align:left;
-  font-weight:700;
-  white-space:nowrap;
   font-size:13px;
+  text-align:left;
 }
 
 td{
   padding:10px;
   border-top:1px solid var(--border);
   vertical-align:top;
+  text-align:left; /* ✅ FORCE LEFT ALIGN */
 }
 
-/* ---------- ROW TYPES ---------- */
+/* ROW TYPES */
 .click{ cursor:pointer }
 
+/* Sales PIC */
 .sales{
   font-size:14px;
   font-weight:700;
   white-space:nowrap;
 }
 
+/* CUSTOMER */
 .customer{
   font-size:13px;
   font-weight:400;
-  padding-left:26px;
+  padding-left:28px;
   background:#fafcff;
-  white-space:normal;        /* WRAP CUSTOMER NAME */
+  white-space:normal;
   word-break:break-word;
+  max-width:180px;
 }
 
+/* INVOICE */
 .invoice{
   font-size:12px;
   font-style:italic;
   color:#444;
-  padding-left:46px;
+  padding-left:48px;
   white-space:nowrap;
 }
 
-/* ---------- AMOUNTS ---------- */
+/* AMOUNTS */
 .amount-cell{
   font-size:13px;
-  text-align:right;
   white-space:nowrap;
+  text-align:left; /* ✅ LEFT aligned numbers */
 }
 
 .total{
@@ -132,7 +132,7 @@ td{
   font-weight:700;
 }
 
-/* ---------- LOADER ---------- */
+/* LOADER */
 .loader{
   position:fixed;
   inset:0;
@@ -144,11 +144,6 @@ td{
   font-weight:700;
   color:var(--brand);
   z-index:9999;
-}
-
-@media(max-width:768px){
-  .header h1{ font-size:16px }
-  .amount{ font-size:20px }
 }
 </style>
 </head>
@@ -186,149 +181,85 @@ td{
 const API_URL =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-let DATA = {};
-let activeSales = null;
+let DATA={}, activeSales=null;
 
 fetch(API_URL)
-  .then(r => r.json())
-  .then(init)
-  .catch(() => {
-    document.getElementById("loader").textContent = "Failed to load data";
-  });
+.then(r=>r.json())
+.then(init);
 
 function init(json){
-  DATA = json.salesPICs;
-
-  document.getElementById("grandTotal").textContent =
-    formatAmount(json.grandTotal);
-
-  document.getElementById("updated").textContent =
-    "Last updated: " + new Date(json.lastUpdated).toLocaleString();
-
+  DATA=json.salesPICs;
+  document.getElementById("grandTotal").textContent=formatAmount(json.grandTotal);
+  document.getElementById("updated").textContent="Last updated: "+new Date(json.lastUpdated).toLocaleString();
   renderSales();
   document.getElementById("loader").style.display="none";
 }
 
-function clearBody(){
-  document.getElementById("body").innerHTML="";
-}
+function clearBody(){ body.innerHTML=""; }
 
 function renderSales(){
-  clearBody();
-  activeSales=null;
-
-  Object.entries(DATA).forEach(([name,s])=>{
-    addRow({
-      label:"▶ "+name,
-      cls:"sales click",
-      values:s,
-      type:"sales",
-      onClick:()=>openSales(name)
-    });
+  clearBody(); activeSales=null;
+  Object.entries(DATA).forEach(([n,s])=>{
+    addRow("▶ "+n,"sales click",s,()=>openSales(n),"sales");
   });
 }
 
 function openSales(name){
-  clearBody();
-  activeSales=name;
+  clearBody(); activeSales=name;
   const s=DATA[name];
+  addRow("▼ "+name,"sales click",s,renderSales,"sales");
 
-  addRow({
-    label:"▼ "+name,
-    cls:"sales click",
-    values:s,
-    type:"sales",
-    onClick:renderSales
-  });
-
-  Object.entries(s.customers).forEach(([cust,c])=>{
-    addRow({
-      label:"▶ "+cust,
-      cls:"customer click",
-      values:c,
-      type:"customer",
-      onClick:()=>openCustomer(cust)
-    });
+  Object.entries(s.customers).forEach(([c,v])=>{
+    addRow(c,"customer click",v,()=>openCustomer(c),"customer");
   });
 }
 
-function openCustomer(custName){
+function openCustomer(cust){
   clearBody();
   const s=DATA[activeSales];
+  addRow("▼ "+activeSales,"sales click",s,renderSales,"sales");
 
-  addRow({
-    label:"▼ "+activeSales,
-    cls:"sales click",
-    values:s,
-    type:"sales",
-    onClick:renderSales
-  });
-
-  Object.entries(s.customers).forEach(([name,c])=>{
-    if(name!==custName){
-      addRow({
-        label:"▶ "+name,
-        cls:"customer click",
-        values:c,
-        type:"customer",
-        onClick:()=>openCustomer(name)
-      });
+  Object.entries(s.customers).forEach(([c,v])=>{
+    if(c!==cust){
+      addRow(c,"customer click",v,()=>openCustomer(c),"customer");
     }else{
-      addRow({
-        label:"▼ "+name,
-        cls:"customer click",
-        values:c,
-        type:"customer",
-        onClick:()=>openSales(activeSales)
-      });
-
-      c.invoices.forEach(inv=>{
-        addRow({
-          label:inv.invoiceNo,
-          cls:"invoice",
-          values:inv,
-          type:"invoice"
-        });
+      addRow(c,"customer click",v,()=>openSales(activeSales),"customer");
+      v.invoices.forEach(inv=>{
+        addRow(inv.invoiceNo,"invoice",inv,null,"invoice");
       });
     }
   });
 }
 
-function addRow({label,cls,values,onClick,type}){
+function addRow(label,cls,val,click,type){
   const tr=document.createElement("tr");
-
   const td0=document.createElement("td");
   td0.textContent=label;
   td0.className=cls;
-  if(onClick) td0.onclick=onClick;
+  if(click) td0.onclick=click;
   tr.appendChild(td0);
 
-  tr.appendChild(makeAmountTD(values.total,"total"));
-  tr.appendChild(makeAmountTD(type==="customer"?values.onAccount:0,"green"));
-  tr.appendChild(makeAmountTD(values.d90,"red"));
-  tr.appendChild(makeAmountTD(values.d61_90));
-  tr.appendChild(makeAmountTD(values.d31_60));
-  tr.appendChild(makeAmountTD(values.d1_30));
+  tr.appendChild(makeTD(val.total,"total"));
+  tr.appendChild(makeTD(type==="customer"?val.onAccount:0,"green"));
+  tr.appendChild(makeTD(val.d90,"red"));
+  tr.appendChild(makeTD(val.d61_90));
+  tr.appendChild(makeTD(val.d31_60));
+  tr.appendChild(makeTD(val.d1_30));
 
-  document.getElementById("body").appendChild(tr);
+  body.appendChild(tr);
 }
 
-function makeAmountTD(val,cls=""){
+function makeTD(v,cls=""){
   const td=document.createElement("td");
   td.className="amount-cell "+cls;
-  td.textContent = val ? formatAmount(val) : "–";
+  td.textContent=v?formatAmount(v):"–";
   return td;
 }
 
-/* ₹k / ₹L formatter */
-function formatAmount(val){
-  if(val >= 100000){
-    return "₹"+(val/100000).toFixed(1).replace(/\.0$/,"")+"L";
-  }
-  if(val >= 1000){
-    return "₹"+Math.round(val/1000)+"k";
-  }
-  return "₹"+val;
+function formatAmount(v){
+  if(v>=100000) return "₹"+(v/100000).toFixed(1).replace(".0","")+"L";
+  if(v>=1000) return "₹"+Math.round(v/1000)+"k";
+  return "₹"+v;
 }
 </script>
 
