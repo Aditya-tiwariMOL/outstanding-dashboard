@@ -13,261 +13,119 @@
   --red:#d93025;
   --green:#188038;
 }
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  background:var(--bg);
-}
-
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:16px;
-}
-
-h1{
-  color:var(--brand);
-  margin:0 0 6px;
-}
-
-.amount{
-  font-size:34px;
-  font-weight:800;
-}
-
-.updated{
-  color:#666;
-  margin-bottom:16px;
-}
-
-.table-wrap{
-  background:#fff;
-  border-radius:14px;
-  overflow-x:auto;
-  box-shadow:0 6px 20px rgba(0,0,0,.04);
-}
-
-table{
-  width:100%;
-  min-width:1100px;
-  border-collapse:collapse;
-}
-
-th{
-  background:#eef3ff;
-  color:var(--brand);
-  padding:12px;
-  text-align:left;
-  font-weight:700;
-}
-
-td{
-  padding:12px;
-  border-top:1px solid var(--border);
-  white-space:nowrap;
-}
-
+body{margin:0;font-family:system-ui;background:var(--bg)}
+.container{max-width:1200px;margin:auto;padding:16px}
+h1{color:var(--brand)}
+.amount{font-size:34px;font-weight:800}
+.updated{color:#666;margin-bottom:16px}
+.table-wrap{background:#fff;border-radius:14px;overflow-x:auto}
+table{width:100%;min-width:900px;border-collapse:collapse}
+th{background:#eef3ff;color:var(--brand);padding:12px;text-align:left}
+td{padding:12px;border-top:1px solid var(--border)}
 .click{cursor:pointer;font-weight:600}
 .sales{border-left:4px solid var(--brand)}
 .customer{padding-left:28px;background:#fafcff}
-.invoice{padding-left:48px;font-style:italic;color:#444}
-
+.invoice{padding-left:48px;font-style:italic}
 .red{color:var(--red);font-weight:700}
 .green{color:var(--green);font-weight:700}
-
-/* Loader */
-.loader{
-  position:fixed;
-  inset:0;
-  background:var(--bg);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  font-weight:700;
-  color:var(--brand);
-  z-index:9999;
-}
-
-/* Mobile */
-@media(max-width:768px){
-  h1{font-size:18px}
-  .amount{font-size:26px}
-}
+.loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700}
 </style>
 </head>
 
 <body>
-
-<div id="loader" class="loader">Loading outstanding data…</div>
+<div id="loader" class="loader">Loading…</div>
 
 <div class="container">
-  <h1>Outstanding Receivables Dashboard</h1>
-  <div class="amount" id="grandTotal">₹ 0</div>
-  <div class="updated" id="updated"></div>
+<h1>Outstanding Receivables Dashboard</h1>
+<div class="amount" id="grandTotal">₹ 0</div>
+<div class="updated" id="updated"></div>
 
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Sales PIC</th>
-          <th>Invoice / Ref</th>
-          <th>Total</th>
-          <th>On Account</th>
-          <th>90+</th>
-          <th>61–90</th>
-          <th>31–60</th>
-          <th>1–30</th>
-        </tr>
-      </thead>
-      <tbody id="body"></tbody>
-    </table>
-  </div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>Sales PIC</th>
+  <th>Total</th>
+  <th>On Account</th>
+  <th>90+</th>
+  <th>61–90</th>
+  <th>31–60</th>
+  <th>1–30</th>
+</tr>
+</thead>
+<tbody id="body"></tbody>
+</table>
+</div>
 </div>
 
 <script>
-const API_URL =
-"https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+let DATA={},activeSales=null;
 
-const body = document.getElementById("body");
-let DATA = {};
-let activeSales = null;
-let activeCustomer = null;
-
-fetch(API_URL)
-  .then(r => r.json())
-  .then(init)
-  .catch(() => {
-    document.getElementById("loader").textContent = "Failed to load data";
-  });
-
-function init(json){
-  DATA = json.salesPICs;
-
-  document.getElementById("grandTotal").textContent =
-    "₹ " + json.grandTotal.toLocaleString("en-IN");
-
-  document.getElementById("updated").textContent =
-    "Last updated: " + new Date(json.lastUpdated).toLocaleString();
-
+fetch(API_URL).then(r=>r.json()).then(j=>{
+  DATA=j.salesPICs;
+  grandTotal.textContent="₹ "+j.grandTotal.toLocaleString("en-IN");
+  updated.textContent="Last updated: "+new Date(j.lastUpdated).toLocaleString();
   renderSales();
-  document.getElementById("loader").style.display = "none";
-}
+  loader.style.display="none";
+});
 
-function clearBody(){ body.innerHTML=""; }
+function clear(){body.innerHTML=""}
 
 function renderSales(){
-  clearBody();
-  activeSales=null;
-  activeCustomer=null;
-
-  Object.entries(DATA).forEach(([name,s])=>{
-    addRow({
-      label:"▶ "+name,
-      ref:"",
-      cls:"sales click",
-      values:s,
-      onClick:()=>openSales(name)
-    });
-  });
+  clear(); activeSales=null;
+  for(const [n,s] of Object.entries(DATA)){
+    row("▶ "+n,"sales click",s,()=>openSales(n));
+  }
 }
 
-function openSales(name){
-  clearBody();
-  activeSales=name;
-  activeCustomer=null;
-
-  const s=DATA[name];
-
-  addRow({
-    label:"▼ "+name,
-    ref:"",
-    cls:"sales click",
-    values:s,
-    onClick:renderSales
-  });
-
-  Object.entries(s.customers).forEach(([cust,c])=>{
-    addRow({
-      label:"▶ "+cust,
-      ref:"",
-      cls:"customer click",
-      values:c,
-      onClick:()=>openCustomer(cust)
-    });
-  });
+function openSales(n){
+  clear(); activeSales=n;
+  const s=DATA[n];
+  row("▼ "+n,"sales click",s,renderSales);
+  for(const [c,o] of Object.entries(s.customers)){
+    row("▶ "+c,"customer click",o,()=>openCustomer(c));
+  }
 }
 
-function openCustomer(custName){
-  clearBody();
+function openCustomer(cn){
+  clear();
   const s=DATA[activeSales];
+  row("▼ "+activeSales,"sales click",s,renderSales);
 
-  addRow({
-    label:"▼ "+activeSales,
-    ref:"",
-    cls:"sales click",
-    values:s,
-    onClick:renderSales
-  });
-
-  Object.entries(s.customers).forEach(([name,c])=>{
-    if(name!==custName){
-      addRow({
-        label:"▶ "+name,
-        ref:"",
-        cls:"customer click",
-        values:c,
-        onClick:()=>openCustomer(name)
-      });
+  for(const [n,c] of Object.entries(s.customers)){
+    if(n!==cn){
+      row("▶ "+n,"customer click",c,()=>openCustomer(n));
     }else{
-      addRow({
-        label:"▼ "+name,
-        ref:"",
-        cls:"customer click",
-        values:c,
-        onClick:()=>openSales(activeSales)
-      });
-
-      c.invoices.forEach(inv=>{
-        addRow({
-          label:"",
-          ref:inv.invoiceNo,
-          cls:"invoice",
-          values:inv
-        });
-      });
+      row("▼ "+n,"customer click",c,()=>openSales(activeSales),true);
+      c.invoices.forEach(i=>row(i.invoiceNo,"invoice",i));
     }
-  });
+  }
 }
 
-function addRow({label,ref,cls,values,onClick}){
+function row(label,cls,v,cb,isCustomer=false){
   const tr=document.createElement("tr");
+  const td=document.createElement("td");
+  td.textContent=label; td.className=cls;
+  if(cb) td.onclick=cb;
+  tr.appendChild(td);
 
-  const td0=td(label,cls);
-  if(onClick) td0.onclick=onClick;
-  tr.appendChild(td0);
-
-  tr.appendChild(td(ref));
-  tr.appendChild(td(values.total));
-  tr.appendChild(td(values.onAccount,"green"));
-  tr.appendChild(td(values.d90,"red"));
-  tr.appendChild(td(values.d61_90));
-  tr.appendChild(td(values.d31_60));
-  tr.appendChild(td(values.d1_30));
+  tr.appendChild(tdVal(v.total));
+  tr.appendChild(tdVal(isCustomer?v.onAccount:null,"green"));
+  tr.appendChild(tdVal(v.d90,"red"));
+  tr.appendChild(tdVal(v.d61_90));
+  tr.appendChild(tdVal(v.d31_60));
+  tr.appendChild(tdVal(v.d1_30));
 
   body.appendChild(tr);
 }
 
-function td(val,cls=""){
-  const t=document.createElement("td");
-  t.textContent = val ? val.toLocaleString("en-IN") : "–";
-  if(cls) t.className=cls;
-  return t;
+function tdVal(v,c){
+  const td=document.createElement("td");
+  td.textContent=v?v.toLocaleString("en-IN"):"–";
+  if(c&&v) td.className=c;
+  return td;
 }
 </script>
-
 </body>
 </html>
