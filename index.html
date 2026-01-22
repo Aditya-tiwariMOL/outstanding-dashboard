@@ -2,77 +2,96 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Outstanding Receivables Dashboard</title>
 
 <style>
-:root{
-  --brand:#0B419B;
-  --border:#e4e8f0;
-  --bg:#f5f7fb;
+:root {
+  --brand: #0B419B;
+  --light: #f4f7fb;
+  --border: #e2e6ef;
 }
 
-body{
-  margin:0;
-  padding:16px;
-  font-family:Arial, sans-serif;
-  background:var(--bg);
+body {
+  margin: 0;
+  font-family: system-ui, Arial, sans-serif;
+  background: var(--light);
 }
 
-.container{
-  background:#fff;
-  border-radius:12px;
-  padding:20px;
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 16px;
 }
 
-h1{color:var(--brand);margin:0}
-.total{font-size:32px;font-weight:bold;margin:8px 0}
-.updated{color:#666;margin-bottom:16px}
-
-.table-wrap{overflow-x:auto}
-
-table{
-  border-collapse:collapse;
-  min-width:900px;
-  width:100%;
+h1 {
+  color: var(--brand);
+  margin-bottom: 8px;
 }
 
-th,td{
-  padding:12px;
-  border-bottom:1px solid var(--border);
-  text-align:right;
+.amount {
+  font-size: 34px;
+  font-weight: bold;
 }
 
-th:first-child,td:first-child{text-align:left}
-
-thead{
-  background:#eef3fb;
-  color:var(--brand);
+.updated {
+  color: #666;
+  margin-bottom: 16px;
 }
 
-.sales{
-  font-weight:bold;
-  cursor:pointer;
-  border-left:4px solid var(--brand);
+.table-wrap {
+  overflow-x: auto;
+  background: white;
+  border-radius: 12px;
 }
 
-.customer{
-  background:#fafbff;
-  cursor:pointer;
+table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
 }
 
-.invoice{
-  font-style:italic;
-  color:#555;
+th {
+  background: #eef3ff;
+  color: var(--brand);
+  padding: 12px;
+  text-align: left;
 }
 
-.toggle{margin-right:6px}
-.red{color:#d93025}
+td {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
 
-@media(max-width:600px){
-  body{padding:8px}
-  h1{font-size:20px}
-  .total{font-size:26px}
+.click {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.sales {
+  border-left: 4px solid var(--brand);
+}
+
+.customer {
+  padding-left: 28px;
+  background: #fafcff;
+}
+
+.invoice {
+  padding-left: 48px;
+  font-style: italic;
+  color: #444;
+}
+
+.red {
+  color: #d93025;
+  font-weight: 700;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  h1 { font-size: 18px; }
+  .amount { font-size: 26px; }
 }
 </style>
 </head>
@@ -80,8 +99,8 @@ thead{
 <body>
 <div class="container">
   <h1>Outstanding Receivables Dashboard</h1>
-  <div class="total">₹ 7,74,000</div>
-  <div class="updated">Last updated: 21 Jan 2026</div>
+  <div class="amount" id="grandTotal">₹ 0</div>
+  <div class="updated" id="updated"></div>
 
   <div class="table-wrap">
     <table>
@@ -95,157 +114,139 @@ thead{
           <th>1–30</th>
         </tr>
       </thead>
-      <tbody id="tbody"></tbody>
+      <tbody id="body"></tbody>
     </table>
   </div>
 </div>
 
 <script>
-/* ================= DATA ================= */
-const data = [
-  {
-    name:"Bharat San",
-    total:"1,23,000",
-    buckets:["–","78,000","–","45,000"],
-    customers:[
-      {
-        name:"ABC Traders",
-        total:"45,000",
-        buckets:["–","–","–","45,000"],
-        invoices:[{no:"INV-1001",total:"45,000"}]
-      },
-      {
-        name:"XYZ Industries",
-        total:"78,000",
-        buckets:["–","78,000","–","–"],
-        invoices:[]
-      }
-    ]
-  },
-  {
-    name:"Amit Verma",
-    total:"2,82,000",
-    buckets:["1,25,000","–","1,02,000","55,000"],
-    customers:[
-      {
-        name:"ABC Traders",
-        total:"60,000",
-        buckets:["–","–","60,000","–"],
-        invoices:[{no:"INV-2001",total:"60,000"}]
-      }
-    ]
-  },
-  {
-    name:"Neha Kapoor",
-    total:"2,19,000",
-    buckets:["90,000","91,000","–","38,000"],
-    customers:[]
-  }
-];
+const API_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
 
-/* ================= STATE ================= */
-const tbody=document.getElementById("tbody");
-let openSalesRow=null;
-let openCustomerRow=null;
+let activeSales = null;
+let activeCustomer = null;
+let DATA = {};
 
-/* ================= HELPERS ================= */
-function removeUntilNextSales(startRow){
-  let row=startRow.nextSibling;
-  while(row && !row.classList.contains("sales")){
-    let next=row.nextSibling;
-    row.remove();
-    row=next;
-  }
-}
-
-/* ================= RENDER ================= */
-function render(){
-  tbody.innerHTML="";
-  data.forEach((s)=>{
-    const tr=document.createElement("tr");
-    tr.className="sales";
-    tr.innerHTML=`
-      <td><span class="toggle">▶</span>${s.name}</td>
-      <td>${s.total}</td>
-      <td class="red">${s.buckets[0]}</td>
-      <td>${s.buckets[1]}</td>
-      <td>${s.buckets[2]}</td>
-      <td>${s.buckets[3]}</td>
-    `;
-    tr.onclick=()=>toggleSales(tr,s);
-    tbody.appendChild(tr);
+fetch(API_URL)
+  .then(r => r.json())
+  .then(json => {
+    DATA = json.salesPICs;
+    document.getElementById("grandTotal").innerText =
+      "₹ " + json.grandTotal.toLocaleString("en-IN");
+    document.getElementById("updated").innerText =
+      "Last updated: " + new Date(json.lastUpdated).toLocaleString();
+    renderSales();
   });
+
+function clearBody() {
+  document.getElementById("body").innerHTML = "";
 }
 
-/* ================= SALES ================= */
-function toggleSales(row,sales){
-  // Close ANY open Sales PIC fully
-  if(openSalesRow){
-    removeUntilNextSales(openSalesRow);
-    openSalesRow=null;
-    openCustomerRow=null;
+function renderSales() {
+  clearBody();
+  activeSales = null;
+  activeCustomer = null;
+
+  for (const [sales, s] of Object.entries(DATA)) {
+    addRow({
+      label: "▶ " + sales,
+      cls: "sales click",
+      values: s,
+      onClick: () => toggleSales(sales)
+    });
+  }
+}
+
+function toggleSales(sales) {
+  if (activeSales === sales) {
+    renderSales();
+    return;
   }
 
-  // If clicking same row again → just close
-  if(openSalesRow===row) return;
+  clearBody();
+  activeSales = sales;
+  activeCustomer = null;
 
-  openSalesRow=row;
+  const s = DATA[sales];
 
-  let insertAfter=row;
-  sales.customers.forEach(c=>{
-    const tr=document.createElement("tr");
-    tr.className="customer";
-    tr.innerHTML=`
-      <td>&nbsp;&nbsp;<span class="toggle">▶</span>${c.name}</td>
-      <td>${c.total}</td>
-      <td>${c.buckets[0]}</td>
-      <td>${c.buckets[1]}</td>
-      <td>${c.buckets[2]}</td>
-      <td>${c.buckets[3]}</td>
-    `;
-    tr.onclick=(e)=>{e.stopPropagation();toggleCustomer(tr,c)};
-    insertAfter.after(tr);
-    insertAfter=tr;
+  addRow({
+    label: "▼ " + sales,
+    cls: "sales click",
+    values: s,
+    onClick: () => renderSales()
   });
+
+  for (const [cust, c] of Object.entries(s.customers)) {
+    addRow({
+      label: "▶ " + cust,
+      cls: "customer click",
+      values: c,
+      onClick: () => toggleCustomer(cust, c)
+    });
+  }
 }
 
-/* ================= CUSTOMER ================= */
-function toggleCustomer(row,customer){
-  // Close previous customer invoices
-  if(openCustomerRow){
-    let r=openCustomerRow.nextSibling;
-    while(r && r.classList.contains("invoice")){
-      let n=r.nextSibling;
-      r.remove();
-      r=n;
-    }
-    if(openCustomerRow===row){
-      openCustomerRow=null;
-      return;
+function toggleCustomer(name, cust) {
+  clearBody();
+
+  // redraw sales header
+  const s = DATA[activeSales];
+  addRow({
+    label: "▼ " + activeSales,
+    cls: "sales click",
+    values: s,
+    onClick: () => renderSales()
+  });
+
+  for (const [custName, c] of Object.entries(s.customers)) {
+    if (custName !== name) {
+      addRow({
+        label: "▶ " + custName,
+        cls: "customer click",
+        values: c,
+        onClick: () => toggleCustomer(custName, c)
+      });
+    } else {
+      addRow({
+        label: "▼ " + custName,
+        cls: "customer click",
+        values: c,
+        onClick: () => toggleSales(activeSales)
+      });
+
+      c.invoices.forEach(inv => {
+        addRow({
+          label: inv.invoiceNo,
+          cls: "invoice",
+          values: inv
+        });
+      });
     }
   }
-
-  openCustomerRow=row;
-
-  let insertAfter=row;
-  customer.invoices.forEach(inv=>{
-    const tr=document.createElement("tr");
-    tr.className="invoice";
-    tr.innerHTML=`
-      <td>&nbsp;&nbsp;&nbsp;&nbsp;${inv.no}</td>
-      <td>${inv.total}</td>
-      <td>–</td>
-      <td>–</td>
-      <td>–</td>
-      <td>${inv.total}</td>
-    `;
-    insertAfter.after(tr);
-    insertAfter=tr;
-  });
 }
 
-/* ================= INIT ================= */
-render();
+function addRow({ label, cls, values, onClick }) {
+  const tr = document.createElement("tr");
+  const td0 = document.createElement("td");
+  td0.textContent = label;
+  td0.className = cls;
+  if (onClick) td0.onclick = onClick;
+
+  tr.appendChild(td0);
+  tr.appendChild(td(values.total));
+  tr.appendChild(td(values.d90, true));
+  tr.appendChild(td(values.d61_90));
+  tr.appendChild(td(values.d31_60));
+  tr.appendChild(td(values.d1_30));
+
+  document.getElementById("body").appendChild(tr);
+}
+
+function td(val, red=false) {
+  const td = document.createElement("td");
+  td.textContent = val ? val.toLocaleString("en-IN") : "–";
+  if (red && val) td.className = "red";
+  return td;
+}
 </script>
 </body>
 </html>
