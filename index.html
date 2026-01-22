@@ -22,25 +22,36 @@ body{
   background:var(--bg);
 }
 
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:16px;
+/* ---------- HEADER ---------- */
+.header{
+  text-align:center;
+  padding:16px 8px 10px;
 }
 
-h1{
+.header h1{
+  margin:0;
+  font-size:18px;
+  font-weight:700;
   color:var(--brand);
-  margin:0 0 6px;
 }
 
 .amount{
-  font-size:34px;
+  font-size:22px;
   font-weight:800;
+  margin-top:4px;
 }
 
 .updated{
+  font-size:12px;
   color:#666;
-  margin-bottom:16px;
+  margin-top:2px;
+}
+
+/* ---------- CONTAINER ---------- */
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:12px;
 }
 
 /* ---------- TABLE ---------- */
@@ -54,45 +65,71 @@ h1{
 table{
   width:100%;
   border-collapse:collapse;
-  table-layout:auto; /* AUTO WIDTH */
+  table-layout:auto;
 }
 
 th{
   background:#eef3ff;
   color:var(--brand);
-  padding:12px;
+  padding:10px;
   text-align:left;
+  font-weight:700;
+  white-space:nowrap;
+  font-size:13px;
+}
+
+td{
+  padding:10px;
+  border-top:1px solid var(--border);
+  vertical-align:top;
+}
+
+/* ---------- ROW TYPES ---------- */
+.click{ cursor:pointer }
+
+.sales{
+  font-size:14px;
   font-weight:700;
   white-space:nowrap;
 }
 
-td{
-  padding:12px;
-  border-top:1px solid var(--border);
+.customer{
+  font-size:13px;
+  font-weight:400;
+  padding-left:26px;
+  background:#fafcff;
+  white-space:normal;        /* WRAP CUSTOMER NAME */
+  word-break:break-word;
+}
+
+.invoice{
+  font-size:12px;
+  font-style:italic;
+  color:#444;
+  padding-left:46px;
   white-space:nowrap;
 }
 
-/* ---------- ROW TYPES ---------- */
-.click{ cursor:pointer; font-weight:600 }
-.sales{ border-left:4px solid var(--brand) }
-.customer{ padding-left:28px; background:#fafcff }
-.invoice{ padding-left:48px; font-style:italic; color:#444 }
+/* ---------- AMOUNTS ---------- */
+.amount-cell{
+  font-size:13px;
+  text-align:right;
+  white-space:nowrap;
+}
 
-/* ---------- COLORS ---------- */
-.red{ color:var(--red); font-weight:700 }
-.green{ color:var(--green); font-weight:700 }
-
-/* ---------- TOTAL COLUMN ---------- */
 .total{
   font-weight:800;
   color:#000;
 }
 
-/* ---------- AGEING COMPACT ---------- */
-.age{
-  padding:6px 8px;
-  font-size:12px;
-  text-align:right;
+.green{
+  color:var(--green);
+  font-weight:700;
+}
+
+.red{
+  color:var(--red);
+  font-weight:700;
 }
 
 /* ---------- LOADER ---------- */
@@ -103,15 +140,15 @@ td{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:20px;
+  font-size:18px;
   font-weight:700;
   color:var(--brand);
   z-index:9999;
 }
 
 @media(max-width:768px){
-  h1{ font-size:18px }
-  .amount{ font-size:26px }
+  .header h1{ font-size:16px }
+  .amount{ font-size:20px }
 }
 </style>
 </head>
@@ -120,11 +157,13 @@ td{
 
 <div id="loader" class="loader">Loading outstanding data…</div>
 
-<div class="container">
+<div class="header">
   <h1>Outstanding Receivables Dashboard</h1>
   <div class="amount" id="grandTotal">₹ 0</div>
   <div class="updated" id="updated"></div>
+</div>
 
+<div class="container">
   <div class="table-wrap">
     <table>
       <thead>
@@ -161,7 +200,7 @@ function init(json){
   DATA = json.salesPICs;
 
   document.getElementById("grandTotal").textContent =
-    "₹ " + json.grandTotal.toLocaleString("en-IN");
+    formatAmount(json.grandTotal);
 
   document.getElementById("updated").textContent =
     "Last updated: " + new Date(json.lastUpdated).toLocaleString();
@@ -192,7 +231,6 @@ function renderSales(){
 function openSales(name){
   clearBody();
   activeSales=name;
-
   const s=DATA[name];
 
   addRow({
@@ -265,50 +303,32 @@ function addRow({label,cls,values,onClick,type}){
   if(onClick) td0.onclick=onClick;
   tr.appendChild(td0);
 
-  const totalTD = document.createElement("td");
-  totalTD.textContent = values.total ? values.total.toLocaleString("en-IN") : "–";
-  totalTD.className = "total";
-  tr.appendChild(totalTD);
-
-  tr.appendChild(makeOnAccountTD(type==="customer" ? values.onAccount : 0));
-  tr.appendChild(makeAgeTD(values.d90,true));
-  tr.appendChild(makeAgeTD(values.d61_90));
-  tr.appendChild(makeAgeTD(values.d31_60));
-  tr.appendChild(makeAgeTD(values.d1_30));
+  tr.appendChild(makeAmountTD(values.total,"total"));
+  tr.appendChild(makeAmountTD(type==="customer"?values.onAccount:0,"green"));
+  tr.appendChild(makeAmountTD(values.d90,"red"));
+  tr.appendChild(makeAmountTD(values.d61_90));
+  tr.appendChild(makeAmountTD(values.d31_60));
+  tr.appendChild(makeAmountTD(values.d1_30));
 
   document.getElementById("body").appendChild(tr);
 }
 
-/* ---------- HELPERS ---------- */
-
-function makeOnAccountTD(val){
+function makeAmountTD(val,cls=""){
   const td=document.createElement("td");
-  if(val && val>0){
-    td.textContent = val.toLocaleString("en-IN");
-    td.className="green";
-  }else{
-    td.textContent="–";
-  }
+  td.className="amount-cell "+cls;
+  td.textContent = val ? formatAmount(val) : "–";
   return td;
 }
 
-function compact(val){
-  if(!val) return "–";
+/* ₹k / ₹L formatter */
+function formatAmount(val){
   if(val >= 100000){
-    return "₹" + (val/100000).toFixed(1).replace(/\.0$/,"") + "L";
+    return "₹"+(val/100000).toFixed(1).replace(/\.0$/,"")+"L";
   }
   if(val >= 1000){
-    return "₹" + (val/1000).toFixed(0) + "k";
+    return "₹"+Math.round(val/1000)+"k";
   }
-  return "₹" + val;
-}
-
-function makeAgeTD(val,isRed=false){
-  const td=document.createElement("td");
-  td.textContent = compact(val);
-  td.className="age";
-  if(isRed && val) td.classList.add("red");
-  return td;
+  return "₹"+val;
 }
 </script>
 
