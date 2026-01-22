@@ -14,7 +14,6 @@
   --green:#188038;
 }
 
-/* ---------- BASE ---------- */
 *{ box-sizing:border-box }
 
 body{
@@ -54,11 +53,10 @@ h1{
 
 table{
   width:100%;
-  min-width:900px;
   border-collapse:collapse;
+  table-layout:auto; /* AUTO WIDTH */
 }
 
-/* Header */
 th{
   background:#eef3ff;
   color:var(--brand);
@@ -68,32 +66,11 @@ th{
   white-space:nowrap;
 }
 
-/* Body cells */
 td{
   padding:12px;
   border-top:1px solid var(--border);
   white-space:nowrap;
 }
-
-/* ---------- FREEZE FIRST 2 COLUMNS ---------- */
-th:nth-child(1),
-td:nth-child(1){
-  position:sticky;
-  left:0;
-  background:#fff;
-  z-index:3;
-}
-
-th:nth-child(2),
-td:nth-child(2){
-  position:sticky;
-  left:220px; /* width of first column */
-  background:#fff;
-  z-index:3;
-}
-
-th:nth-child(1){ z-index:4 }
-th:nth-child(2){ z-index:4 }
 
 /* ---------- ROW TYPES ---------- */
 .click{ cursor:pointer; font-weight:600 }
@@ -105,9 +82,15 @@ th:nth-child(2){ z-index:4 }
 .red{ color:var(--red); font-weight:700 }
 .green{ color:var(--green); font-weight:700 }
 
-/* ---------- AGEING COMPACT STYLE ---------- */
+/* ---------- TOTAL COLUMN ---------- */
+.total{
+  font-weight:800;
+  color:#000;
+}
+
+/* ---------- AGEING COMPACT ---------- */
 .age{
-  padding:6px 8px !important;
+  padding:6px 8px;
   font-size:12px;
   text-align:right;
 }
@@ -126,7 +109,6 @@ th:nth-child(2){ z-index:4 }
   z-index:9999;
 }
 
-/* ---------- MOBILE ---------- */
 @media(max-width:768px){
   h1{ font-size:18px }
   .amount{ font-size:26px }
@@ -283,7 +265,11 @@ function addRow({label,cls,values,onClick,type}){
   if(onClick) td0.onclick=onClick;
   tr.appendChild(td0);
 
-  tr.appendChild(makeTD(values.total));
+  const totalTD = document.createElement("td");
+  totalTD.textContent = values.total ? values.total.toLocaleString("en-IN") : "–";
+  totalTD.className = "total";
+  tr.appendChild(totalTD);
+
   tr.appendChild(makeOnAccountTD(type==="customer" ? values.onAccount : 0));
   tr.appendChild(makeAgeTD(values.d90,true));
   tr.appendChild(makeAgeTD(values.d61_90));
@@ -293,13 +279,7 @@ function addRow({label,cls,values,onClick,type}){
   document.getElementById("body").appendChild(tr);
 }
 
-/* ---------- CELL HELPERS ---------- */
-
-function makeTD(val){
-  const td=document.createElement("td");
-  td.textContent = val ? val.toLocaleString("en-IN") : "–";
-  return td;
-}
+/* ---------- HELPERS ---------- */
 
 function makeOnAccountTD(val){
   const td=document.createElement("td");
@@ -312,7 +292,6 @@ function makeOnAccountTD(val){
   return td;
 }
 
-/* Compact ₹k / ₹L formatter for ageing */
 function compact(val){
   if(!val) return "–";
   if(val >= 100000){
