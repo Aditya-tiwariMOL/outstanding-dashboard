@@ -14,7 +14,8 @@
   --green:#188038;
 }
 
-*{box-sizing:border-box}
+/* ---------- BASE ---------- */
+*{ box-sizing:border-box }
 
 body{
   margin:0;
@@ -43,6 +44,7 @@ h1{
   margin-bottom:16px;
 }
 
+/* ---------- TABLE ---------- */
 .table-wrap{
   background:#fff;
   border-radius:14px;
@@ -56,29 +58,61 @@ table{
   border-collapse:collapse;
 }
 
+/* Header */
 th{
   background:#eef3ff;
   color:var(--brand);
   padding:12px;
   text-align:left;
   font-weight:700;
+  white-space:nowrap;
 }
 
+/* Body cells */
 td{
   padding:12px;
   border-top:1px solid var(--border);
   white-space:nowrap;
 }
 
+/* ---------- FREEZE FIRST 2 COLUMNS ---------- */
+th:nth-child(1),
+td:nth-child(1){
+  position:sticky;
+  left:0;
+  background:#fff;
+  z-index:3;
+}
+
+th:nth-child(2),
+td:nth-child(2){
+  position:sticky;
+  left:220px; /* width of first column */
+  background:#fff;
+  z-index:3;
+}
+
+th:nth-child(1){ z-index:4 }
+th:nth-child(2){ z-index:4 }
+
+/* ---------- ROW TYPES ---------- */
 .click{ cursor:pointer; font-weight:600 }
 .sales{ border-left:4px solid var(--brand) }
 .customer{ padding-left:28px; background:#fafcff }
 .invoice{ padding-left:48px; font-style:italic; color:#444 }
 
+/* ---------- COLORS ---------- */
 .red{ color:var(--red); font-weight:700 }
 .green{ color:var(--green); font-weight:700 }
 
-/* Loader */
+/* ---------- AGEING COMPACT STYLE ---------- */
+.age{
+  padding:6px 8px !important;
+  font-size:12px;
+  text-align:right;
+}
+
+/* ---------- LOADER ---------- */
 .loader{
   position:fixed;
   inset:0;
@@ -92,9 +126,10 @@ td{
   z-index:9999;
 }
 
+/* ---------- MOBILE ---------- */
 @media(max-width:768px){
-  h1{font-size:18px}
-  .amount{font-size:26px}
+  h1{ font-size:18px }
+  .amount{ font-size:26px }
 }
 </style>
 </head>
@@ -250,18 +285,19 @@ function addRow({label,cls,values,onClick,type}){
 
   tr.appendChild(makeTD(values.total));
   tr.appendChild(makeOnAccountTD(type==="customer" ? values.onAccount : 0));
-  tr.appendChild(makeTD(values.d90,true));
-  tr.appendChild(makeTD(values.d61_90));
-  tr.appendChild(makeTD(values.d31_60));
-  tr.appendChild(makeTD(values.d1_30));
+  tr.appendChild(makeAgeTD(values.d90,true));
+  tr.appendChild(makeAgeTD(values.d61_90));
+  tr.appendChild(makeAgeTD(values.d31_60));
+  tr.appendChild(makeAgeTD(values.d1_30));
 
   document.getElementById("body").appendChild(tr);
 }
 
-function makeTD(val,red=false){
+/* ---------- CELL HELPERS ---------- */
+
+function makeTD(val){
   const td=document.createElement("td");
   td.textContent = val ? val.toLocaleString("en-IN") : "–";
-  if(red && val) td.className="red";
   return td;
 }
 
@@ -273,6 +309,26 @@ function makeOnAccountTD(val){
   }else{
     td.textContent="–";
   }
+  return td;
+}
+
+/* Compact ₹k / ₹L formatter for ageing */
+function compact(val){
+  if(!val) return "–";
+  if(val >= 100000){
+    return "₹" + (val/100000).toFixed(1).replace(/\.0$/,"") + "L";
+  }
+  if(val >= 1000){
+    return "₹" + (val/1000).toFixed(0) + "k";
+  }
+  return "₹" + val;
+}
+
+function makeAgeTD(val,isRed=false){
+  const td=document.createElement("td");
+  td.textContent = compact(val);
+  td.className="age";
+  if(isRed && val) td.classList.add("red");
   return td;
 }
 </script>
