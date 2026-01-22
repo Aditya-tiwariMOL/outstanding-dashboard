@@ -6,97 +6,120 @@
 <title>Outstanding Receivables Dashboard</title>
 
 <style>
-:root {
-  --brand: #0B419B;
-  --light: #f4f7fb;
-  --border: #e2e6ef;
+:root{
+  --brand:#0B419B;
+  --bg:#f4f7fb;
+  --border:#e2e6ef;
+  --red:#d93025;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, Arial, sans-serif;
-  background: var(--light);
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
 }
 
-.container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 16px;
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:16px;
 }
 
-h1 {
-  color: var(--brand);
-  margin-bottom: 8px;
+h1{
+  color:var(--brand);
+  margin:0 0 6px;
 }
 
-.amount {
-  font-size: 34px;
-  font-weight: bold;
+.amount{
+  font-size:34px;
+  font-weight:800;
 }
 
-.updated {
-  color: #666;
-  margin-bottom: 16px;
+.updated{
+  color:#666;
+  margin-bottom:16px;
 }
 
-.table-wrap {
-  overflow-x: auto;
-  background: white;
-  border-radius: 12px;
+.table-wrap{
+  background:#fff;
+  border-radius:14px;
+  overflow-x:auto;
+  box-shadow:0 6px 20px rgba(0,0,0,.04);
 }
 
-table {
-  width: 100%;
-  min-width: 900px;
-  border-collapse: collapse;
+table{
+  width:100%;
+  min-width:900px;
+  border-collapse:collapse;
 }
 
-th {
-  background: #eef3ff;
-  color: var(--brand);
-  padding: 12px;
-  text-align: left;
+th{
+  background:#eef3ff;
+  color:var(--brand);
+  padding:12px;
+  text-align:left;
+  font-weight:700;
 }
 
-td {
-  padding: 12px;
-  border-top: 1px solid var(--border);
+td{
+  padding:12px;
+  border-top:1px solid var(--border);
+  white-space:nowrap;
 }
 
-.click {
-  cursor: pointer;
-  font-weight: 600;
+.click{
+  cursor:pointer;
+  font-weight:600;
 }
 
-.sales {
-  border-left: 4px solid var(--brand);
+.sales{
+  border-left:4px solid var(--brand);
 }
 
-.customer {
-  padding-left: 28px;
-  background: #fafcff;
+.customer{
+  padding-left:28px;
+  background:#fafcff;
 }
 
-.invoice {
-  padding-left: 48px;
-  font-style: italic;
-  color: #444;
+.invoice{
+  padding-left:48px;
+  font-style:italic;
+  color:#444;
 }
 
-.red {
-  color: #d93025;
-  font-weight: 700;
+.red{
+  color:var(--red);
+  font-weight:700;
 }
 
-/* MOBILE */
-@media (max-width: 768px) {
-  h1 { font-size: 18px; }
-  .amount { font-size: 26px; }
+/* Loader */
+.loader{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:700;
+  color:var(--brand);
+  z-index:9999;
+}
+
+/* Mobile tweaks */
+@media(max-width:768px){
+  h1{font-size:18px}
+  .amount{font-size:26px}
 }
 </style>
 </head>
 
 <body>
+
+<div id="loader" class="loader">Loading outstanding data…</div>
+
 <div class="container">
   <h1>Outstanding Receivables Dashboard</h1>
   <div class="amount" id="grandTotal">₹ 0</div>
@@ -120,133 +143,140 @@ td {
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+const API_URL =
+"https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
+let DATA = {};
 let activeSales = null;
 let activeCustomer = null;
-let DATA = {};
 
 fetch(API_URL)
   .then(r => r.json())
-  .then(json => {
-    DATA = json.salesPICs;
-    document.getElementById("grandTotal").innerText =
-      "₹ " + json.grandTotal.toLocaleString("en-IN");
-    document.getElementById("updated").innerText =
-      "Last updated: " + new Date(json.lastUpdated).toLocaleString();
-    renderSales();
+  .then(useData)
+  .catch(() => {
+    document.getElementById("loader").textContent =
+      "Failed to load data";
   });
 
-function clearBody() {
+function useData(json){
+  DATA = json.salesPICs;
+
+  document.getElementById("grandTotal").textContent =
+    "₹ " + json.grandTotal.toLocaleString("en-IN");
+
+  document.getElementById("updated").textContent =
+    "Last updated: " + new Date(json.lastUpdated).toLocaleString();
+
+  renderSales();
+  document.getElementById("loader").style.display = "none";
+}
+
+function clearBody(){
   document.getElementById("body").innerHTML = "";
 }
 
-function renderSales() {
+function renderSales(){
   clearBody();
   activeSales = null;
   activeCustomer = null;
 
-  for (const [sales, s] of Object.entries(DATA)) {
+  for(const [name,s] of Object.entries(DATA)){
     addRow({
-      label: "▶ " + sales,
-      cls: "sales click",
-      values: s,
-      onClick: () => toggleSales(sales)
+      label:"▶ "+name,
+      cls:"sales click",
+      values:s,
+      onClick:()=>openSales(name)
     });
   }
 }
 
-function toggleSales(sales) {
-  if (activeSales === sales) {
-    renderSales();
-    return;
-  }
-
+function openSales(name){
   clearBody();
-  activeSales = sales;
+  activeSales = name;
   activeCustomer = null;
 
-  const s = DATA[sales];
+  const s = DATA[name];
 
   addRow({
-    label: "▼ " + sales,
-    cls: "sales click",
-    values: s,
-    onClick: () => renderSales()
+    label:"▼ "+name,
+    cls:"sales click",
+    values:s,
+    onClick:renderSales
   });
 
-  for (const [cust, c] of Object.entries(s.customers)) {
+  for(const [cust,c] of Object.entries(s.customers)){
     addRow({
-      label: "▶ " + cust,
-      cls: "customer click",
-      values: c,
-      onClick: () => toggleCustomer(cust, c)
+      label:"▶ "+cust,
+      cls:"customer click",
+      values:c,
+      onClick:()=>openCustomer(cust)
     });
   }
 }
 
-function toggleCustomer(name, cust) {
+function openCustomer(custName){
   clearBody();
-
-  // redraw sales header
   const s = DATA[activeSales];
+
   addRow({
-    label: "▼ " + activeSales,
-    cls: "sales click",
-    values: s,
-    onClick: () => renderSales()
+    label:"▼ "+activeSales,
+    cls:"sales click",
+    values:s,
+    onClick:renderSales
   });
 
-  for (const [custName, c] of Object.entries(s.customers)) {
-    if (custName !== name) {
+  for(const [name,c] of Object.entries(s.customers)){
+    if(name!==custName){
       addRow({
-        label: "▶ " + custName,
-        cls: "customer click",
-        values: c,
-        onClick: () => toggleCustomer(custName, c)
+        label:"▶ "+name,
+        cls:"customer click",
+        values:c,
+        onClick:()=>openCustomer(name)
       });
-    } else {
+    }else{
       addRow({
-        label: "▼ " + custName,
-        cls: "customer click",
-        values: c,
-        onClick: () => toggleSales(activeSales)
+        label:"▼ "+name,
+        cls:"customer click",
+        values:c,
+        onClick:()=>openSales(activeSales)
       });
 
-      c.invoices.forEach(inv => {
+      c.invoices.forEach(inv=>{
         addRow({
-          label: inv.invoiceNo,
-          cls: "invoice",
-          values: inv
+          label:inv.invoiceNo,
+          cls:"invoice",
+          values:inv
         });
       });
     }
   }
 }
 
-function addRow({ label, cls, values, onClick }) {
-  const tr = document.createElement("tr");
-  const td0 = document.createElement("td");
-  td0.textContent = label;
-  td0.className = cls;
-  if (onClick) td0.onclick = onClick;
+function addRow({label,cls,values,onClick}){
+  const tr=document.createElement("tr");
 
+  const td0=document.createElement("td");
+  td0.textContent=label;
+  td0.className=cls;
+  if(onClick) td0.onclick=onClick;
   tr.appendChild(td0);
-  tr.appendChild(td(values.total));
-  tr.appendChild(td(values.d90, true));
-  tr.appendChild(td(values.d61_90));
-  tr.appendChild(td(values.d31_60));
-  tr.appendChild(td(values.d1_30));
+
+  tr.appendChild(makeTD(values.total));
+  tr.appendChild(makeTD(values.d90,true));
+  tr.appendChild(makeTD(values.d61_90));
+  tr.appendChild(makeTD(values.d31_60));
+  tr.appendChild(makeTD(values.d1_30));
 
   document.getElementById("body").appendChild(tr);
 }
 
-function td(val, red=false) {
-  const td = document.createElement("td");
+function makeTD(val,red=false){
+  const td=document.createElement("td");
   td.textContent = val ? val.toLocaleString("en-IN") : "–";
-  if (red && val) td.className = "red";
+  if(red && val) td.className="red";
   return td;
 }
 </script>
+
 </body>
 </html>
