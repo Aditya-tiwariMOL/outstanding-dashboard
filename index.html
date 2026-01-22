@@ -6,17 +6,17 @@
 <title>Outstanding Receivables Dashboard</title>
 
 <style>
-:root {
+:root{
   --brand:#0B419B;
-  --border:#e3e7ef;
-  --light:#f5f7fb;
+  --border:#e4e8f0;
+  --bg:#f5f7fb;
 }
 
 body{
-  font-family:Arial, sans-serif;
-  background:var(--light);
   margin:0;
   padding:16px;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
 }
 
 .container{
@@ -26,14 +26,14 @@ body{
 }
 
 h1{color:var(--brand);margin:0}
-.total{font-size:32px;font-weight:bold;margin:6px 0}
+.total{font-size:32px;font-weight:bold;margin:8px 0}
 .updated{color:#666;margin-bottom:16px}
 
 .table-wrap{overflow-x:auto}
 
 table{
   border-collapse:collapse;
-  min-width:850px;
+  min-width:900px;
   width:100%;
 }
 
@@ -45,7 +45,10 @@ th,td{
 
 th:first-child,td:first-child{text-align:left}
 
-thead{background:#eef3fb;color:var(--brand)}
+thead{
+  background:#eef3fb;
+  color:var(--brand);
+}
 
 .sales{
   font-weight:bold;
@@ -64,7 +67,6 @@ thead{background:#eef3fb;color:var(--brand)}
 }
 
 .toggle{margin-right:6px}
-
 .red{color:#d93025}
 
 @media(max-width:600px){
@@ -99,6 +101,7 @@ thead{background:#eef3fb;color:var(--brand)}
 </div>
 
 <script>
+/* ================= DATA ================= */
 const data = [
   {
     name:"Bharat San",
@@ -109,9 +112,7 @@ const data = [
         name:"ABC Traders",
         total:"45,000",
         buckets:["–","–","–","45,000"],
-        invoices:[
-          {no:"INV-1001",total:"45,000"}
-        ]
+        invoices:[{no:"INV-1001",total:"45,000"}]
       },
       {
         name:"XYZ Industries",
@@ -130,30 +131,37 @@ const data = [
         name:"ABC Traders",
         total:"60,000",
         buckets:["–","–","60,000","–"],
-        invoices:[
-          {no:"INV-2001",total:"60,000"}
-        ]
+        invoices:[{no:"INV-2001",total:"60,000"}]
       }
     ]
+  },
+  {
+    name:"Neha Kapoor",
+    total:"2,19,000",
+    buckets:["90,000","91,000","–","38,000"],
+    customers:[]
   }
 ];
 
+/* ================= STATE ================= */
 const tbody=document.getElementById("tbody");
-let openSales=null;
-let openCustomer=null;
+let openSalesRow=null;
+let openCustomerRow=null;
 
-function clearBelow(row){
-  let next=row.nextSibling;
-  while(next && !next.classList.contains("sales")){
-    let temp=next.nextSibling;
-    next.remove();
-    next=temp;
+/* ================= HELPERS ================= */
+function removeUntilNextSales(startRow){
+  let row=startRow.nextSibling;
+  while(row && !row.classList.contains("sales")){
+    let next=row.nextSibling;
+    row.remove();
+    row=next;
   }
 }
 
+/* ================= RENDER ================= */
 function render(){
   tbody.innerHTML="";
-  data.forEach((s,si)=>{
+  data.forEach((s)=>{
     const tr=document.createElement("tr");
     tr.className="sales";
     tr.innerHTML=`
@@ -162,28 +170,29 @@ function render(){
       <td class="red">${s.buckets[0]}</td>
       <td>${s.buckets[1]}</td>
       <td>${s.buckets[2]}</td>
-      <td>${s.buckets[3]}</td>`;
-    tr.onclick=()=>toggleSales(tr,si);
+      <td>${s.buckets[3]}</td>
+    `;
+    tr.onclick=()=>toggleSales(tr,s);
     tbody.appendChild(tr);
   });
 }
 
-function toggleSales(row,si){
-  if(openSales!==null){
-    const prev=tbody.children[openSales];
-    clearBelow(prev);
-  }
-  openCustomer=null;
-
-  if(openSales===si){
-    openSales=null;
-    return;
+/* ================= SALES ================= */
+function toggleSales(row,sales){
+  // Close ANY open Sales PIC fully
+  if(openSalesRow){
+    removeUntilNextSales(openSalesRow);
+    openSalesRow=null;
+    openCustomerRow=null;
   }
 
-  openSales=si;
-  const sales=data[si];
+  // If clicking same row again → just close
+  if(openSalesRow===row) return;
 
-  sales.customers.forEach((c,ci)=>{
+  openSalesRow=row;
+
+  let insertAfter=row;
+  sales.customers.forEach(c=>{
     const tr=document.createElement("tr");
     tr.className="customer";
     tr.innerHTML=`
@@ -192,39 +201,50 @@ function toggleSales(row,si){
       <td>${c.buckets[0]}</td>
       <td>${c.buckets[1]}</td>
       <td>${c.buckets[2]}</td>
-      <td>${c.buckets[3]}</td>`;
+      <td>${c.buckets[3]}</td>
+    `;
     tr.onclick=(e)=>{e.stopPropagation();toggleCustomer(tr,c)};
-    row.after(tr);
-    row=tr;
+    insertAfter.after(tr);
+    insertAfter=tr;
   });
 }
 
+/* ================= CUSTOMER ================= */
 function toggleCustomer(row,customer){
-  let next=row.nextSibling;
-  while(next && next.classList.contains("invoice")){
-    let temp=next.nextSibling;
-    next.remove();
-    next=temp;
+  // Close previous customer invoices
+  if(openCustomerRow){
+    let r=openCustomerRow.nextSibling;
+    while(r && r.classList.contains("invoice")){
+      let n=r.nextSibling;
+      r.remove();
+      r=n;
+    }
+    if(openCustomerRow===row){
+      openCustomerRow=null;
+      return;
+    }
   }
 
-  if(openCustomer===row){
-    openCustomer=null;
-    return;
-  }
+  openCustomerRow=row;
 
-  openCustomer=row;
+  let insertAfter=row;
   customer.invoices.forEach(inv=>{
     const tr=document.createElement("tr");
     tr.className="invoice";
     tr.innerHTML=`
       <td>&nbsp;&nbsp;&nbsp;&nbsp;${inv.no}</td>
       <td>${inv.total}</td>
-      <td>–</td><td>–</td><td>–</td><td>${inv.total}</td>`;
-    row.after(tr);
-    row=tr;
+      <td>–</td>
+      <td>–</td>
+      <td>–</td>
+      <td>${inv.total}</td>
+    `;
+    insertAfter.after(tr);
+    insertAfter=tr;
   });
 }
 
+/* ================= INIT ================= */
 render();
 </script>
 </body>
