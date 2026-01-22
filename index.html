@@ -11,6 +11,7 @@
   --bg:#f4f7fb;
   --border:#e2e6ef;
   --red:#d93025;
+  --green:#188038;
 }
 
 *{box-sizing:border-box}
@@ -51,7 +52,7 @@ h1{
 
 table{
   width:100%;
-  min-width:900px;
+  min-width:1000px;
   border-collapse:collapse;
 }
 
@@ -69,30 +70,13 @@ td{
   white-space:nowrap;
 }
 
-.click{
-  cursor:pointer;
-  font-weight:600;
-}
+.click{cursor:pointer;font-weight:600}
+.sales{border-left:4px solid var(--brand)}
+.customer{padding-left:28px;background:#fafcff}
+.invoice{padding-left:48px;font-style:italic;color:#444}
 
-.sales{
-  border-left:4px solid var(--brand);
-}
-
-.customer{
-  padding-left:28px;
-  background:#fafcff;
-}
-
-.invoice{
-  padding-left:48px;
-  font-style:italic;
-  color:#444;
-}
-
-.red{
-  color:var(--red);
-  font-weight:700;
-}
+.red{color:var(--red);font-weight:700}
+.green{color:var(--green);font-weight:700}
 
 /* Loader */
 .loader{
@@ -108,7 +92,7 @@ td{
   z-index:9999;
 }
 
-/* Mobile tweaks */
+/* Mobile */
 @media(max-width:768px){
   h1{font-size:18px}
   .amount{font-size:26px}
@@ -131,6 +115,7 @@ td{
         <tr>
           <th>Sales PIC</th>
           <th>Total</th>
+          <th>On Account</th>
           <th>90+</th>
           <th>61–90</th>
           <th>31–60</th>
@@ -148,14 +133,12 @@ const API_URL =
 
 let DATA = {};
 let activeSales = null;
-let activeCustomer = null;
 
 fetch(API_URL)
-  .then(r => r.json())
+  .then(r=>r.json())
   .then(useData)
-  .catch(() => {
-    document.getElementById("loader").textContent =
-      "Failed to load data";
+  .catch(()=>{
+    document.getElementById("loader").textContent="Failed to load data";
   });
 
 function useData(json){
@@ -168,17 +151,14 @@ function useData(json){
     "Last updated: " + new Date(json.lastUpdated).toLocaleString();
 
   renderSales();
-  document.getElementById("loader").style.display = "none";
+  document.getElementById("loader").style.display="none";
 }
 
-function clearBody(){
-  document.getElementById("body").innerHTML = "";
-}
+function clearBody(){ body.innerHTML="" }
 
 function renderSales(){
   clearBody();
-  activeSales = null;
-  activeCustomer = null;
+  activeSales=null;
 
   for(const [name,s] of Object.entries(DATA)){
     addRow({
@@ -192,10 +172,8 @@ function renderSales(){
 
 function openSales(name){
   clearBody();
-  activeSales = name;
-  activeCustomer = null;
-
-  const s = DATA[name];
+  activeSales=name;
+  const s=DATA[name];
 
   addRow({
     label:"▼ "+name,
@@ -216,7 +194,7 @@ function openSales(name){
 
 function openCustomer(custName){
   clearBody();
-  const s = DATA[activeSales];
+  const s=DATA[activeSales];
 
   addRow({
     label:"▼ "+activeSales,
@@ -261,19 +239,20 @@ function addRow({label,cls,values,onClick}){
   if(onClick) td0.onclick=onClick;
   tr.appendChild(td0);
 
-  tr.appendChild(makeTD(values.total));
-  tr.appendChild(makeTD(values.d90,true));
-  tr.appendChild(makeTD(values.d61_90));
-  tr.appendChild(makeTD(values.d31_60));
-  tr.appendChild(makeTD(values.d1_30));
+  tr.appendChild(td(values.total));
+  tr.appendChild(td(values.onAccount,true));
+  tr.appendChild(td(values.d90,true));
+  tr.appendChild(td(values.d61_90));
+  tr.appendChild(td(values.d31_60));
+  tr.appendChild(td(values.d1_30));
 
-  document.getElementById("body").appendChild(tr);
+  body.appendChild(tr);
 }
 
-function makeTD(val,red=false){
+function td(val,isGreen=false){
   const td=document.createElement("td");
   td.textContent = val ? val.toLocaleString("en-IN") : "–";
-  if(red && val) td.className="red";
+  if(isGreen && val) td.className="green";
   return td;
 }
 </script>
