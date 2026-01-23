@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Outstanding Receivables</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Outstanding Receivables Dashboard</title>
 
 <style>
 :root{
@@ -13,15 +13,22 @@
   --red:#d93025;
   --green:#1e8e3e;
 }
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui;background:var(--bg)}
 
-/* ===== PASSCODE ===== */
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
+}
+
+/* ========== PASSCODE ========== */
 .lock-screen{
-  min-height:100vh;
+  min-height:100dvh;
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:center;
+  padding:24px 12px;
 }
 .lock-box{
   background:#fff;
@@ -29,38 +36,65 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   border-radius:14px;
   width:100%;
   max-width:340px;
-  text-align:center;
   box-shadow:0 8px 24px rgba(0,0,0,.08);
+  text-align:center;
+  margin-top:10vh;
 }
-.brand-logo{max-width:120px;margin-bottom:12px}
+
+/* BRANDING */
+.brand-wrap{margin-bottom:18px}
+.brand-logo{max-width:120px;margin-bottom:10px}
+.brand-name{
+  font-size:20px;
+  font-weight:800;
+  color:var(--brand);
+}
+.brand-sub{font-size:14px;color:#555}
+
 .lock-box input{
   width:100%;
   padding:12px;
+  font-size:16px;
   border-radius:8px;
   border:1px solid var(--border);
-  font-size:16px;
 }
 .lock-box button{
-  margin-top:12px;
   width:100%;
+  margin-top:12px;
   padding:12px;
-  background:var(--brand);
-  color:#fff;
+  font-weight:600;
   border:none;
   border-radius:8px;
-  font-weight:600;
+  background:var(--brand);
+  color:#fff;
   cursor:pointer;
 }
-.error{color:var(--red);font-size:13px;display:none}
+.error{display:none;margin-top:10px;color:var(--red);font-size:13px}
 
-/* ===== DASHBOARD ===== */
-.container{max-width:1200px;margin:auto;padding:16px;display:none}
-.header{text-align:center;margin-bottom:20px}
+/* ========== DASHBOARD ========== */
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:16px;
+  display:none;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:20px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
 .dash-logo{max-width:100px;margin-bottom:8px}
-.header h2{color:var(--brand);margin:6px 0}
+.header h2{
+  font-size:1.3rem;
+  font-weight:600;
+  color:var(--brand);
+}
 .amount{font-size:22px;font-weight:700}
 #updated{font-size:12px;color:#666}
 
+/* TABLE */
 .table-wrap{
   background:#fff;
   border-radius:14px;
@@ -76,9 +110,24 @@ th{
   background:#eef3ff;
   color:var(--brand);
   font-size:0.85rem;
+  font-weight:600;
 }
 
-.sales{font-weight:700;cursor:pointer}
+/* widen ageing columns */
+th:nth-child(6),
+th:nth-child(7),
+th:nth-child(8),
+td:nth-child(6),
+td:nth-child(7),
+td:nth-child(8){
+  min-width:110px;
+}
+
+.sales-row{background:#fff}
+.customer-row{background:#f5f8ff}
+.invoice-row{background:#fafafa}
+
+.sales{font-weight:600;cursor:pointer}
 .customer{padding-left:18px;cursor:pointer}
 .invoice{padding-left:36px;font-size:13px;color:#555}
 
@@ -86,13 +135,13 @@ th{
 .red{color:var(--red);font-weight:600}
 .total{font-weight:700}
 
+/* ⭐ FORECAST */
 .forecast-input{
   width:90px;
   padding:6px;
   border:1px solid var(--border);
   border-radius:6px;
 }
-
 .submit-wrap{text-align:right;margin-top:12px}
 .submit-btn{
   background:var(--brand);
@@ -112,8 +161,12 @@ th{
 <!-- PASSCODE -->
 <div class="lock-screen" id="lock">
   <div class="lock-box">
-    <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png" class="brand-logo">
-    <input type="password" id="pass" placeholder="Enter passcode">
+    <div class="brand-wrap">
+      <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png" class="brand-logo">
+      <div class="brand-name">MOL Logistics ( India ) PVT. LTD.</div>
+      <div class="brand-sub">Outstanding Receivables</div>
+    </div>
+    <input type="password" id="pass" placeholder="Passcode">
     <button onclick="checkPass()">Access</button>
     <div class="error" id="err">Wrong passcode</div>
   </div>
@@ -146,38 +199,31 @@ th{
     </table>
   </div>
 
+  <!-- ⭐ FORECAST -->
   <div class="submit-wrap">
     <button class="submit-btn" id="submitBtn" onclick="submitForecast()">Submit Forecast</button>
   </div>
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 const PASS_HASH="158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
+const API="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-let DATA=null, ready=false, allowed=false;
-let activePIC=null;
-let forecastBuffer={};
+let DATA=null, ready=false, allowed=false, active=null;
+let forecastBuffer={}; // ⭐ FORECAST
 
-/* preload data */
 fetch(API).then(r=>r.json()).then(j=>{
   DATA=j; ready=true;
   if(allowed) render();
 });
 
 async function checkPass(){
-  const hash=await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(pass.value)
-  ).then(b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""));
-
-  if(hash===PASS_HASH){
+  const h=await sha(pass.value);
+  if(h===PASS_HASH){
     allowed=true;
     lock.style.display="none";
     if(ready) render();
-  }else{
-    err.style.display="block";
-  }
+  }else err.style.display="block";
 }
 
 function render(){
@@ -185,42 +231,42 @@ function render(){
   grand.innerText="₹ "+DATA.grandTotal.toLocaleString("en-IN");
   updated.innerText="Last updated: "+
     new Date(DATA.lastUpdated).toLocaleDateString("en-GB",
-    {day:"2-digit",month:"short",year:"numeric"});
+      {day:"2-digit",month:"short",year:"numeric"});
   drawSales();
 }
 
 function drawSales(){
-  body.innerHTML="";
+  body.innerHTML=""; active=null;
   Object.entries(DATA.salesPICs).forEach(([n,s])=>{
-    drawRow(n,"sales",s,()=>openSales(n));
+    row(n,"sales",s,()=>openSales(n));
   });
 }
 
-function openSales(pic){
-  activePIC=pic;
-  body.innerHTML="";
-  drawRow(pic,"sales",DATA.salesPICs[pic],drawSales);
-  Object.entries(DATA.salesPICs[pic].customers).forEach(([c,v])=>{
-    drawRow(c,"customer",v,()=>openCustomer(c));
+function openSales(n){
+  body.innerHTML=""; active=n;
+  const s=DATA.salesPICs[n];
+  row(n,"sales",s,drawSales);
+  Object.entries(s.customers).forEach(([c,v])=>{
+    row(c,"customer",v,()=>openCust(c),true);
   });
 }
 
-function openCustomer(cust){
+function openCust(c){
   body.innerHTML="";
-  const pic=DATA.salesPICs[activePIC];
-  drawRow(activePIC,"sales",pic,drawSales);
-
-  Object.entries(pic.customers).forEach(([n,v])=>{
-    if(n!==cust) drawRow(n,"customer",v,()=>openCustomer(n));
+  const s=DATA.salesPICs[active];
+  row(active,"sales",s,drawSales);
+  Object.entries(s.customers).forEach(([n,v])=>{
+    if(n!==c) row(n,"customer",v,()=>openCust(n),true);
     else{
-      drawRow(n,"customer",v,()=>openSales(activePIC),true);
-      v.invoices.forEach(i=>drawRow(i.invoiceNo,"invoice",i));
+      row(n,"customer",v,()=>openSales(active),true);
+      v.invoices.forEach(i=>row(i.invoiceNo,"invoice",i));
     }
   });
 }
 
-function drawRow(label,cls,v,cb,editable=false){
+function row(label,cls,v,cb,allowForecast=false){
   const tr=document.createElement("tr");
+  tr.classList.add(cls+"-row");
 
   const name=document.createElement("td");
   name.innerText=label;
@@ -228,13 +274,14 @@ function drawRow(label,cls,v,cb,editable=false){
   if(cb) name.onclick=cb;
   tr.appendChild(name);
 
+  // ⭐ FORECAST CELL
   const ftd=document.createElement("td");
-  if(editable){
+  if(cls==="customer" && allowForecast){
     const input=document.createElement("input");
     input.className="forecast-input";
     input.value=v.forecast||"";
     input.oninput=()=>{
-      forecastBuffer[activePIC+"||"+label]=input.value;
+      forecastBuffer[active+"||"+label]=input.value;
       submitBtn.style.display="inline-block";
     };
     ftd.appendChild(input);
@@ -243,24 +290,14 @@ function drawRow(label,cls,v,cb,editable=false){
   }
   tr.appendChild(ftd);
 
-  tr.appendChild(cell(v.total,true));
-  tr.appendChild(cell(v.onAccount,false,true));
-  tr.appendChild(cell(v.d90,false,false,true));
-  tr.appendChild(cell(v.d61_90));
-  tr.appendChild(cell(v.d31_60));
-  tr.appendChild(cell(v.d1_30));
+  tr.appendChild(td(v.total,true));
+  tr.appendChild(td(v.onAccount,false,true));
+  tr.appendChild(td(v.d90,false,false,true));
+  tr.appendChild(td(v.d61_90));
+  tr.appendChild(td(v.d31_60));
+  tr.appendChild(td(v.d1_30));
 
   body.appendChild(tr);
-}
-
-function cell(n,t,g,r){
-  const td=document.createElement("td");
-  if(!n){td.innerText="–";return td}
-  td.innerText="₹"+n.toLocaleString("en-IN");
-  if(t)td.classList.add("total");
-  if(g)td.classList.add("green");
-  if(r)td.classList.add("red");
-  return td;
 }
 
 function submitForecast(){
@@ -269,10 +306,32 @@ function submitForecast(){
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({forecast:forecastBuffer})
   }).then(()=>{
-    alert("Forecast saved successfully");
+    alert("Forecast saved");
     forecastBuffer={};
     submitBtn.style.display="none";
   });
+}
+
+function td(v,t,g,r){
+  const d=document.createElement("td");
+  if(!v){d.innerText="–";return d}
+  d.innerText=fmt(v);
+  if(t) d.classList.add("total");
+  if(g) d.classList.add("green");
+  if(r) d.classList.add("red");
+  return d;
+}
+
+function fmt(n){
+  if(n>=100000) return "₹"+(n/100000).toFixed(1)+"L";
+  if(n>=1000) return "₹"+Math.round(n/1000)+"k";
+  return "₹"+n;
+}
+
+async function sha(t){
+  const b=new TextEncoder().encode(t);
+  const h=await crypto.subtle.digest("SHA-256",b);
+  return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 </script>
 
