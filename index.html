@@ -24,11 +24,13 @@ body{
 
 /* PASSCODE */
 .lock-screen{
-  min-height:100vh;
+  min-height:100dvh;
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:center;
+  padding:24px 12px;
 }
+
 .lock-box{
   background:#fff;
   padding:28px;
@@ -37,34 +39,39 @@ body{
   max-width:340px;
   box-shadow:0 8px 24px rgba(0,0,0,.08);
   text-align:center;
+  margin-top:10vh;
 }
 
 /* BRANDING */
 .brand-wrap{
   margin-bottom:18px;
 }
+
 .brand-logo{
-  max-width:170px;
+  max-width:120px; /* reduced ~30% */
   width:100%;
   height:auto;
   margin-bottom:10px;
 }
+
 .brand-name{
-  font-size:14px;
-  font-weight:600;
+  font-size:20px; /* increased ~40% */
+  font-weight:800;
   color:var(--brand);
   margin-bottom:4px;
 }
+
 .brand-sub{
-  font-size:13px;
+  font-size:14px;
   font-weight:500;
   color:#555;
 }
 
 .lock-box h2{
-  margin:12px 0 16px;
+  margin:14px 0 16px;
   color:var(--brand);
 }
+
 .lock-box input{
   width:100%;
   padding:12px;
@@ -72,6 +79,7 @@ body{
   border-radius:8px;
   border:1px solid var(--border);
 }
+
 .lock-box button{
   width:100%;
   margin-top:12px;
@@ -83,6 +91,7 @@ body{
   color:#fff;
   cursor:pointer;
 }
+
 .error{
   display:none;
   margin-top:10px;
@@ -97,10 +106,12 @@ body{
   padding:16px;
   display:none;
 }
+
 .header{
   text-align:center;
   margin-bottom:16px;
 }
+
 .amount{
   font-size:28px;
   font-weight:700;
@@ -112,37 +123,45 @@ body{
   border-radius:14px;
   overflow-x:auto;
 }
+
 table{width:100%;border-collapse:collapse}
+
 th,td{
   padding:12px 16px;
   text-align:left;
   border-top:1px solid var(--border);
 }
+
 th{
   background:#eef3ff;
   color:var(--brand);
 }
+
 .sales{font-weight:600;cursor:pointer}
+
 .customer{
   font-size:14px;
   max-width:220px;
   word-break:break-word;
   cursor:pointer;
 }
+
 .invoice{
   font-size:13px;
   font-style:italic;
   color:#555;
   padding-left:24px;
 }
+
 .green{color:var(--green);font-weight:600}
 .red{color:var(--red);font-weight:600}
 .total{font-weight:700}
 
+/* DESKTOP */
 @media(min-width:768px){
-  .brand-logo{max-width:190px}
-  .brand-name{font-size:15px}
-  .brand-sub{font-size:14px}
+  .brand-logo{max-width:130px}
+  .brand-name{font-size:22px}
+  .lock-box{margin-top:8vh}
 }
 
 @media(min-width:1024px){
@@ -184,6 +203,7 @@ th{
     <div class="amount" id="grand"></div>
     <div id="updated"></div>
   </div>
+
   <div class="table-wrap">
     <table>
       <thead>
