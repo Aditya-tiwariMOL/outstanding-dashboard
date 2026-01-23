@@ -290,12 +290,12 @@ function row(label,cls,v,cb,allowForecast=false){
   }
   tr.appendChild(ftd);
 
-  tr.appendChild(td(v.total,true));
-  tr.appendChild(td(v.onAccount,false,true));
-  tr.appendChild(td(v.d90,false,false,true));
-  tr.appendChild(td(v.d61_90));
-  tr.appendChild(td(v.d31_60));
-  tr.appendChild(td(v.d1_30));
+ tr.appendChild(td(v.total, true));                 // Total
+tr.appendChild(td(v.onAccount, false, true));      // On Account
+tr.appendChild(td(v.d90, false, false, true));     // 90+
+tr.appendChild(td(v.d61_90));                      // 61–90
+tr.appendChild(td(v.d31_60));                      // 31–60
+tr.appendChild(td(v.d1_30));                       // 1–30
 
   body.appendChild(tr);
 }
