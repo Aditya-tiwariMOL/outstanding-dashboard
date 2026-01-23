@@ -14,7 +14,7 @@
   --green:#1e8e3e;
 }
 body{margin:0;font-family:system-ui;background:var(--bg)}
-.container{max-width:1200px;margin:auto;padding:16px;display:none}
+.container{max-width:1200px;margin:auto;padding:16px}
 .header{text-align:center;border-bottom:1px solid var(--border);padding-bottom:12px}
 .amount{font-size:22px;font-weight:700}
 
@@ -22,20 +22,30 @@ table{width:100%;border-collapse:collapse;background:#fff}
 th,td{padding:12px;border-top:1px solid var(--border)}
 th{background:#eef3ff;color:var(--brand);font-size:0.85rem}
 
-.customer-row{background:#f5f8ff}
 .sales{font-weight:600;cursor:pointer}
+.customer-row{background:#f5f8ff}
 .customer{padding-left:18px;cursor:pointer}
 .invoice{padding-left:36px;font-size:13px;color:#555}
 
 .forecast-input{
-  width:100px;
+  width:110px;
   padding:6px;
   border:1px solid var(--border);
   border-radius:6px;
 }
+
 .green{color:var(--green);font-weight:600}
 .red{color:var(--red);font-weight:600}
 .total{font-weight:700}
+
+.error-box{
+  background:#fff3f3;
+  color:#b00020;
+  padding:12px;
+  border-radius:8px;
+  margin:16px 0;
+  display:none;
+}
 </style>
 </head>
 
@@ -44,8 +54,12 @@ th{background:#eef3ff;color:var(--brand);font-size:0.85rem}
 <div class="container" id="dash">
   <div class="header">
     <h2>Outstanding Receivables</h2>
-    <div class="amount" id="grand"></div>
+    <div class="amount" id="grand">Loading…</div>
     <div id="updated"></div>
+  </div>
+
+  <div class="error-box" id="errorBox">
+    Unable to load data. Please check Apps Script URL.
   </div>
 
   <table>
@@ -67,15 +81,21 @@ th{background:#eef3ff;color:var(--brand);font-size:0.85rem}
 
 <script>
 const API="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+
 let DATA=null, active=null;
 
-fetch(API).then(r=>r.json()).then(j=>{
-  DATA=j;
-  render();
-});
+fetch(API)
+  .then(r=>r.json())
+  .then(j=>{
+    DATA=j;
+    render();
+  })
+  .catch(()=>{
+    errorBox.style.display="block";
+    grand.innerText="Error";
+  });
 
 function render(){
-  dash.style.display="block";
   grand.innerText="₹ "+DATA.grandTotal.toLocaleString("en-IN");
   updated.innerText="Last updated: "+
     new Date(DATA.lastUpdated).toLocaleDateString("en-GB",
@@ -117,7 +137,9 @@ function row(label,cls,v,cb){
     input.onblur=()=>saveForecast(active,label,input.value);
     input.onkeydown=e=>{if(e.key==="Enter")input.blur()};
     ftd.appendChild(input);
-  }else ftd.innerText="–";
+  }else{
+    ftd.innerText="–";
+  }
   tr.appendChild(ftd);
 
   tr.appendChild(td(v.total,true));
@@ -126,6 +148,7 @@ function row(label,cls,v,cb){
   tr.appendChild(td(v.d61_90));
   tr.appendChild(td(v.d31_60));
   tr.appendChild(td(v.d1_30));
+
   body.appendChild(tr);
 }
 
