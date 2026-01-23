@@ -3,70 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <title>Outstanding Receivables</title>
+
 <style>
-:root{--brand:#0B419B;--bg:#f4f7fb}
-body{margin:0;font-family:system-ui;background:var(--bg)}
-.container{max-width:1200px;margin:auto;padding:16px}
-table{width:100%;border-collapse:collapse;background:#fff}
-th,td{padding:12px;border-top:1px solid #ddd}
-th{background:#eef3ff;color:var(--brand)}
+:root{
+  --brand:#0B419B;
+  --bg:#f4f7fb;
+  --border:#e2e6ef;
+  --green:#1e8e3e;
+}
+
+body{
+  margin:0;
+  font-family:system-ui;
+  background:var(--bg);
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:16px;
+}
+
+h2{text-align:center;margin-bottom:6px}
+.amount{text-align:center;font-size:22px;font-weight:700;margin-bottom:4px}
+.updated{text-align:center;font-size:12px;color:#666;margin-bottom:16px}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+th,td{
+  padding:12px;
+  border-top:1px solid var(--border);
+}
+
+th{
+  background:#eef3ff;
+  color:var(--brand);
+  font-size:0.85rem;
+}
+
 .customer{padding-left:18px}
-.forecast-input{width:120px;padding:6px}
-.submit{margin:20px;text-align:center}
-button{background:var(--brand);color:#fff;border:none;padding:12px 24px;border-radius:8px}
+
+.forecast-input{
+  width:120px;
+  padding:6px 8px;
+  text-align:right;
+  border:1px solid var(--border);
+  border-radius:6px;
+}
+
+.forecast-input:focus{
+  outline:none;
+  border-color:var(--brand);
+}
+
+.edited{
+  background:#fff7db;
+}
+
+/* SUBMIT AREA */
+.submit-wrap{
+  margin:20px 0;
+  text-align:center;
+  display:none;
+}
+
+.submit-btn{
+  background:var(--brand);
+  color:#fff;
+  border:none;
+  padding:12px 26px;
+  border-radius:8px;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.submit-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#e6f4ea;
+  color:var(--green);
+  padding:12px 18px;
+  border-radius:8px;
+  display:none;
+  font-size:14px;
+}
 </style>
 </head>
 
 <body>
+
 <div class="container">
   <h2>Outstanding Receivables</h2>
+  <div class="amount" id="grand"></div>
+  <div class="updated" id="updated"></div>
+
   <table>
     <thead>
       <tr>
-        <th>Customer</th><th>Forecast</th><th>Total</th>
+        <th>Customer</th>
+        <th>Forecast</th>
+        <th>Total</th>
       </tr>
     </thead>
     <tbody id="body"></tbody>
   </table>
 
-  <div class="submit" id="submitWrap" style="display:none">
-    <button onclick="submitAll()">Submit Forecasts</button>
+  <div class="submit-wrap" id="submitWrap">
+    <button class="submit-btn" id="submitBtn" onclick="submitAll()">
+      Submit Forecasts
+    </button>
   </div>
 </div>
 
+<div class="toast" id="toast">✔ Forecasts saved successfully</div>
+
 <script>
 const API="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+
 let edits={}, activePIC=null;
 
 fetch(API).then(r=>r.json()).then(d=>{
   activePIC=Object.keys(d.salesPICs)[0];
+
+  grand.innerText="₹ "+d.grandTotal.toLocaleString("en-IN");
+  updated.innerText="Last updated: "+
+    new Date(d.lastUpdated).toLocaleDateString("en-GB",
+      {day:"2-digit",month:"short",year:"numeric"});
+
   const customers=d.salesPICs[activePIC].customers;
+
   for(const c in customers){
-    body.innerHTML+=`
-      <tr>
-        <td class="customer">${c}</td>
-        <td><input class="forecast-input"
-          oninput="edit('${c}',this.value)"></td>
-        <td>${customers[c].total}</td>
-      </tr>`;
+    const tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td class="customer">${c}</td>
+      <td>
+        <input class="forecast-input"
+          placeholder="₹ Forecast"
+          oninput="editRow(this,'${c}')">
+      </td>
+      <td>₹ ${customers[c].total.toLocaleString("en-IN")}</td>
+    `;
+    body.appendChild(tr);
   }
 });
 
-function edit(c,v){
-  edits[c]=v;
+function editRow(input,customer){
+  const tr=input.closest("tr");
+  tr.classList.add("edited");
+
+  edits[customer]=input.value;
   submitWrap.style.display="block";
 }
 
 function submitAll(){
-  Object.entries(edits).forEach(([customer,forecast])=>{
-    fetch(API,{
-      method:"POST",
-      headers:{ "Content-Type":"application/x-www-form-urlencoded" },
-      body:`pic=${encodeURIComponent(activePIC)}&customer=${encodeURIComponent(customer)}&forecast=${forecast}`
-    });
+  submitBtn.disabled=true;
+  submitBtn.innerText="Saving...";
+
+  Promise.all(
+    Object.entries(edits).map(([customer,forecast])=>{
+      return fetch(API,{
+        method:"POST",
+        headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+        body:`pic=${encodeURIComponent(activePIC)}&customer=${encodeURIComponent(customer)}&forecast=${forecast}`
+      });
+    })
+  ).then(()=>{
+    showToast();
+    edits={};
+    submitWrap.style.display="none";
+    submitBtn.disabled=false;
+    submitBtn.innerText="Submit Forecasts";
+
+    document.querySelectorAll(".edited")
+      .forEach(r=>r.classList.remove("edited"));
   });
-  alert("Forecasts saved");
+}
+
+function showToast(){
+  toast.style.display="block";
+  setTimeout(()=>toast.style.display="none",3000);
 }
 </script>
+
 </body>
 </html>
