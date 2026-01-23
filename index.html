@@ -36,12 +36,19 @@ body{
   padding:28px;
   border-radius:14px;
   width:100%;
-  max-width:340px;
+  max-width:340px; /* mobile default */
   box-shadow:0 8px 24px rgba(0,0,0,.08);
   text-align:center;
   margin-top:10vh;
 }
 
+  @media(min-width:1024px){
+  .lock-box{
+    max-width:440px;   /* stretched for desktop */
+    padding:32px 36px; /* more breathing space */
+  }
+}
+  
 /* BRANDING */
 .brand-wrap{
   margin-bottom:18px;
