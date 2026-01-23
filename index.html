@@ -34,12 +34,35 @@ body{
   padding:28px;
   border-radius:14px;
   width:100%;
-  max-width:320px;
+  max-width:340px;
   box-shadow:0 8px 24px rgba(0,0,0,.08);
   text-align:center;
 }
+
+/* BRANDING */
+.brand-wrap{
+  margin-bottom:18px;
+}
+.brand-logo{
+  max-width:170px;
+  width:100%;
+  height:auto;
+  margin-bottom:10px;
+}
+.brand-name{
+  font-size:14px;
+  font-weight:600;
+  color:var(--brand);
+  margin-bottom:4px;
+}
+.brand-sub{
+  font-size:13px;
+  font-weight:500;
+  color:#555;
+}
+
 .lock-box h2{
-  margin:0 0 16px;
+  margin:12px 0 16px;
   color:var(--brand);
 }
 .lock-box input{
@@ -116,6 +139,12 @@ th{
 .red{color:var(--red);font-weight:600}
 .total{font-weight:700}
 
+@media(min-width:768px){
+  .brand-logo{max-width:190px}
+  .brand-name{font-size:15px}
+  .brand-sub{font-size:14px}
+}
+
 @media(min-width:1024px){
   body{font-size:115%}
   .sales::before{content:"▸ ";color:#555}
@@ -129,6 +158,18 @@ th{
 <!-- PASSCODE -->
 <div class="lock-screen" id="lock">
   <div class="lock-box">
+
+    <!-- BRAND -->
+    <div class="brand-wrap">
+      <img
+        src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png"
+        alt="MOL Logistics Logo"
+        class="brand-logo"
+      />
+      <div class="brand-name">MOL Logistics ( India ) PVT. LTD.</div>
+      <div class="brand-sub">Outstanding Receivables</div>
+    </div>
+
     <h2>Enter Passcode</h2>
     <input type="password" id="pass" placeholder="Passcode" />
     <button onclick="checkPass()">Access</button>
