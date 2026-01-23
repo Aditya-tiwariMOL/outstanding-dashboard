@@ -20,17 +20,15 @@ body{
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   background:var(--bg);
-  color:#000;
 }
 
-/* ================= PASSCODE SCREEN ================= */
+/* PASSCODE */
 .lock-screen{
   min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
 }
-
 .lock-box{
   background:#fff;
   padding:28px;
@@ -40,26 +38,21 @@ body{
   box-shadow:0 8px 24px rgba(0,0,0,.08);
   text-align:center;
 }
-
 .lock-box h2{
   margin:0 0 16px;
   color:var(--brand);
-  font-size:18px;
 }
-
 .lock-box input{
   width:100%;
   padding:12px;
   font-size:16px;
   border-radius:8px;
   border:1px solid var(--border);
-  margin-bottom:12px;
 }
-
 .lock-box button{
   width:100%;
+  margin-top:12px;
   padding:12px;
-  font-size:15px;
   font-weight:600;
   border:none;
   border-radius:8px;
@@ -67,123 +60,89 @@ body{
   color:#fff;
   cursor:pointer;
 }
-
-.lock-box .error{
+.error{
+  display:none;
+  margin-top:10px;
   color:#d93025;
   font-size:13px;
-  margin-top:10px;
-  display:none;
 }
 
-/* ================= DASHBOARD ================= */
+/* DASHBOARD */
 .container{
   max-width:1200px;
   margin:auto;
   padding:16px;
   display:none;
 }
-
 .header{
   text-align:center;
   margin-bottom:16px;
 }
-
-.header h1{
-  color:var(--brand);
-  margin:0 0 6px;
-  font-size:20px;
-  font-weight:600;
-}
-
 .amount{
   font-size:28px;
   font-weight:700;
 }
 
-.updated{
-  color:#666;
-  font-size:13px;
-}
-
-/* Table */
+/* TABLE */
 .table-wrap{
   background:#fff;
   border-radius:14px;
   overflow-x:auto;
-  box-shadow:0 6px 20px rgba(0,0,0,.04);
 }
-
-table{
-  width:100%;
-  border-collapse:collapse;
+table{width:100%;border-collapse:collapse}
+th,td{
+  padding:12px 16px;
+  text-align:left;
+  border-top:1px solid var(--border);
 }
-
 th{
   background:#eef3ff;
   color:var(--brand);
-  padding:12px 16px;
-  text-align:left;
-  font-weight:600;
 }
-
-td{
-  padding:12px 16px;
-  border-top:1px solid var(--border);
-  vertical-align:top;
-  text-align:left;
-}
-
-/* Rows */
-.sales{ font-weight:600; cursor:pointer; }
+.sales{font-weight:600;cursor:pointer}
 .customer{
   font-size:14px;
-  font-weight:500;
   max-width:220px;
-  white-space:normal;
   word-break:break-word;
   cursor:pointer;
 }
 .invoice{
-  padding-left:24px;
   font-size:13px;
   font-style:italic;
   color:#555;
+  padding-left:24px;
 }
+.green{color:var(--green);font-weight:600}
+.red{color:var(--red);font-weight:600}
+.total{font-weight:700}
 
-/* Amounts */
-.total{ font-weight:700; }
-.green{ color:var(--green); font-weight:600; }
-.red{ color:var(--red); font-weight:600; }
-
-/* Desktop arrows */
-@media (min-width:1024px){
+@media(min-width:1024px){
   body{font-size:115%}
-  .sales::before{ content:"▸ "; color:#555; }
-  .customer::before{ content:"▸ "; color:#888; }
+  .sales::before{content:"▸ ";color:#555}
+  .customer::before{content:"▸ ";color:#888}
 }
 </style>
 </head>
 
 <body>
 
-<!-- PASSCODE SCREEN -->
-<div class="lock-screen" id="lockScreen">
+<!-- PASSCODE -->
+<div class="lock-screen" id="lock">
   <div class="lock-box">
     <h2>Enter Passcode</h2>
-    <input type="password" id="passInput" placeholder="Passcode" />
-    <button onclick="checkPass()">Access Dashboard</button>
-    <div class="error" id="errorMsg">No access. Wrong passcode.</div>
+    <input type="password" id="pass" placeholder="Passcode" />
+    <button onclick="checkPass()">Access</button>
+    <div class="error" id="err">Wrong passcode</div>
   </div>
 </div>
 
 <!-- DASHBOARD -->
-<div class="container" id="dashboard">
+<div class="container" id="dash">
   <div class="header">
-    <h1>Outstanding Receivables Dashboard</h1>
-    <div class="amount" id="grandTotal">₹ 0</div>
-    <div class="updated" id="updated"></div>
+    <h2>Outstanding Receivables</h2>
+    <div class="amount" id="grand"></div>
+    <div id="updated"></div>
   </div>
-
   <div class="table-wrap">
     <table>
       <thead>
@@ -203,126 +162,108 @@ td{
 </div>
 
 <script>
-/* ================= CONFIG ================= */
+/* ===== CONFIG ===== */
 const PASS_HASH =
-"6f4b6612125fb3a0daecd2799dfd6c9c0a5c3f4e3d0f5b66e2e8d4d9f6a6a5f1";
+"158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
 
-const API_URL =
+const API =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-/* ================= STATE ================= */
-let DATA=null;
-let dataReady=false;
-let accessGranted=false;
-let activeSales=null;
+/* ===== STATE ===== */
+let DATA=null, ready=false, allowed=false, active=null;
 
-/* ================= FETCH EARLY ================= */
-fetch(API_URL)
-  .then(r=>r.json())
-  .then(json=>{
-    DATA=json;
-    dataReady=true;
-    if(accessGranted) renderDashboard();
-  });
+/* FETCH EARLY */
+fetch(API).then(r=>r.json()).then(j=>{
+  DATA=j; ready=true;
+  if(allowed) render();
+});
 
-/* ================= PASSCODE ================= */
 async function checkPass(){
-  const input=document.getElementById("passInput").value;
-  const hash=await sha256(input);
-  if(hash===PASS_HASH){
-    accessGranted=true;
-    document.getElementById("lockScreen").style.display="none";
-    if(dataReady) renderDashboard();
+  const v=document.getElementById("pass").value;
+  const h=await sha(v);
+  if(h===PASS_HASH){
+    allowed=true;
+    document.getElementById("lock").style.display="none";
+    if(ready) render();
   }else{
-    document.getElementById("errorMsg").style.display="block";
+    document.getElementById("err").style.display="block";
   }
 }
 
-/* ================= RENDER ================= */
-function renderDashboard(){
-  document.getElementById("dashboard").style.display="block";
-  document.getElementById("grandTotal").textContent =
+function render(){
+  document.getElementById("dash").style.display="block";
+  document.getElementById("grand").innerText =
     "₹ "+DATA.grandTotal.toLocaleString("en-IN");
-  document.getElementById("updated").textContent =
+  document.getElementById("updated").innerText =
     "Last updated: "+new Date(DATA.lastUpdated).toLocaleString();
-  renderSales();
+  drawSales();
 }
 
-function clearBody(){ body.innerHTML=""; }
-
-function renderSales(){
-  clearBody(); activeSales=null;
+function drawSales(){
+  body.innerHTML=""; active=null;
   Object.entries(DATA.salesPICs).forEach(([n,s])=>{
-    addRow(n,"sales",s,()=>openSales(n));
+    row(n,"sales",s,()=>openSales(n));
   });
 }
 
-function openSales(name){
-  clearBody(); activeSales=name;
-  const s=DATA.salesPICs[name];
-  addRow(name,"sales",s,renderSales);
+function openSales(n){
+  body.innerHTML=""; active=n;
+  const s=DATA.salesPICs[n];
+  row(n,"sales",s,drawSales);
   Object.entries(s.customers).forEach(([c,v])=>{
-    addRow(c,"customer",v,()=>openCustomer(c));
+    row(c,"customer",v,()=>openCust(c));
   });
 }
 
-function openCustomer(cust){
-  clearBody();
-  const s=DATA.salesPICs[activeSales];
-  addRow(activeSales,"sales",s,renderSales);
-  Object.entries(s.customers).forEach(([c,v])=>{
-    if(c!==cust){
-      addRow(c,"customer",v,()=>openCustomer(c));
-    }else{
-      addRow(c,"customer",v,()=>openSales(activeSales));
-      v.invoices.forEach(inv=>{
-        addRow(inv.invoiceNo,"invoice",inv);
-      });
+function openCust(c){
+  body.innerHTML="";
+  const s=DATA.salesPICs[active];
+  row(active,"sales",s,drawSales);
+  Object.entries(s.customers).forEach(([n,v])=>{
+    if(n!==c) row(n,"customer",v,()=>openCust(n));
+    else{
+      row(n,"customer",v,()=>openSales(active));
+      v.invoices.forEach(i=>row(i.invoiceNo,"invoice",i));
     }
   });
 }
 
-function addRow(label,cls,val,click){
+function row(l,cls,v,cb){
   const tr=document.createElement("tr");
-  const td0=document.createElement("td");
-  td0.textContent=label;
-  td0.className=cls;
-  if(click) td0.onclick=click;
-  tr.appendChild(td0);
+  const t=document.createElement("td");
+  t.innerText=l; t.className=cls;
+  if(cb) t.onclick=cb;
+  tr.appendChild(t);
 
-  tr.appendChild(tdAmt(val.total,true));
-  tr.appendChild(tdAmt(val.onAccount,false,true));
-  tr.appendChild(tdAmt(val.d90,false,false,true));
-  tr.appendChild(tdAmt(val.d61_90));
-  tr.appendChild(tdAmt(val.d31_60));
-  tr.appendChild(tdAmt(val.d1_30));
-
+  tr.appendChild(td(v.total,true));
+  tr.appendChild(td(v.onAccount,false,true));
+  tr.appendChild(td(v.d90,false,false,true));
+  tr.appendChild(td(v.d61_90));
+  tr.appendChild(td(v.d31_60));
+  tr.appendChild(td(v.d1_30));
   body.appendChild(tr);
 }
 
-function tdAmt(v,isTotal=false,isGreen=false,isRed=false){
-  const td=document.createElement("td");
-  if(!v){ td.textContent="–"; return td; }
-  td.textContent=formatAmt(v);
-  if(isTotal) td.classList.add("total");
-  if(isGreen) td.classList.add("green");
-  if(isRed) td.classList.add("red");
-  return td;
+function td(v,t,g,r){
+  const d=document.createElement("td");
+  if(!v){d.innerText="–";return d}
+  d.innerText=fmt(v);
+  if(t) d.classList.add("total");
+  if(g) d.classList.add("green");
+  if(r) d.classList.add("red");
+  return d;
 }
 
-function formatAmt(n){
+function fmt(n){
   if(n>=100000) return "₹"+(n/100000).toFixed(1)+"L";
   if(n>=1000) return "₹"+Math.round(n/1000)+"k";
   return "₹"+n;
 }
 
-/* ================= HASH ================= */
-async function sha256(text){
-  const data=new TextEncoder().encode(text);
-  const hash=await crypto.subtle.digest("SHA-256",data);
-  return Array.from(new Uint8Array(hash))
-    .map(b=>b.toString(16).padStart(2,"0"))
-    .join("");
+async function sha(t){
+  const b=new TextEncoder().encode(t);
+  const h=await crypto.subtle.digest("SHA-256",b);
+  return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 </script>
 
