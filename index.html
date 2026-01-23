@@ -134,11 +134,7 @@ td{
 }
 
 /* Rows */
-.sales{
-  font-weight:600;
-  cursor:pointer;
-}
-
+.sales{ font-weight:600; cursor:pointer; }
 .customer{
   font-size:14px;
   font-weight:500;
@@ -147,7 +143,6 @@ td{
   word-break:break-word;
   cursor:pointer;
 }
-
 .invoice{
   padding-left:24px;
   font-size:13px;
@@ -163,16 +158,8 @@ td{
 /* Desktop arrows */
 @media (min-width:1024px){
   body{font-size:115%}
-
-  .sales::before{
-    content:"▸ ";
-    color:#555;
-  }
-
-  .customer::before{
-    content:"▸ ";
-    color:#888;
-  }
+  .sales::before{ content:"▸ "; color:#555; }
+  .customer::before{ content:"▸ "; color:#888; }
 }
 </style>
 </head>
@@ -217,46 +204,47 @@ td{
 
 <script>
 /* ================= CONFIG ================= */
-const PASSCODE = "2026";
+const PASS_HASH =
+"5a5c2e7e7b8c8c4c3b5b47d0c48c1a7e7fbdc6e3b6f1c1bb8e6e4d7b5c7f7e2";
+
 const API_URL =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
 /* ================= STATE ================= */
-let DATA = null;
-let dataReady = false;
-let accessGranted = false;
-let activeSales = null;
+let DATA=null;
+let dataReady=false;
+let accessGranted=false;
+let activeSales=null;
 
-/* ================= FETCH IMMEDIATELY ================= */
+/* ================= FETCH EARLY ================= */
 fetch(API_URL)
-  .then(r => r.json())
-  .then(json => {
-    DATA = json;
-    dataReady = true;
+  .then(r=>r.json())
+  .then(json=>{
+    DATA=json;
+    dataReady=true;
     if(accessGranted) renderDashboard();
   });
 
 /* ================= PASSCODE ================= */
-function checkPass(){
-  const val = document.getElementById("passInput").value;
-  if(val === PASSCODE){
-    accessGranted = true;
-    document.getElementById("lockScreen").style.display = "none";
-    if(dataReady){
-      renderDashboard();
-    }
+async function checkPass(){
+  const input=document.getElementById("passInput").value;
+  const hash=await sha256(input);
+  if(hash===PASS_HASH){
+    accessGranted=true;
+    document.getElementById("lockScreen").style.display="none";
+    if(dataReady) renderDashboard();
   }else{
-    document.getElementById("errorMsg").style.display = "block";
+    document.getElementById("errorMsg").style.display="block";
   }
 }
 
 /* ================= RENDER ================= */
 function renderDashboard(){
-  document.getElementById("dashboard").style.display = "block";
+  document.getElementById("dashboard").style.display="block";
   document.getElementById("grandTotal").textContent =
-    "₹ " + DATA.grandTotal.toLocaleString("en-IN");
+    "₹ "+DATA.grandTotal.toLocaleString("en-IN");
   document.getElementById("updated").textContent =
-    "Last updated: " + new Date(DATA.lastUpdated).toLocaleString();
+    "Last updated: "+new Date(DATA.lastUpdated).toLocaleString();
   renderSales();
 }
 
@@ -326,6 +314,15 @@ function formatAmt(n){
   if(n>=100000) return "₹"+(n/100000).toFixed(1)+"L";
   if(n>=1000) return "₹"+Math.round(n/1000)+"k";
   return "₹"+n;
+}
+
+/* ================= HASH ================= */
+async function sha256(text){
+  const data=new TextEncoder().encode(text);
+  const hash=await crypto.subtle.digest("SHA-256",data);
+  return Array.from(new Uint8Array(hash))
+    .map(b=>b.toString(16).padStart(2,"0"))
+    .join("");
 }
 </script>
 
