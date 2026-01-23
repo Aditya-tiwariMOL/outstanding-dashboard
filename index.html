@@ -3,62 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Outstanding Receivables</title>
+<title>Outstanding Receivables Dashboard</title>
 
 <style>
 :root{
   --brand:#0B419B;
   --bg:#f4f7fb;
   --border:#e2e6ef;
-  --green:#1e8e3e;
   --red:#d93025;
+  --green:#1e8e3e;
 }
 
 *{box-sizing:border-box}
 
 body{
   margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   background:var(--bg);
 }
 
-/* ========== PASSCODE ========== */
+/* ================= PASSCODE ================= */
 .lock-screen{
   min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
+  padding:16px;
 }
+
 .lock-box{
   background:#fff;
   padding:28px;
   border-radius:14px;
   width:100%;
   max-width:360px;
-  text-align:center;
   box-shadow:0 8px 24px rgba(0,0,0,.08);
+  text-align:center;
 }
-.lock-box h2{color:var(--brand);margin-bottom:12px}
+
+/* PASSCODE BRANDING (RESTORED) */
+.brand-wrap{margin-bottom:18px}
+
+.brand-logo{
+  max-width:120px;
+  margin-bottom:10px;
+}
+
+.brand-name{
+  font-size:20px;
+  font-weight:800;
+  color:var(--brand);
+  margin-bottom:4px;
+}
+
+.brand-sub{
+  font-size:14px;
+  color:#555;
+}
+
 .lock-box input{
   width:100%;
   padding:12px;
+  font-size:16px;
   border-radius:8px;
   border:1px solid var(--border);
 }
+
 .lock-box button{
   width:100%;
   margin-top:12px;
   padding:12px;
-  background:var(--brand);
-  color:#fff;
+  font-weight:600;
   border:none;
   border-radius:8px;
-  font-weight:600;
+  background:var(--brand);
+  color:#fff;
   cursor:pointer;
 }
-.error{display:none;color:var(--red);margin-top:8px;font-size:13px}
 
-/* ========== DASHBOARD ========== */
+.error{
+  display:none;
+  margin-top:10px;
+  color:var(--red);
+  font-size:13px;
+}
+
+/* ================= DASHBOARD ================= */
 .container{
   max-width:1200px;
   margin:auto;
@@ -66,19 +96,46 @@ body{
   display:none;
 }
 
+/* HEADER CLEANUP (YOUR ORIGINAL DESIGN) */
 .header{
   text-align:center;
   margin-bottom:20px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--border);
 }
+
+.dash-logo{
+  max-width:100px;
+  margin-bottom:8px;
+}
+
+.header h2{
+  font-size:1.3rem;
+  font-weight:600;
+  margin:4px 0 8px;
+  color:var(--brand);
+}
+
 .amount{
   font-size:22px;
   font-weight:700;
-}
-.updated{
-  font-size:12px;
-  color:#666;
+  margin:6px 0;
 }
 
+#updated{
+  font-size:12px;
+  color:#666;
+  margin-top:2px;
+}
+
+/* MOBILE REFINEMENT */
+@media(max-width:600px){
+  .dash-logo{max-width:90px}
+  .header h2{font-size:1.2rem}
+  .amount{font-size:20px}
+}
+
+/* ================= TABLE ================= */
 .table-wrap{
   background:#fff;
   border-radius:14px;
@@ -92,8 +149,8 @@ table{
 
 th,td{
   padding:12px 16px;
-  border-top:1px solid var(--border);
   text-align:left;
+  border-top:1px solid var(--border);
 }
 
 th{
@@ -102,18 +159,17 @@ th{
   font-size:0.85rem;
 }
 
-.sales{font-weight:700;cursor:pointer}
-.customer{padding-left:20px;cursor:pointer}
-.invoice{padding-left:36px;font-size:13px;color:#555}
-
 .sales-row{background:#fff}
 .customer-row{background:#f6f9ff}
-.invoice-row{background:#fafafa}
+
+.sales{font-weight:700;cursor:pointer}
+.customer{padding-left:20px;cursor:pointer}
 
 .total{font-weight:700}
 .green{color:var(--green);font-weight:600}
 .red{color:var(--red);font-weight:600}
 
+/* FORECAST */
 .forecast-input{
   width:110px;
   padding:6px 8px;
@@ -121,6 +177,7 @@ th{
   border-radius:6px;
   text-align:right;
 }
+
 .forecast-input:focus{
   outline:none;
   border-color:var(--brand);
@@ -134,6 +191,7 @@ th{
   margin:18px 0;
   display:none;
 }
+
 .submit-btn{
   background:var(--brand);
   color:#fff;
@@ -143,6 +201,7 @@ th{
   font-size:15px;
   cursor:pointer;
 }
+
 .submit-btn:disabled{opacity:.6}
 
 /* TOAST */
@@ -165,8 +224,14 @@ th{
 <!-- PASSCODE -->
 <div class="lock-screen" id="lock">
   <div class="lock-box">
-    <h2>Enter Passcode</h2>
-    <input type="password" id="pass" placeholder="Passcode">
+    <div class="brand-wrap">
+      <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png"
+           class="brand-logo" alt="MOL Logo">
+      <div class="brand-name">MOL Logistics ( India ) PVT. LTD.</div>
+      <div class="brand-sub">Outstanding Receivables</div>
+    </div>
+
+    <input type="password" id="pass" placeholder="Enter Passcode">
     <button onclick="checkPass()">Access</button>
     <div class="error" id="err">Wrong passcode</div>
   </div>
@@ -175,9 +240,11 @@ th{
 <!-- DASHBOARD -->
 <div class="container" id="dash">
   <div class="header">
+    <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png"
+         class="dash-logo" alt="MOL Logo">
     <h2>Outstanding Receivables</h2>
     <div class="amount" id="grand"></div>
-    <div class="updated" id="updated"></div>
+    <div id="updated"></div>
   </div>
 
   <div class="table-wrap">
@@ -212,11 +279,9 @@ th{
 const PASS_HASH="158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
 const API="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-/* ===== STATE ===== */
 let DATA=null, activePIC=null;
 let edits={};
 
-/* ===== PASSCODE ===== */
 async function checkPass(){
   const h=await sha(pass.value);
   if(h===PASS_HASH){
@@ -228,7 +293,6 @@ async function checkPass(){
   }
 }
 
-/* ===== LOAD DATA ===== */
 function loadData(){
   fetch(API).then(r=>r.json()).then(d=>{
     DATA=d;
@@ -309,7 +373,6 @@ function td(v,t,g,r){
   return d;
 }
 
-/* ===== SUBMIT FORECASTS ===== */
 function submitForecasts(){
   submitBtn.disabled=true;
   submitBtn.innerText="Saving...";
@@ -333,7 +396,6 @@ function submitForecasts(){
   });
 }
 
-/* ===== UTIL ===== */
 function showToast(){
   toast.style.display="block";
   setTimeout(()=>toast.style.display="none",3000);
