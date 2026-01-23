@@ -22,7 +22,7 @@ body{
   background:var(--bg);
 }
 
-/* PASSCODE */
+/* ========== PASSCODE ========== */
 .lock-screen{
   min-height:100dvh;
   display:flex;
@@ -36,33 +36,23 @@ body{
   padding:28px;
   border-radius:14px;
   width:100%;
-  max-width:340px; /* mobile default */
+  max-width:340px;
   box-shadow:0 8px 24px rgba(0,0,0,.08);
   text-align:center;
   margin-top:10vh;
 }
 
-  @media(min-width:1024px){
-  .lock-box{
-    max-width:440px;   /* stretched for desktop */
-    padding:32px 36px; /* more breathing space */
-  }
-}
-  
 /* BRANDING */
-.brand-wrap{
-  margin-bottom:18px;
-}
+.brand-wrap{margin-bottom:18px}
 
 .brand-logo{
-  max-width:120px; /* reduced ~30% */
+  max-width:120px;
   width:100%;
-  height:auto;
   margin-bottom:10px;
 }
 
 .brand-name{
-  font-size:20px; /* increased ~40% */
+  font-size:20px;
   font-weight:800;
   color:var(--brand);
   margin-bottom:4px;
@@ -70,7 +60,6 @@ body{
 
 .brand-sub{
   font-size:14px;
-  font-weight:500;
   color:#555;
 }
 
@@ -102,11 +91,11 @@ body{
 .error{
   display:none;
   margin-top:10px;
-  color:#d93025;
+  color:var(--red);
   font-size:13px;
 }
 
-/* DASHBOARD */
+/* ========== DASHBOARD ========== */
 .container{
   max-width:1200px;
   margin:auto;
@@ -119,19 +108,35 @@ body{
   margin-bottom:16px;
 }
 
-.amount{
-  font-size:28px;
-  font-weight:700;
+.dash-logo{
+  max-width:108px;
+  margin-bottom:6px;
 }
 
-/* TABLE */
+.header h2{
+  font-size:1.4rem;
+  font-weight:600;
+  margin:6px 0 4px;
+  color:var(--brand);
+}
+
+.amount{
+  font-size:22px;
+  font-weight:700;
+  margin-top:4px;
+}
+
+/* ========== TABLE ========== */
 .table-wrap{
   background:#fff;
   border-radius:14px;
   overflow-x:auto;
 }
 
-table{width:100%;border-collapse:collapse}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
 
 th,td{
   padding:12px 16px;
@@ -142,39 +147,49 @@ th,td{
 th{
   background:#eef3ff;
   color:var(--brand);
+  font-size:0.85rem;
+  font-weight:600;
+  letter-spacing:.2px;
 }
+
+/* widen ageing columns */
+th:nth-child(5),
+th:nth-child(6),
+th:nth-child(7),
+td:nth-child(5),
+td:nth-child(6),
+td:nth-child(7){
+  min-width:110px;
+}
+
+/* ROW TYPES */
+.sales-row{background:#fff}
+.customer-row{background:#f5f8ff}
+.invoice-row{background:#fafafa}
 
 .sales{font-weight:600;cursor:pointer}
-
 .customer{
   font-size:14px;
-  max-width:220px;
-  word-break:break-word;
   cursor:pointer;
+  padding-left:18px;
 }
-
 .invoice{
   font-size:13px;
   font-style:italic;
   color:#555;
-  padding-left:24px;
+  padding-left:36px;
 }
 
 .green{color:var(--green);font-weight:600}
 .red{color:var(--red);font-weight:600}
 .total{font-weight:700}
 
-/* DESKTOP */
-@media(min-width:768px){
-  .brand-logo{max-width:130px}
-  .brand-name{font-size:22px}
-  .lock-box{margin-top:8vh}
-}
-
 @media(min-width:1024px){
+  .lock-box{
+    max-width:440px;
+    padding:32px 36px;
+  }
   body{font-size:115%}
-  .sales::before{content:"▸ ";color:#555}
-  .customer::before{content:"▸ ";color:#888}
 }
 </style>
 </head>
@@ -184,18 +199,15 @@ th{
 <!-- PASSCODE -->
 <div class="lock-screen" id="lock">
   <div class="lock-box">
-
-    <!-- BRAND -->
     <div class="brand-wrap">
-      <img
-        src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png"
-        alt="MOL Logistics Logo"
-        class="brand-logo"
-      />
+      <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png"
+           class="brand-logo" alt="MOL Logo">
       <div class="brand-name">MOL Logistics ( India ) PVT. LTD.</div>
       <div class="brand-sub">Outstanding Receivables</div>
     </div>
-    <input type="password" id="pass" placeholder="Enter-Passcode" />
+
+    <h2>Enter Passcode</h2>
+    <input type="password" id="pass" placeholder="Passcode">
     <button onclick="checkPass()">Access</button>
     <div class="error" id="err">Wrong passcode</div>
   </div>
@@ -204,6 +216,8 @@ th{
 <!-- DASHBOARD -->
 <div class="container" id="dash">
   <div class="header">
+    <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png"
+         class="dash-logo" alt="MOL Logo">
     <h2>Outstanding Receivables</h2>
     <div class="amount" id="grand"></div>
     <div id="updated"></div>
@@ -228,40 +242,31 @@ th{
 </div>
 
 <script>
-/* ===== CONFIG ===== */
-const PASS_HASH =
-"158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
+const PASS_HASH="158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
+const API="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-const API =
-"https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
-
-/* ===== STATE ===== */
 let DATA=null, ready=false, allowed=false, active=null;
 
-/* FETCH EARLY */
 fetch(API).then(r=>r.json()).then(j=>{
   DATA=j; ready=true;
   if(allowed) render();
 });
 
 async function checkPass(){
-  const v=document.getElementById("pass").value;
-  const h=await sha(v);
+  const h=await sha(pass.value);
   if(h===PASS_HASH){
     allowed=true;
-    document.getElementById("lock").style.display="none";
+    lock.style.display="none";
     if(ready) render();
-  }else{
-    document.getElementById("err").style.display="block";
-  }
+  }else err.style.display="block";
 }
 
 function render(){
-  document.getElementById("dash").style.display="block";
-  document.getElementById("grand").innerText =
-    "₹ "+DATA.grandTotal.toLocaleString("en-IN");
-  document.getElementById("updated").innerText =
-    "Last updated: "+new Date(DATA.lastUpdated).toLocaleString();
+  dash.style.display="block";
+  grand.innerText="₹ "+DATA.grandTotal.toLocaleString("en-IN");
+  updated.innerText="Last updated: "+
+    new Date(DATA.lastUpdated).toLocaleDateString("en-GB",
+      {day:"2-digit",month:"short",year:"numeric"});
   drawSales();
 }
 
@@ -296,11 +301,11 @@ function openCust(c){
 
 function row(l,cls,v,cb){
   const tr=document.createElement("tr");
+  tr.classList.add(cls+"-row");
   const t=document.createElement("td");
   t.innerText=l; t.className=cls;
   if(cb) t.onclick=cb;
   tr.appendChild(t);
-
   tr.appendChild(td(v.total,true));
   tr.appendChild(td(v.onAccount,false,true));
   tr.appendChild(td(v.d90,false,false,true));
