@@ -26,35 +26,26 @@ body{
 .lock-screen{
   min-height:100dvh;
   display:flex;
-  align-items:flex-start;
   justify-content:center;
-  padding:24px 12px;
+  padding-top:10vh;
 }
+
 .lock-box{
   background:#fff;
   padding:28px;
   border-radius:14px;
   width:100%;
-  max-width:340px;
+  max-width:360px;
   box-shadow:0 8px 24px rgba(0,0,0,.08);
   text-align:center;
-  margin-top:10vh;
 }
 
-/* BRANDING */
-.brand-wrap{margin-bottom:18px}
-.brand-logo{max-width:120px;margin-bottom:10px}
-.brand-name{
-  font-size:20px;
-  font-weight:800;
-  color:var(--brand);
-}
-.brand-sub{font-size:14px;color:#555}
+.brand-logo{max-width:120px;margin-bottom:12px}
 
+.lock-box h2{color:var(--brand)}
 .lock-box input{
   width:100%;
   padding:12px;
-  font-size:16px;
   border-radius:8px;
   border:1px solid var(--border);
 }
@@ -62,14 +53,14 @@ body{
   width:100%;
   margin-top:12px;
   padding:12px;
-  font-weight:600;
   border:none;
   border-radius:8px;
   background:var(--brand);
   color:#fff;
+  font-weight:600;
   cursor:pointer;
 }
-.error{display:none;margin-top:10px;color:var(--red);font-size:13px}
+.error{color:var(--red);margin-top:8px;display:none}
 
 /* ========== DASHBOARD ========== */
 .container{
@@ -86,15 +77,11 @@ body{
   border-bottom:1px solid var(--border);
 }
 .dash-logo{max-width:100px;margin-bottom:8px}
-.header h2{
-  font-size:1.3rem;
-  font-weight:600;
-  color:var(--brand);
-}
+.header h2{color:var(--brand)}
 .amount{font-size:22px;font-weight:700}
 #updated{font-size:12px;color:#666}
 
-/* TABLE */
+/* ========== TABLE ========== */
 .table-wrap{
   background:#fff;
   border-radius:14px;
@@ -104,7 +91,6 @@ table{width:100%;border-collapse:collapse}
 th,td{
   padding:12px 16px;
   border-top:1px solid var(--border);
-  text-align:left;
 }
 th{
   background:#eef3ff;
@@ -113,7 +99,7 @@ th{
   font-weight:600;
 }
 
-/* widen ageing columns */
+/* correct ageing column widths */
 th:nth-child(6),
 th:nth-child(7),
 th:nth-child(8),
@@ -135,23 +121,11 @@ td:nth-child(8){
 .red{color:var(--red);font-weight:600}
 .total{font-weight:700}
 
-/* ⭐ FORECAST */
 .forecast-input{
-  width:90px;
+  width:100px;
   padding:6px;
-  border:1px solid var(--border);
   border-radius:6px;
-}
-.submit-wrap{text-align:right;margin-top:12px}
-.submit-btn{
-  background:var(--brand);
-  color:#fff;
-  padding:10px 16px;
-  border:none;
-  border-radius:8px;
-  font-weight:600;
-  display:none;
-  cursor:pointer;
+  border:1px solid var(--border);
 }
 </style>
 </head>
@@ -161,11 +135,8 @@ td:nth-child(8){
 <!-- PASSCODE -->
 <div class="lock-screen" id="lock">
   <div class="lock-box">
-    <div class="brand-wrap">
-      <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png" class="brand-logo">
-      <div class="brand-name">MOL Logistics ( India ) PVT. LTD.</div>
-      <div class="brand-sub">Outstanding Receivables</div>
-    </div>
+    <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png" class="brand-logo">
+    <h2>Enter Passcode</h2>
     <input type="password" id="pass" placeholder="Passcode">
     <button onclick="checkPass()">Access</button>
     <div class="error" id="err">Wrong passcode</div>
@@ -198,19 +169,13 @@ td:nth-child(8){
       <tbody id="body"></tbody>
     </table>
   </div>
-
-  <!-- ⭐ FORECAST -->
-  <div class="submit-wrap">
-    <button class="submit-btn" id="submitBtn" onclick="submitForecast()">Submit Forecast</button>
-  </div>
 </div>
 
 <script>
 const PASS_HASH="158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
 const API="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-let DATA=null, ready=false, allowed=false, active=null;
-let forecastBuffer={}; // ⭐ FORECAST
+let DATA=null, allowed=false, ready=false, active=null;
 
 fetch(API).then(r=>r.json()).then(j=>{
   DATA=j; ready=true;
@@ -247,7 +212,7 @@ function openSales(n){
   const s=DATA.salesPICs[n];
   row(n,"sales",s,drawSales);
   Object.entries(s.customers).forEach(([c,v])=>{
-    row(c,"customer",v,()=>openCust(c),true);
+    row(c,"customer",v,()=>openCust(c));
   });
 }
 
@@ -256,17 +221,17 @@ function openCust(c){
   const s=DATA.salesPICs[active];
   row(active,"sales",s,drawSales);
   Object.entries(s.customers).forEach(([n,v])=>{
-    if(n!==c) row(n,"customer",v,()=>openCust(n),true);
+    if(n!==c) row(n,"customer",v,()=>openCust(n));
     else{
-      row(n,"customer",v,()=>openSales(active),true);
+      row(n,"customer",v,()=>openSales(active));
       v.invoices.forEach(i=>row(i.invoiceNo,"invoice",i));
     }
   });
 }
 
-function row(label,cls,v,cb,allowForecast=false){
+function row(label,cls,v,cb){
   const tr=document.createElement("tr");
-  tr.classList.add(cls+"-row");
+  tr.className=cls+"-row";
 
   const name=document.createElement("td");
   name.innerText=label;
@@ -274,41 +239,31 @@ function row(label,cls,v,cb,allowForecast=false){
   if(cb) name.onclick=cb;
   tr.appendChild(name);
 
-  // ⭐ FORECAST CELL
   const ftd=document.createElement("td");
-  if(cls==="customer" && allowForecast){
+  if(cls==="customer"){
     const input=document.createElement("input");
     input.className="forecast-input";
     input.value=v.forecast||"";
-    input.oninput=()=>{
-      forecastBuffer[active+"||"+label]=input.value;
-      submitBtn.style.display="inline-block";
-    };
+    input.onblur=()=>saveForecast(active,label,input.value);
     ftd.appendChild(input);
-  }else{
-    ftd.innerText="–";
-  }
+  }else ftd.innerText="–";
   tr.appendChild(ftd);
 
- tr.appendChild(td(v.total, true));                 // Total
-tr.appendChild(td(v.onAccount, false, true));      // On Account
-tr.appendChild(td(v.d90, false, false, true));     // 90+
-tr.appendChild(td(v.d61_90));                      // 61–90
-tr.appendChild(td(v.d31_60));                      // 31–60
-tr.appendChild(td(v.d1_30));                       // 1–30
+  tr.appendChild(td(v.total,true));
+  tr.appendChild(td(v.onAccount,false,true));
+  tr.appendChild(td(v.d90,false,false,true));
+  tr.appendChild(td(v.d61_90));
+  tr.appendChild(td(v.d31_60));
+  tr.appendChild(td(v.d1_30));
 
   body.appendChild(tr);
 }
 
-function submitForecast(){
+function saveForecast(pic,customer,value){
   fetch(API,{
     method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({forecast:forecastBuffer})
-  }).then(()=>{
-    alert("Forecast saved");
-    forecastBuffer={};
-    submitBtn.style.display="none";
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ pic, customer, forecast:value })
   });
 }
 
@@ -316,9 +271,9 @@ function td(v,t,g,r){
   const d=document.createElement("td");
   if(!v){d.innerText="–";return d}
   d.innerText=fmt(v);
-  if(t) d.classList.add("total");
-  if(g) d.classList.add("green");
-  if(r) d.classList.add("red");
+  if(t)d.classList.add("total");
+  if(g)d.classList.add("green");
+  if(r)d.classList.add("red");
   return d;
 }
 
