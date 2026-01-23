@@ -49,12 +49,12 @@ body{margin:0;font-family:system-ui;background:var(--bg)}
   border:none;
   border-radius:8px;
   font-weight:600;
+  cursor:pointer;
 }
 .error{color:var(--red);font-size:13px;display:none}
 
 /* ===== DASHBOARD ===== */
 .container{max-width:1200px;margin:auto;padding:16px;display:none}
-
 .header{text-align:center;margin-bottom:20px}
 .dash-logo{max-width:100px;margin-bottom:8px}
 .header h2{color:var(--brand);margin:6px 0}
@@ -102,6 +102,7 @@ th{
   border-radius:8px;
   font-weight:600;
   display:none;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -151,8 +152,8 @@ th{
 </div>
 
 <script>
+const API="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 const PASS_HASH="158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
-const API="PASTE_YOUR_APPS_SCRIPT_URL";
 
 let DATA=null, ready=false, allowed=false;
 let activePIC=null;
@@ -165,15 +166,18 @@ fetch(API).then(r=>r.json()).then(j=>{
 });
 
 async function checkPass(){
-  const h=await crypto.subtle.digest(
+  const hash=await crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(pass.value)
   ).then(b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""));
-  if(h===PASS_HASH){
+
+  if(hash===PASS_HASH){
     allowed=true;
     lock.style.display="none";
     if(ready) render();
-  }else err.style.display="block";
+  }else{
+    err.style.display="block";
+  }
 }
 
 function render(){
@@ -192,23 +196,22 @@ function drawSales(){
   });
 }
 
-function openSales(name){
-  activePIC=name;
+function openSales(pic){
+  activePIC=pic;
   body.innerHTML="";
-  drawRow(name,"sales",DATA.salesPICs[name],drawSales);
-
-  Object.entries(DATA.salesPICs[name].customers).forEach(([c,v])=>{
+  drawRow(pic,"sales",DATA.salesPICs[pic],drawSales);
+  Object.entries(DATA.salesPICs[pic].customers).forEach(([c,v])=>{
     drawRow(c,"customer",v,()=>openCustomer(c));
   });
 }
 
-function openCustomer(c){
+function openCustomer(cust){
   body.innerHTML="";
   const pic=DATA.salesPICs[activePIC];
   drawRow(activePIC,"sales",pic,drawSales);
 
   Object.entries(pic.customers).forEach(([n,v])=>{
-    if(n!==c) drawRow(n,"customer",v,()=>openCustomer(n));
+    if(n!==cust) drawRow(n,"customer",v,()=>openCustomer(n));
     else{
       drawRow(n,"customer",v,()=>openSales(activePIC),true);
       v.invoices.forEach(i=>drawRow(i.invoiceNo,"invoice",i));
@@ -235,20 +238,22 @@ function drawRow(label,cls,v,cb,editable=false){
       submitBtn.style.display="inline-block";
     };
     ftd.appendChild(input);
-  }else ftd.innerText="–";
+  }else{
+    ftd.innerText="–";
+  }
   tr.appendChild(ftd);
 
-  tr.appendChild(val(v.total,true));
-  tr.appendChild(val(v.onAccount,false,true));
-  tr.appendChild(val(v.d90,false,false,true));
-  tr.appendChild(val(v.d61_90));
-  tr.appendChild(val(v.d31_60));
-  tr.appendChild(val(v.d1_30));
+  tr.appendChild(cell(v.total,true));
+  tr.appendChild(cell(v.onAccount,false,true));
+  tr.appendChild(cell(v.d90,false,false,true));
+  tr.appendChild(cell(v.d61_90));
+  tr.appendChild(cell(v.d31_60));
+  tr.appendChild(cell(v.d1_30));
 
   body.appendChild(tr);
 }
 
-function val(n,t,g,r){
+function cell(n,t,g,r){
   const td=document.createElement("td");
   if(!n){td.innerText="–";return td}
   td.innerText="₹"+n.toLocaleString("en-IN");
@@ -264,7 +269,7 @@ function submitForecast(){
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({forecast:forecastBuffer})
   }).then(()=>{
-    alert("Forecast saved");
+    alert("Forecast saved successfully");
     forecastBuffer={};
     submitBtn.style.display="none";
   });
