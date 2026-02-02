@@ -7,13 +7,11 @@
 
 <style>
 :root {
-  --comp-blue: #002147; /* Professional Dark Blue */
-  --comp-blue-light: #003366;
+  --comp-blue: #002147;
   --comp-blue-pale: #f0f4f8;
   --border-color: #d1d9e6;
   --text-dark: #1a1a1a;
   --text-muted: #4a5568;
-  --bg-gray: #fcfcfc;
 }
 
 body {
@@ -23,73 +21,77 @@ body {
   color: var(--text-dark);
 }
 
-/* Header & Summary */
+/* Header & Summary - Updated for iPhone Alignment */
 .header-container {
   background: var(--comp-blue);
   color: #ffffff;
-  padding: 20px 16px;
-  text-align: left;
+  padding: 15px 12px;
 }
 
 h1 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
 }
 
 .summary {
-  margin-top: 10px;
+  margin-top: 8px;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column; /* Stacked for mobile */
+  align-items: flex-start;
 }
 
 .summary .amount {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
+  line-height: 1;
 }
 
 .summary .date {
   font-size: 11px;
   opacity: 0.8;
+  margin-top: 4px; /* Placed below the number */
 }
 
 /* Table Management */
 .table-wrapper {
   width: 100%;
-  overflow-x: auto; /* Enables horizontal swipe on mobile */
+  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .table-content {
-  min-width: 850px; /* Ensures table doesn't squash, allows comparison */
-  padding: 0 16px 100px;
+  min-width: 900px; /* Slightly wider to prevent input overflow */
+  padding: 0 0 100px; /* Removed side padding for edge-to-edge feel */
 }
 
 .row {
   display: grid;
-  grid-template-columns: 2.5fr 1.2fr 1fr 1fr 1fr 1fr 1.2fr;
+  /* Adjusted columns to give Forecast more room */
+  grid-template-columns: 2.2fr 1.1fr 1fr 0.9fr 0.9fr 0.9fr 1.3fr;
   border-bottom: 1px solid var(--border-color);
   align-items: center;
-  font-size: 13px;
+  font-size: 15px; /* Increased text size for table */
 }
 
 .header {
-  background: var(--bg-gray);
+  background: #f8f9fa;
   border-bottom: 2px solid var(--comp-blue);
   color: var(--comp-blue);
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: 12px;
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .row > div {
-  padding: 12px 8px;
+  padding: 6px 8px; /* Reduced padding for compactness */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Specific Row Styles */
@@ -102,65 +104,56 @@ h1 {
 .customer-row {
   background: #ffffff;
   cursor: pointer;
-  color: var(--comp-blue-light);
-}
-
-.customer-row:hover {
-  background: #f8f9fa;
 }
 
 .invoice-row {
-  background: #ffffff;
-  font-size: 12px;
+  font-size: 14px; /* Slightly smaller than main row but bigger than before */
   color: var(--text-muted);
 }
 
-/* Alignment */
-.num { text-align: right; font-family: 'Courier New', monospace; }
-
-/* Input Styling */
-input {
-  width: 100%;
-  padding: 4px 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 2px;
-  font-size: 12px;
-  outline: none;
-  text-align: right;
+.num { 
+  text-align: right; 
+  font-family: 'SF Mono', 'Courier New', monospace; 
 }
 
-input:focus {
-  border-color: var(--comp-blue);
+/* Forecast Input - Fixed overflow */
+.forecast-cell {
+  padding-right: 12px !important;
+}
+
+input {
+  width: 100%;
+  max-width: 100px; /* Prevents stretching outside table */
+  padding: 3px 5px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  font-size: 14px;
+  text-align: right;
+  box-sizing: border-box; /* Ensures padding doesn't add to width */
 }
 
 .hidden { display: none; }
 
-/* Notification */
 .toast {
   position: fixed;
   bottom: 20px;
-  right: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--comp-blue);
   color: #fff;
-  padding: 12px 24px;
+  padding: 10px 20px;
   font-size: 13px;
-  border-left: 4px solid #48bb78;
   display: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 1000;
 }
 
-/* Mobile Instructions */
 .mobile-hint {
-  display: none;
-  padding: 8px 16px;
+  padding: 6px;
   font-size: 10px;
-  color: var(--text-muted);
-  background: #eee;
+  background: #f1f1f1;
   text-align: center;
-}
-
-@media (max-width: 768px) {
-  .mobile-hint { display: block; }
+  color: #777;
 }
 </style>
 </head>
@@ -171,18 +164,18 @@ input:focus {
   <h1>Outstanding Receivables</h1>
   <div class="summary">
     <div class="amount" id="netOutstanding">₹0.00</div>
-    <div class="date" id="lastUpdated">Updating...</div>
+    <div class="date" id="lastUpdated">LOADING DATA...</div>
   </div>
 </div>
 
-<div class="mobile-hint">Swipe left/right to view all columns</div>
+<div class="mobile-hint">SWIPE HORIZONTALLY TO VIEW AGING & FORECAST</div>
 
 <div class="table-wrapper">
   <div class="table-content">
     <div class="row header">
-      <div>Account Name / Invoice</div>
+      <div>Account / Invoice</div>
       <div class="num">Total</div>
-      <div class="num">On Account</div>
+      <div class="num">On A/C</div>
       <div class="num">90+</div>
       <div class="num">60–90</div>
       <div class="num">30–60</div>
@@ -192,10 +185,10 @@ input:focus {
   </div>
 </div>
 
-<div class="toast" id="toast">SYSTEM: Forecast data updated.</div>
+<div class="toast" id="toast">Update successful</div>
 
 <script>
-// Logic remains identical to ensure functionality is preserved
+// Logics remain identical
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
 let openPIC = null;
@@ -223,7 +216,7 @@ function updateSummary(data) {
     "₹" + (totalOutstanding - totalOnAccount).toLocaleString('en-IN', {minimumFractionDigits: 2});
 
   document.getElementById("lastUpdated").innerText =
-    "AS OF " + new Date().toLocaleString().toUpperCase();
+    "LAST REFRESHED: " + new Date().toLocaleString().toUpperCase();
 }
 
 function render(data) {
@@ -248,7 +241,7 @@ function render(data) {
         const inv = document.createElement("div");
         inv.className = "row invoice-row";
         inv.innerHTML = `
-          <div style="padding-left: 40px;">${i.invoiceNo}</div>
+          <div style="padding-left: 30px;">${i.invoiceNo}</div>
           <div class="num">${i.total.toLocaleString('en-IN')}</div>
           <div class="num"></div>
           <div class="num">${i.ageing["90+"] || 0}</div>
@@ -287,13 +280,13 @@ function createCustomerRow(picName, c) {
   const row = document.createElement("div");
   row.className = "row customer-row";
   row.innerHTML = `
-    <div style="padding-left: 20px;">${c.customerName}</div>
+    <div style="padding-left: 15px;">${c.customerName}</div>
     <div class="num">${sum(c.totals).toLocaleString('en-IN')}</div>
     <div class="num">${(c.onAccount || 0).toLocaleString('en-IN')}</div>
     <div class="num">${c.totals["90+"] || 0}</div>
     <div class="num">${c.totals["61-90"] || 0}</div>
     <div class="num">${c.totals["31-60"] || 0}</div>
-    <div class="num">
+    <div class="num forecast-cell">
       <input type="number" value="${c.forecast || ""}" 
         onclick="event.stopPropagation()"
         onchange="saveForecast('${picName}','${c.customerName}',this.value)">
@@ -324,7 +317,7 @@ function saveForecast(pic, customer, value) {
 function showToast() {
   const t = document.getElementById("toast");
   t.style.display = "block";
-  setTimeout(() => t.style.display = "none", 3000);
+  setTimeout(() => t.style.display = "none", 2500);
 }
 </script>
 
