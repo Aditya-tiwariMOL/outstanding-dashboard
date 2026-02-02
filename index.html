@@ -5,29 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Outstanding Receivables</title>
 
+<style>
+/* ================= THEME ================= */
 :root {
   --mol-blue: #1f4ea3;
   --bg: #f4f6fb;
   --card: #ffffff;
+  --danger: #c62828;
 }
 
+/* ================= BASE ================= */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: var(--bg);
+  color: #000;
 }
 
 /* ================= HEADER ================= */
 h1 {
   text-align: center;
   color: var(--mol-blue);
-  margin: 14px 0 4px;
-  font-size: 22px;
+  margin: 16px 0 6px;
+  font-size: 24px;
 }
 
 .summary {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .summary .amount {
@@ -40,31 +45,33 @@ h1 {
   color: #555;
 }
 
-/* ================= TABLE ================= */
+/* ================= TABLE WRAPPER ================= */
 .table-wrapper {
   overflow-x: auto;
-  padding: 0 8px 30px;
+  padding: 0 12px 40px;
   -webkit-overflow-scrolling: touch;
 }
 
+/* ================= TABLE ROW ================= */
 .row {
   display: grid;
   grid-template-columns:
-    150px   /* Name */
-    60px    /* Total */
-    70px    /* On Account */
-    55px    /* 90+ */
-    55px    /* 60–90 */
-    55px    /* 30–60 */
-    80px;   /* Forecast */
+    200px   /* Name */
+    90px    /* Total */
+    100px   /* On Account */
+    80px    /* 90+ */
+    80px    /* 60–90 */
+    80px    /* 30–60 */
+    120px;  /* Forecast */
+  gap: 8px;
+  padding: 10px;
   align-items: center;
-  min-width: 580px;
-  padding: 6px 6px;
-  gap: 4px;
+  min-width: 900px;
   font-size: 14px;
   background: #fff;
 }
 
+/* ================= HEADER ROW ================= */
 .header {
   background: var(--mol-blue);
   color: #fff;
@@ -74,50 +81,66 @@ h1 {
 
 /* ================= CARDS ================= */
 .card {
-  background: transparent;
-  margin-top: 8px;
+  background: var(--card);
+  border-radius: 6px;
+  margin-top: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 /* ================= SALES PIC ================= */
-.row:not(.customer):not(.invoice) {
+.pic-row {
   font-weight: bold;
+  cursor: pointer;
 }
 
 /* ================= CUSTOMER ================= */
 .customer {
-  background: #f1f5ff;
+  background: #eef3ff;
 }
 
 /* ================= INVOICE ================= */
 .invoice {
-  background: #fafbff;
-  padding-left: 18px;
+  padding-left: 28px;
   font-size: 13px;
+  background: #fafbff;
+}
+
+/* ================= 90+ HIGHLIGHT ================= */
+.red {
+  color: var(--danger);
+  font-weight: bold;
 }
 
 /* ================= INPUT ================= */
 input {
   width: 100%;
-  padding: 3px 4px;
-  font-size: 13px;
+  padding: 6px;
+  font-size: 14px;
   box-sizing: border-box;
+}
+
+/* ================= HIDDEN ================= */
+.hidden {
+  display: none;
 }
 
 /* ================= TOAST ================= */
 .toast {
   position: fixed;
-  bottom: 16px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--mol-blue);
   color: #fff;
-  padding: 8px 16px;
-  border-radius: 18px;
-  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: 20px;
   display: none;
+  font-size: 14px;
 }
 
-/* ================= MOBILE OPTIMIZATION ================= */
+/* =================================================
+   MOBILE TABLE (NOT CARDS)
+   ================================================= */
 @media (max-width: 768px) {
 
   h1 {
@@ -129,35 +152,32 @@ input {
   }
 
   .row {
-    font-size: 15px;          /* BIGGER TEXT */
-    padding: 6px 5px;         /* LESS PADDING */
-    min-width: 560px;         /* LESS SCROLL */
+    min-width: 640px;
+    font-size: 15px;
+    padding: 8px 6px;
+    gap: 6px;
   }
 
   .header {
     font-size: 14px;
-    padding: 8px 6px;
   }
 
   .customer,
   .invoice {
-    background: #fff;         /* FIX background split */
+    background: #fff;
   }
 
   .invoice {
     font-size: 14px;
-    padding-left: 14px;
+    padding-left: 16px;
   }
 
   input {
-    font-size: 14px;
-    padding: 3px 4px;
-  }
-
-  .table-wrapper {
-    padding-right: 0;         /* FIX forecast cut */
+    font-size: 15px;
+    padding: 5px;
   }
 }
+</style>
 </head>
 
 <body>
@@ -166,7 +186,7 @@ input {
 
 <div class="summary">
   <div class="amount" id="netOutstanding">—</div>
-  <div class="date" id="lastUpdated">Last updated: —</div>
+  <div class="date" id="lastUpdated">Last refreshed: —</div>
 </div>
 
 <div class="table-wrapper">
@@ -210,7 +230,7 @@ function updateSummary(data) {
   });
 
   document.getElementById("netOutstanding").innerText =
-    "Net Outstanding: ₹" + (totalOutstanding - totalOnAccount);
+    "Net Outstanding: ₹" + (totalOutstanding - totalOnAccount).toLocaleString();
 
   document.getElementById("lastUpdated").innerText =
     "Last refreshed: " + new Date().toLocaleString();
@@ -225,12 +245,12 @@ function render(data) {
     card.className = "card";
 
     const picRow = document.createElement("div");
-    picRow.className = "row";
+    picRow.className = "row pic-row";
     picRow.innerHTML = `
       <div>${pic.salesPIC}</div>
       <div>${sum(pic.totals)}</div>
       <div></div>
-      <div class="col-90">${pic.totals["90+"]}</div>
+      <div class="red">${pic.totals["90+"]}</div>
       <div>${pic.totals["61-90"]}</div>
       <div>${pic.totals["31-60"]}</div>
       <div></div>
@@ -242,13 +262,13 @@ function render(data) {
     picRow.onclick = () => toggle(customerContainer, "pic");
 
     Object.values(pic.customers).forEach(c => {
-      const row = document.createElement("div");
-      row.className = "row customer";
-      row.innerHTML = `
+      const customerRow = document.createElement("div");
+      customerRow.className = "row customer";
+      customerRow.innerHTML = `
         <div>${c.customerName}</div>
         <div>${sum(c.totals)}</div>
         <div>${c.onAccount || 0}</div>
-        <div class="col-90">${c.totals["90+"]}</div>
+        <div class="red">${c.totals["90+"]}</div>
         <div>${c.totals["61-90"]}</div>
         <div>${c.totals["31-60"]}</div>
         <div>
@@ -258,7 +278,29 @@ function render(data) {
             onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
         </div>
       `;
-      customerContainer.appendChild(row);
+
+      const invoiceContainer = document.createElement("div");
+      invoiceContainer.className = "hidden";
+
+      customerRow.onclick = () => toggle(invoiceContainer, "customer");
+
+      c.invoices.forEach(i => {
+        const inv = document.createElement("div");
+        inv.className = "row invoice";
+        inv.innerHTML = `
+          <div>${i.invoiceNo}</div>
+          <div>${i.total}</div>
+          <div></div>
+          <div class="red">${i.ageing["90+"]}</div>
+          <div>${i.ageing["61-90"]}</div>
+          <div>${i.ageing["31-60"]}</div>
+          <div></div>
+        `;
+        invoiceContainer.appendChild(inv);
+      });
+
+      customerContainer.appendChild(customerRow);
+      customerContainer.appendChild(invoiceContainer);
     });
 
     card.appendChild(picRow);
@@ -268,26 +310,35 @@ function render(data) {
 }
 
 function sum(t) {
-  return (t["90+"]||0)+(t["61-90"]||0)+(t["31-60"]||0)+(t["1-30"]||0);
+  return (t["90+"] || 0) + (t["61-90"] || 0) + (t["31-60"] || 0) + (t["1-30"] || 0);
 }
 
 function toggle(el, level) {
-  if (level==="pic" && openPIC && openPIC!==el) openPIC.classList.add("hidden");
+  if (level === "pic" && openPIC && openPIC !== el) openPIC.classList.add("hidden");
+  if (level === "customer" && openCustomer && openCustomer !== el) openCustomer.classList.add("hidden");
+
   el.classList.toggle("hidden");
-  openPIC = el.classList.contains("hidden") ? null : el;
+
+  if (level === "pic") openPIC = el.classList.contains("hidden") ? null : el;
+  if (level === "customer") openCustomer = el.classList.contains("hidden") ? null : el;
 }
 
 function saveForecast(pic, customer, value) {
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({action:"updateForecast",salesPIC:pic,customer,forecast:+value})
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "updateForecast",
+      salesPIC: pic,
+      customer: customer,
+      forecast: Number(value)
+    })
   }).then(showToast);
 }
 
 function showToast() {
-  const t=document.getElementById("toast");
-  t.style.display="block";
-  setTimeout(()=>t.style.display="none",2000);
+  const t = document.getElementById("toast");
+  t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 2000);
 }
 </script>
 
