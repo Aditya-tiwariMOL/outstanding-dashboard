@@ -21,37 +21,38 @@ body {
   color: var(--text-dark);
 }
 
-/* Header & Summary - Updated for iPhone Alignment */
+/* Header & Summary - iPhone Optimized */
 .header-container {
   background: var(--comp-blue);
   color: #ffffff;
-  padding: 15px 12px;
+  padding: 12px 12px;
 }
 
 h1 {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .summary {
-  margin-top: 8px;
+  margin-top: 4px;
   display: flex;
-  flex-direction: column; /* Stacked for mobile */
+  flex-direction: column;
   align-items: flex-start;
 }
 
 .summary .amount {
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 1;
+  font-size: 34px; /* Very large for clarity */
+  font-weight: 800;
+  line-height: 1.1;
 }
 
 .summary .date {
   font-size: 11px;
   opacity: 0.8;
-  margin-top: 4px; /* Placed below the number */
+  margin-top: 2px;
 }
 
 /* Table Management */
@@ -62,98 +63,95 @@ h1 {
 }
 
 .table-content {
-  min-width: 900px; /* Slightly wider to prevent input overflow */
-  padding: 0 0 100px; /* Removed side padding for edge-to-edge feel */
+  min-width: 950px; /* Room for large text without squashing */
+  padding-bottom: 100px;
 }
 
 .row {
   display: grid;
-  /* Adjusted columns to give Forecast more room */
-  grid-template-columns: 2.2fr 1.1fr 1fr 0.9fr 0.9fr 0.9fr 1.3fr;
+  /* Columns: Name, Total, On A/C, 90+, 60-90, 30-60, Forecast */
+  grid-template-columns: 2.4fr 1.1fr 1fr 0.8fr 0.8fr 0.8fr 1.1fr;
   border-bottom: 1px solid var(--border-color);
   align-items: center;
-  font-size: 15px; /* Increased text size for table */
+  font-size: 18px; /* Large Text */
 }
 
 .header {
-  background: #f8f9fa;
+  background: #f2f2f2;
   border-bottom: 2px solid var(--comp-blue);
   color: var(--comp-blue);
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 12px; 
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .row > div {
-  padding: 6px 8px; /* Reduced padding for compactness */
+  padding: 4px 6px; /* Tight padding to reduce gaps */
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-/* Specific Row Styles */
+/* Row Hierarchies */
 .pic-row {
   background: var(--comp-blue-pale);
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
 }
 
 .customer-row {
   background: #ffffff;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .invoice-row {
-  font-size: 14px; /* Slightly smaller than main row but bigger than before */
+  font-size: 16px;
   color: var(--text-muted);
+  background: #fafafa;
 }
 
 .num { 
   text-align: right; 
-  font-family: 'SF Mono', 'Courier New', monospace; 
+  font-family: 'SF Mono', monospace;
 }
 
-/* Forecast Input - Fixed overflow */
-.forecast-cell {
-  padding-right: 12px !important;
-}
-
+/* Forecast Input Containment */
 input {
-  width: 100%;
-  max-width: 100px; /* Prevents stretching outside table */
-  padding: 3px 5px;
+  width: 95%;
+  padding: 2px 4px;
   border: 1px solid var(--border-color);
   border-radius: 2px;
-  font-size: 14px;
+  font-size: 16px;
   text-align: right;
-  box-sizing: border-box; /* Ensures padding doesn't add to width */
+  height: 26px;
+  box-sizing: border-box;
 }
 
 .hidden { display: none; }
+
+.mobile-hint {
+  padding: 5px;
+  font-size: 10px;
+  background: #eee;
+  text-align: center;
+  color: #666;
+  font-weight: bold;
+}
 
 .toast {
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--comp-blue);
+  background: #333;
   color: #fff;
-  padding: 10px 20px;
-  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
   display: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   z-index: 1000;
-}
-
-.mobile-hint {
-  padding: 6px;
-  font-size: 10px;
-  background: #f1f1f1;
-  text-align: center;
-  color: #777;
 }
 </style>
 </head>
@@ -164,11 +162,11 @@ input {
   <h1>Outstanding Receivables</h1>
   <div class="summary">
     <div class="amount" id="netOutstanding">₹0.00</div>
-    <div class="date" id="lastUpdated">LOADING DATA...</div>
+    <div class="date" id="lastUpdated">SYNCING...</div>
   </div>
 </div>
 
-<div class="mobile-hint">SWIPE HORIZONTALLY TO VIEW AGING & FORECAST</div>
+<div class="mobile-hint">SWIPE LEFT TO VIEW FULL COLUMNS</div>
 
 <div class="table-wrapper">
   <div class="table-content">
@@ -185,10 +183,9 @@ input {
   </div>
 </div>
 
-<div class="toast" id="toast">Update successful</div>
+<div class="toast" id="toast">Data Saved</div>
 
 <script>
-// Logics remain identical
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
 let openPIC = null;
@@ -241,7 +238,7 @@ function render(data) {
         const inv = document.createElement("div");
         inv.className = "row invoice-row";
         inv.innerHTML = `
-          <div style="padding-left: 30px;">${i.invoiceNo}</div>
+          <div style="padding-left: 25px;">${i.invoiceNo}</div>
           <div class="num">${i.total.toLocaleString('en-IN')}</div>
           <div class="num"></div>
           <div class="num">${i.ageing["90+"] || 0}</div>
@@ -280,13 +277,13 @@ function createCustomerRow(picName, c) {
   const row = document.createElement("div");
   row.className = "row customer-row";
   row.innerHTML = `
-    <div style="padding-left: 15px;">${c.customerName}</div>
+    <div style="padding-left: 12px;">${c.customerName}</div>
     <div class="num">${sum(c.totals).toLocaleString('en-IN')}</div>
     <div class="num">${(c.onAccount || 0).toLocaleString('en-IN')}</div>
     <div class="num">${c.totals["90+"] || 0}</div>
     <div class="num">${c.totals["61-90"] || 0}</div>
     <div class="num">${c.totals["31-60"] || 0}</div>
-    <div class="num forecast-cell">
+    <div class="num">
       <input type="number" value="${c.forecast || ""}" 
         onclick="event.stopPropagation()"
         onchange="saveForecast('${picName}','${c.customerName}',this.value)">
@@ -317,7 +314,7 @@ function saveForecast(pic, customer, value) {
 function showToast() {
   const t = document.getElementById("toast");
   t.style.display = "block";
-  setTimeout(() => t.style.display = "none", 2500);
+  setTimeout(() => t.style.display = "none", 2000);
 }
 </script>
 
