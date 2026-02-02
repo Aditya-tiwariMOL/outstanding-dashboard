@@ -1,292 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Outstanding Receivables Dashboard</title>
+  <meta charset="UTF-8" />
+  <title>Outstanding Receivables</title>
 
-<style>
-:root{
-  --brand:#0B419B;
-  --bg:#f4f7fb;
-  --border:#e2e6ef;
-  --red:#d93025;
-  --green:#1e8e3e;
-}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 20px;
+    }
 
-*{box-sizing:border-box}
+    h1 {
+      margin-bottom: 20px;
+    }
 
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  background:var(--bg);
-}
+    .card {
+      background: #fff;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
 
-/* ========== PASSCODE ========== */
-.lock-screen{
-  min-height:100dvh;
-  display:flex;
-  justify-content:center;
-  padding-top:10vh;
-}
+    .row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      align-items: center;
+      cursor: pointer;
+    }
 
-.lock-box{
-  background:#fff;
-  padding:28px;
-  border-radius:14px;
-  width:100%;
-  max-width:360px;
-  box-shadow:0 8px 24px rgba(0,0,0,.08);
-  text-align:center;
-}
+    .row.header {
+      background: #2f3e5c;
+      color: #fff;
+      font-weight: bold;
+      cursor: default;
+    }
 
-.brand-logo{max-width:120px;margin-bottom:12px}
+    .row.customer {
+      background: #f9fafc;
+    }
 
-.lock-box h2{color:var(--brand)}
-.lock-box input{
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid var(--border);
-}
-.lock-box button{
-  width:100%;
-  margin-top:12px;
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  background:var(--brand);
-  color:#fff;
-  font-weight:600;
-  cursor:pointer;
-}
-.error{color:var(--red);margin-top:8px;display:none}
+    .row.invoice {
+      background: #ffffff;
+      padding-left: 30px;
+      cursor: default;
+    }
 
-/* ========== DASHBOARD ========== */
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:16px;
-  display:none;
-}
+    .row:hover:not(.header):not(.invoice) {
+      background: #eef2ff;
+    }
 
-.header{
-  text-align:center;
-  margin-bottom:20px;
-  padding-bottom:14px;
-  border-bottom:1px solid var(--border);
-}
-.dash-logo{max-width:100px;margin-bottom:8px}
-.header h2{color:var(--brand)}
-.amount{font-size:22px;font-weight:700}
-#updated{font-size:12px;color:#666}
+    .hidden {
+      display: none;
+    }
 
-/* ========== TABLE ========== */
-.table-wrap{
-  background:#fff;
-  border-radius:14px;
-  overflow-x:auto;
-}
-table{width:100%;border-collapse:collapse}
-th,td{
-  padding:12px 16px;
-  border-top:1px solid var(--border);
-}
-th{
-  background:#eef3ff;
-  color:var(--brand);
-  font-size:0.85rem;
-  font-weight:600;
-}
+    input.forecast {
+      width: 100%;
+      padding: 4px;
+    }
 
-/* correct ageing column widths */
-th:nth-child(6),
-th:nth-child(7),
-th:nth-child(8),
-td:nth-child(6),
-td:nth-child(7),
-td:nth-child(8){
-  min-width:110px;
-}
-
-.sales-row{background:#fff}
-.customer-row{background:#f5f8ff}
-.invoice-row{background:#fafafa}
-
-.sales{font-weight:600;cursor:pointer}
-.customer{padding-left:18px;cursor:pointer}
-.invoice{padding-left:36px;font-size:13px;color:#555}
-
-.green{color:var(--green);font-weight:600}
-.red{color:var(--red);font-weight:600}
-.total{font-weight:700}
-
-.forecast-input{
-  width:100px;
-  padding:6px;
-  border-radius:6px;
-  border:1px solid var(--border);
-}
-</style>
+    .section {
+      margin-bottom: 15px;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- PASSCODE -->
-<div class="lock-screen" id="lock">
-  <div class="lock-box">
-    <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png" class="brand-logo">
-    <h2>Enter Passcode</h2>
-    <input type="password" id="pass" placeholder="Passcode">
-    <button onclick="checkPass()">Access</button>
-    <div class="error" id="err">Wrong passcode</div>
-  </div>
+<h1>Outstanding Receivables</h1>
+
+<div class="row header">
+  <div>Name</div>
+  <div>Total</div>
+  <div>90+</div>
+  <div>61-90</div>
+  <div>31-60</div>
+  <div>1-30</div>
+  <div>Forecast</div>
 </div>
 
-<!-- DASHBOARD -->
-<div class="container" id="dash">
-  <div class="header">
-    <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png" class="dash-logo">
-    <h2>Outstanding Receivables</h2>
-    <div class="amount" id="grand"></div>
-    <div id="updated"></div>
-  </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Sales PIC / Customer</th>
-          <th>Forecast</th>
-          <th>Total</th>
-          <th>On Account</th>
-          <th>90+</th>
-          <th>61–90</th>
-          <th>31–60</th>
-          <th>1–30</th>
-        </tr>
-      </thead>
-      <tbody id="body"></tbody>
-    </table>
-  </div>
-</div>
+<div id="app"></div>
 
 <script>
-const PASS_HASH="158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab";
-const API="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-let DATA=null, allowed=false, ready=false, active=null;
+let openPIC = null;
+let openCustomer = null;
 
-fetch(API).then(r=>r.json()).then(j=>{
-  DATA=j; ready=true;
-  if(allowed) render();
-});
+fetch(API_URL)
+  .then(res => res.json())
+  .then(renderPICs);
 
-async function checkPass(){
-  const h=await sha(pass.value);
-  if(h===PASS_HASH){
-    allowed=true;
-    lock.style.display="none";
-    if(ready) render();
-  }else err.style.display="block";
-}
+function renderPICs(data) {
+  const app = document.getElementById("app");
+  app.innerHTML = "";
 
-function render(){
-  dash.style.display="block";
-  grand.innerText="₹ "+DATA.grandTotal.toLocaleString("en-IN");
-  updated.innerText="Last updated: "+
-    new Date(DATA.lastUpdated).toLocaleDateString("en-GB",
-      {day:"2-digit",month:"short",year:"numeric"});
-  drawSales();
-}
+  data.forEach(pic => {
+    const picCard = document.createElement("div");
+    picCard.className = "card";
 
-function drawSales(){
-  body.innerHTML=""; active=null;
-  Object.entries(DATA.salesPICs).forEach(([n,s])=>{
-    row(n,"sales",s,()=>openSales(n));
+    const picRow = createRow(
+      pic.salesPIC,
+      pic.totals,
+      false,
+      false
+    );
+
+    picRow.onclick = () => togglePIC(picCard);
+
+    const customerContainer = document.createElement("div");
+    customerContainer.className = "hidden";
+
+    Object.values(pic.customers).forEach(customer => {
+      const customerRow = createRow(
+        customer.customerName,
+        customer.totals,
+        true,
+        true,
+        customer.forecast,
+        pic.salesPIC
+      );
+
+      customerRow.onclick = (e) => {
+        e.stopPropagation();
+        toggleCustomer(customerRow);
+      };
+
+      const invoiceContainer = document.createElement("div");
+      invoiceContainer.className = "hidden";
+
+      customer.invoices.forEach(inv => {
+        const invRow = document.createElement("div");
+        invRow.className = "row invoice";
+        invRow.innerHTML = `
+          <div>${inv.invoiceNo}</div>
+          <div>${inv.total}</div>
+          <div>${inv.ageing["90+"]}</div>
+          <div>${inv.ageing["61-90"]}</div>
+          <div>${inv.ageing["31-60"]}</div>
+          <div>${inv.ageing["1-30"]}</div>
+          <div></div>
+        `;
+        invoiceContainer.appendChild(invRow);
+      });
+
+      customerRow.after(invoiceContainer);
+      customerContainer.appendChild(customerRow);
+      customerContainer.appendChild(invoiceContainer);
+    });
+
+    picCard.appendChild(picRow);
+    picCard.appendChild(customerContainer);
+    app.appendChild(picCard);
   });
 }
 
-function openSales(n){
-  body.innerHTML=""; active=n;
-  const s=DATA.salesPICs[n];
-  row(n,"sales",s,drawSales);
-  Object.entries(s.customers).forEach(([c,v])=>{
-    row(c,"customer",v,()=>openCust(c));
+function createRow(name, totals, isCustomer, showForecast, forecast = 0, picName = "") {
+  const row = document.createElement("div");
+  row.className = "row " + (isCustomer ? "customer" : "");
+
+  row.innerHTML = `
+    <div>${name}</div>
+    <div>${sumTotals(totals)}</div>
+    <div>${totals["90+"]}</div>
+    <div>${totals["61-90"]}</div>
+    <div>${totals["31-60"]}</div>
+    <div>${totals["1-30"]}</div>
+    <div>
+      ${showForecast ? `<input class="forecast" type="number" value="${forecast}"
+        onchange="updateForecast('${picName}','${name}',this.value)">` : ""}
+    </div>
+  `;
+  return row;
+}
+
+function sumTotals(t) {
+  return t["1-30"] + t["31-60"] + t["61-90"] + t["90+"];
+}
+
+function togglePIC(card) {
+  if (openPIC && openPIC !== card) {
+    openPIC.querySelector("div:nth-child(2)").classList.add("hidden");
+  }
+  const content = card.querySelector("div:nth-child(2)");
+  content.classList.toggle("hidden");
+  openPIC = content.classList.contains("hidden") ? null : card;
+}
+
+function toggleCustomer(row) {
+  if (openCustomer && openCustomer !== row) {
+    openCustomer.nextSibling.classList.add("hidden");
+  }
+  row.nextSibling.classList.toggle("hidden");
+  openCustomer = row.nextSibling.classList.contains("hidden") ? null : row;
+}
+
+function updateForecast(pic, customer, value) {
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "updateForecast",
+      salesPIC: pic,
+      customer: customer,
+      forecast: Number(value)
+    })
   });
-}
-
-function openCust(c){
-  body.innerHTML="";
-  const s=DATA.salesPICs[active];
-  row(active,"sales",s,drawSales);
-  Object.entries(s.customers).forEach(([n,v])=>{
-    if(n!==c) row(n,"customer",v,()=>openCust(n));
-    else{
-      row(n,"customer",v,()=>openSales(active));
-      v.invoices.forEach(i=>row(i.invoiceNo,"invoice",i));
-    }
-  });
-}
-
-function row(label,cls,v,cb){
-  const tr=document.createElement("tr");
-  tr.className=cls+"-row";
-
-  const name=document.createElement("td");
-  name.innerText=label;
-  name.className=cls;
-  if(cb) name.onclick=cb;
-  tr.appendChild(name);
-
-  const ftd=document.createElement("td");
-  if(cls==="customer"){
-    const input=document.createElement("input");
-    input.className="forecast-input";
-    input.value=v.forecast||"";
-    input.onblur=()=>saveForecast(active,label,input.value);
-    ftd.appendChild(input);
-  }else ftd.innerText="–";
-  tr.appendChild(ftd);
-
-  tr.appendChild(td(v.total,true));
-  tr.appendChild(td(v.onAccount,false,true));
-  tr.appendChild(td(v.d90,false,false,true));
-  tr.appendChild(td(v.d61_90));
-  tr.appendChild(td(v.d31_60));
-  tr.appendChild(td(v.d1_30));
-
-  body.appendChild(tr);
-}
-
-function saveForecast(pic,customer,value){
-  fetch(API,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ pic, customer, forecast:value })
-  });
-}
-
-function td(v,t,g,r){
-  const d=document.createElement("td");
-  if(!v){d.innerText="–";return d}
-  d.innerText=fmt(v);
-  if(t)d.classList.add("total");
-  if(g)d.classList.add("green");
-  if(r)d.classList.add("red");
-  return d;
-}
-
-function fmt(n){
-  if(n>=100000) return "₹"+(n/100000).toFixed(1)+"L";
-  if(n>=1000) return "₹"+Math.round(n/1000)+"k";
-  return "₹"+n;
-}
-
-async function sha(t){
-  const b=new TextEncoder().encode(t);
-  const h=await crypto.subtle.digest("SHA-256",b);
-  return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 </script>
 
