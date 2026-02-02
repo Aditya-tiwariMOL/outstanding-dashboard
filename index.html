@@ -1,89 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Outstanding Receivables</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Outstanding Receivables</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f6f7fb;
-      margin: 0;
-      padding: 20px;
-    }
+<style>
+:root {
+  --mol-blue: #1f4ea3;
+  --bg: #f5f7fb;
+  --card: #ffffff;
+}
 
-    h1 {
-      margin-bottom: 20px;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: #000;
+}
 
-    .card {
-      background: #fff;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      overflow: hidden;
-    }
+h1 {
+  text-align: center;
+  color: var(--mol-blue);
+  margin: 20px 0 10px;
+}
 
-    .row {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
-      padding: 10px 12px;
-      border-bottom: 1px solid #eee;
-      align-items: center;
-      cursor: pointer;
-    }
+.summary {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-    .row.header {
-      background: #2f3e5c;
-      color: #fff;
-      font-weight: bold;
-      cursor: default;
-    }
+.summary .amount {
+  font-size: 22px;
+  font-weight: bold;
+}
 
-    .row.customer {
-      background: #f9fafc;
-    }
+.summary .date {
+  font-size: 12px;
+  color: #555;
+}
 
-    .row.invoice {
-      background: #ffffff;
-      padding-left: 30px;
-      cursor: default;
-    }
+.table-wrapper {
+  overflow-x: auto;
+  padding: 0 10px 30px;
+}
 
-    .row:hover:not(.header):not(.invoice) {
-      background: #eef2ff;
-    }
+.row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 10px;
+  align-items: center;
+  min-width: 800px;
+}
 
-    .hidden {
-      display: none;
-    }
+.header {
+  background: var(--mol-blue);
+  color: #fff;
+  font-weight: bold;
+  border-radius: 6px;
+}
 
-    input.forecast {
-      width: 100%;
-      padding: 4px;
-    }
+.card {
+  background: var(--card);
+  border-radius: 6px;
+  margin-top: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
 
-    .section {
-      margin-bottom: 15px;
-    }
-  </style>
+.customer {
+  background: #f0f4ff;
+}
+
+.invoice {
+  padding-left: 30px;
+  font-size: 14px;
+}
+
+.hidden {
+  display: none;
+}
+
+input {
+  width: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--mol-blue);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 20px;
+  display: none;
+}
+</style>
 </head>
 
 <body>
 
 <h1>Outstanding Receivables</h1>
 
-<div class="row header">
-  <div>Name</div>
-  <div>Total</div>
-  <div>90+</div>
-  <div>61-90</div>
-  <div>31-60</div>
-  <div>1-30</div>
-  <div>Forecast</div>
+<div class="summary">
+  <div class="amount" id="netOutstanding">—</div>
+  <div class="date" id="lastUpdated">Last updated: —</div>
 </div>
 
-<div id="app"></div>
+<div class="table-wrapper">
+  <div class="row header">
+    <div>Name</div>
+    <div>Total</div>
+    <div>90+</div>
+    <div>60–90</div>
+    <div>30–60</div>
+    <div>On Account</div>
+  </div>
+
+  <div id="app"></div>
+</div>
+
+<div class="toast" id="toast">Forecast updated</div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
@@ -92,116 +132,117 @@ let openPIC = null;
 let openCustomer = null;
 
 fetch(API_URL)
-  .then(res => res.json())
-  .then(render);
+  .then(r => r.json())
+  .then(data => {
+    render(data);
+    updateSummary(data);
+  });
+
+function updateSummary(data) {
+  let total = 0;
+  let onAccount = 0;
+
+  data.forEach(p => {
+    total += sum(p.totals);
+    Object.values(p.customers).forEach(c => {
+      onAccount += c.forecast || 0;
+    });
+  });
+
+  document.getElementById("netOutstanding").innerText =
+    "Net Outstanding: ₹" + (total - onAccount).toLocaleString();
+
+  document.getElementById("lastUpdated").innerText =
+    "Last updated: " + new Date().toLocaleString();
+}
 
 function render(data) {
   const app = document.getElementById("app");
   app.innerHTML = "";
 
   data.forEach(pic => {
-    const picCard = document.createElement("div");
-    picCard.className = "card";
+    const card = document.createElement("div");
+    card.className = "card";
 
-    const picRow = createRow(
-      pic.salesPIC,
-      pic.totals,
-      false
-    );
-
+    const picRow = rowHTML(pic.salesPIC, pic.totals);
     const customerContainer = document.createElement("div");
     customerContainer.className = "hidden";
 
-    picRow.onclick = () => togglePIC(customerContainer);
+    picRow.onclick = () => toggle(customerContainer, "pic");
 
-    Object.values(pic.customers).forEach(customer => {
-      const customerBlock = document.createElement("div");
+    Object.values(pic.customers).forEach(c => {
+      const customerRow = document.createElement("div");
+      customerRow.className = "row customer";
+      customerRow.innerHTML = `
+        <div>${c.customerName}</div>
+        <div>${sum(c.totals)}</div>
+        <div>${c.totals["90+"]}</div>
+        <div>${c.totals["61-90"]}</div>
+        <div>${c.totals["31-60"]}</div>
+        <div>
+          <input type="number" value="${c.forecast || 0}"
+            onclick="event.stopPropagation()"
+            onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
+        </div>
+      `;
 
-      const customerRow = createRow(
-        customer.customerName,
-        customer.totals,
-        true,
-        customer.forecast,
-        pic.salesPIC
-      );
+      const invContainer = document.createElement("div");
+      invContainer.className = "hidden";
 
-      const invoiceContainer = document.createElement("div");
-      invoiceContainer.className = "hidden";
+      customerRow.onclick = () => toggle(invContainer, "customer");
 
-      customerRow.onclick = (e) => {
-        e.stopPropagation();
-        toggleCustomer(invoiceContainer);
-      };
-
-      customer.invoices.forEach(inv => {
-        const invRow = document.createElement("div");
-        invRow.className = "row invoice";
-        invRow.innerHTML = `
-          <div>${inv.invoiceNo}</div>
-          <div>${inv.total}</div>
-          <div>${inv.ageing["90+"]}</div>
-          <div>${inv.ageing["61-90"]}</div>
-          <div>${inv.ageing["31-60"]}</div>
-          <div>${inv.ageing["1-30"]}</div>
+      c.invoices.forEach(i => {
+        const inv = document.createElement("div");
+        inv.className = "row invoice";
+        inv.innerHTML = `
+          <div>${i.invoiceNo}</div>
+          <div>${i.total}</div>
+          <div>${i.ageing["90+"]}</div>
+          <div>${i.ageing["61-90"]}</div>
+          <div>${i.ageing["31-60"]}</div>
           <div></div>
         `;
-        invoiceContainer.appendChild(invRow);
+        invContainer.appendChild(inv);
       });
 
-      customerBlock.appendChild(customerRow);
-      customerBlock.appendChild(invoiceContainer);
-      customerContainer.appendChild(customerBlock);
+      customerContainer.appendChild(customerRow);
+      customerContainer.appendChild(invContainer);
     });
 
-    picCard.appendChild(picRow);
-    picCard.appendChild(customerContainer);
-    app.appendChild(picCard);
+    card.appendChild(picRow);
+    card.appendChild(customerContainer);
+    app.appendChild(card);
   });
 }
 
-function createRow(name, totals, isCustomer, forecast = null, picName = "") {
+function rowHTML(name, totals) {
   const row = document.createElement("div");
-  row.className = "row" + (isCustomer ? " customer" : "");
-
+  row.className = "row";
   row.innerHTML = `
     <div>${name}</div>
     <div>${sum(totals)}</div>
     <div>${totals["90+"]}</div>
     <div>${totals["61-90"]}</div>
     <div>${totals["31-60"]}</div>
-    <div>${totals["1-30"]}</div>
-    <div>
-      ${forecast !== null
-        ? `<input type="number" value="${forecast}"
-           onchange="updateForecast('${picName}','${name}',this.value)">`
-        : ""}
-    </div>
+    <div></div>
   `;
   return row;
 }
 
 function sum(t) {
-  return t["1-30"] + t["31-60"] + t["61-90"] + t["90+"];
+  return (t["90+"] || 0) + (t["61-90"] || 0) + (t["31-60"] || 0) + (t["1-30"] || 0);
 }
 
-function togglePIC(container) {
-  if (openPIC && openPIC !== container) {
-    openPIC.classList.add("hidden");
-  }
-  container.classList.toggle("hidden");
-  openPIC = container.classList.contains("hidden") ? null : container;
-  openCustomer = null;
+function toggle(el, level) {
+  if (level === "pic" && openPIC && openPIC !== el) openPIC.classList.add("hidden");
+  if (level === "customer" && openCustomer && openCustomer !== el) openCustomer.classList.add("hidden");
+
+  el.classList.toggle("hidden");
+  if (level === "pic") openPIC = el.classList.contains("hidden") ? null : el;
+  if (level === "customer") openCustomer = el.classList.contains("hidden") ? null : el;
 }
 
-function toggleCustomer(container) {
-  if (openCustomer && openCustomer !== container) {
-    openCustomer.classList.add("hidden");
-  }
-  container.classList.toggle("hidden");
-  openCustomer = container.classList.contains("hidden") ? null : container;
-}
-
-function updateForecast(pic, customer, value) {
+function saveForecast(pic, customer, value) {
   fetch(API_URL, {
     method: "POST",
     body: JSON.stringify({
@@ -210,7 +251,13 @@ function updateForecast(pic, customer, value) {
       customer: customer,
       forecast: Number(value)
     })
-  });
+  }).then(() => showToast());
+}
+
+function showToast() {
+  const t = document.getElementById("toast");
+  t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 2000);
 }
 </script>
 
