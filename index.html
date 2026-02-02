@@ -154,6 +154,62 @@ input {
     padding: 4px 5px;
   }
 }
+  /* ================================
+   MOBILE ONLY – SAFE COMPRESSION
+   ================================ */
+@media (max-width: 768px) {
+
+  /* Page header */
+  h1 {
+    font-size: 20px;
+    margin: 12px 0 6px;
+  }
+
+  .summary .amount {
+    font-size: 16px;
+  }
+
+  .summary .date {
+    font-size: 11px;
+  }
+
+  /* Horizontal scroll only for table */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Compact rows WITHOUT changing structure */
+  .row {
+    font-size: 12px;
+    padding: 6px 6px;
+    gap: 4px;
+    min-width: 720px; /* keeps columns readable */
+  }
+
+  /* Header tighter */
+  .header {
+    font-size: 12px;
+  }
+
+  /* Customer indentation preserved */
+  .customer {
+    padding-left: 12px;
+  }
+
+  /* Invoice rows smaller but still clear */
+  .invoice {
+    padding-left: 22px;
+    font-size: 11px;
+  }
+
+  /* Forecast input compact */
+  input {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+}
+
 </style>
 </head>
 
