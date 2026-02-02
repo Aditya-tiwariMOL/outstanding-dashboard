@@ -6,39 +6,36 @@
 <title>Outstanding Receivables</title>
 
 <style>
-/* ================= THEME ================= */
 :root {
   --mol-blue: #1f4ea3;
-  --bg: #f5f7fb;
-  --border: #e3e6ef;
+  --bg: #f4f6fb;
+  --text: #111;
   --red: #c62828;
   --green: #2e7d32;
 }
 
+/* ================= BASE ================= */
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: Arial, sans-serif;
   background: var(--bg);
-  color: #111;
+  color: var(--text);
 }
 
-/* ================= HEADER ================= */
 h1 {
   text-align: center;
   color: var(--mol-blue);
-  margin: 14px 0 4px;
-  font-size: 22px;
-  font-weight: 600;
+  margin: 14px 0 6px;
 }
 
 .summary {
   text-align: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .summary .amount {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: bold;
 }
 
 .summary .date {
@@ -50,57 +47,59 @@ h1 {
 .table-wrapper {
   overflow-x: auto;
   padding: 0 8px 40px;
-  -webkit-overflow-scrolling: touch;
 }
 
 table {
   border-collapse: collapse;
   width: 100%;
-  min-width: 720px; /* desktop full */
+  min-width: 760px;
   background: #fff;
 }
 
 thead th {
   background: var(--mol-blue);
   color: #fff;
-  padding: 8px 6px;
-  font-size: 13px;
+  font-weight: bold;
+  padding: 10px 8px;
   text-align: left;
-  white-space: nowrap;
-}
-
-tbody td {
-  padding: 7px 6px;
-  border-bottom: 1px solid var(--border);
   font-size: 14px;
   white-space: nowrap;
 }
 
+tbody td {
+  padding: 8px 8px;
+  font-size: 14px;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+
 /* ================= ROW TYPES ================= */
-.pic-row td {
-  font-weight: 700;
-  background: #fff;
+.pic-row {
+  font-weight: bold;
+  cursor: pointer;
 }
 
-.customer-row td {
-  background: #f3f6ff;
+.customer-row {
+  background: #eef3ff;
+  cursor: pointer;
 }
 
-.invoice-row td {
+.invoice-row {
   background: #fafbff;
   font-size: 13px;
 }
 
-/* ================= COLORS ================= */
-.red {
-  color: var(--red);
-  font-weight: 600;
+.invoice-row td:first-child {
+  padding-left: 26px;
 }
 
-.green {
-  color: var(--green);
-  font-weight: 600;
+.customer-row td:first-child {
+  padding-left: 14px;
 }
+
+/* ================= COLORS ================= */
+.red { color: var(--red); font-weight: bold; }
+.green { color: var(--green); font-weight: bold; }
 
 /* ================= INPUT ================= */
 input {
@@ -109,9 +108,13 @@ input {
   font-size: 13px;
 }
 
+/* ================= TOGGLE ================= */
+.collapsed {
+  display: none;
+}
+
 /* ================= MOBILE ================= */
 @media (max-width: 768px) {
-
   h1 {
     font-size: 20px;
   }
@@ -120,38 +123,24 @@ input {
     font-size: 18px;
   }
 
+  table {
+    min-width: 620px;
+  }
+
   thead th {
-    font-size: 14px;
-    padding: 10px 6px;
+    font-size: 13px;
+    padding: 8px 6px;
   }
 
   tbody td {
-    font-size: 15px;
-    padding: 10px 6px;
-  }
-
-  table {
-    min-width: 640px; /* mobile compact */
+    font-size: 15px;      /* Bigger text */
+    padding: 6px 6px;     /* Less padding */
   }
 
   input {
     font-size: 14px;
-    width: 80px;
+    width: 60px;
   }
-}
-
-/* ================= TOAST ================= */
-.toast {
-  position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--mol-blue);
-  color: #fff;
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-size: 13px;
-  display: none;
 }
 </style>
 </head>
@@ -162,14 +151,14 @@ input {
 
 <div class="summary">
   <div class="amount" id="netOutstanding">—</div>
-  <div class="date" id="lastUpdated">—</div>
+  <div class="date" id="lastUpdated">Last updated: —</div>
 </div>
 
 <div class="table-wrapper">
   <table>
     <thead>
       <tr>
-        <th>Sales PIC</th>
+        <th>Name</th>
         <th>Total</th>
         <th>On Account</th>
         <th>90+</th>
@@ -182,13 +171,8 @@ input {
   </table>
 </div>
 
-<div class="toast" id="toast">Forecast updated</div>
-
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
-
-let openPIC = null;
-let openCustomer = null;
 
 fetch(API_URL)
   .then(res => res.json())
@@ -198,21 +182,21 @@ fetch(API_URL)
   });
 
 function updateSummary(data) {
-  let totalOutstanding = 0;
-  let totalOnAccount = 0;
+  let total = 0;
+  let onAccount = 0;
 
   data.forEach(p => {
-    totalOutstanding += sum(p.totals);
+    total += sum(p.totals);
     Object.values(p.customers).forEach(c => {
-      totalOnAccount += c.onAccount || 0;
+      onAccount += c.onAccount || 0;
     });
   });
 
   document.getElementById("netOutstanding").innerText =
-    "Net Outstanding: ₹" + (totalOutstanding - totalOnAccount).toLocaleString();
+    "Net Outstanding: ₹" + (total - onAccount).toLocaleString();
 
   document.getElementById("lastUpdated").innerText =
-    "Last updated: " + new Date().toLocaleString();
+    "Last refreshed: " + new Date().toLocaleString();
 }
 
 function render(data) {
@@ -220,25 +204,26 @@ function render(data) {
   app.innerHTML = "";
 
   data.forEach(pic => {
-    const picRow = document.createElement("tr");
-    picRow.className = "pic-row";
-    picRow.innerHTML = `
+    // PIC ROW
+    const picRow = tr("pic-row", `
       <td>${pic.salesPIC}</td>
-      <td>₹${sum(pic.totals)}</td>
+      <td>${sum(pic.totals)}</td>
       <td></td>
       <td class="red">${pic.totals["90+"]}</td>
       <td>${pic.totals["61-90"]}</td>
       <td>${pic.totals["31-60"]}</td>
       <td></td>
-    `;
+    `);
+
+    picRow.onclick = () => togglePIC(pic.salesPIC);
+    picRow.dataset.pic = pic.salesPIC;
     app.appendChild(picRow);
 
     Object.values(pic.customers).forEach(c => {
-      const custRow = document.createElement("tr");
-      custRow.className = "customer-row";
-      custRow.innerHTML = `
+      // CUSTOMER ROW
+      const custRow = tr("customer-row collapsed", `
         <td>${c.customerName}</td>
-        <td>₹${sum(c.totals)}</td>
+        <td>${sum(c.totals)}</td>
         <td class="green">${c.onAccount || 0}</td>
         <td class="red">${c.totals["90+"]}</td>
         <td>${c.totals["61-90"]}</td>
@@ -246,16 +231,55 @@ function render(data) {
         <td>
           <input type="number"
             value="${c.forecast || ""}"
+            onclick="event.stopPropagation()"
             onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
         </td>
-      `;
+      `);
+
+      custRow.dataset.pic = pic.salesPIC;
+      custRow.dataset.customer = c.customerName;
+      custRow.onclick = () => toggleCustomer(pic.salesPIC, c.customerName);
       app.appendChild(custRow);
+
+      // INVOICES
+      c.invoices.forEach(i => {
+        const invRow = tr("invoice-row collapsed", `
+          <td>${i.invoiceNo}</td>
+          <td>${i.total}</td>
+          <td></td>
+          <td class="red">${i.ageing["90+"]}</td>
+          <td>${i.ageing["61-90"]}</td>
+          <td>${i.ageing["31-60"]}</td>
+          <td></td>
+        `);
+
+        invRow.dataset.pic = pic.salesPIC;
+        invRow.dataset.customer = c.customerName;
+        app.appendChild(invRow);
+      });
     });
   });
 }
 
+function togglePIC(pic) {
+  document.querySelectorAll(".customer-row").forEach(r => r.classList.add("collapsed"));
+  document.querySelectorAll(".invoice-row").forEach(r => r.classList.add("collapsed"));
+
+  document.querySelectorAll(`.customer-row[data-pic="${pic}"]`)
+    .forEach(r => r.classList.toggle("collapsed"));
+}
+
+function toggleCustomer(pic, customer) {
+  document.querySelectorAll(`.invoice-row[data-pic="${pic}"]`)
+    .forEach(r => r.classList.add("collapsed"));
+
+  document.querySelectorAll(
+    `.invoice-row[data-pic="${pic}"][data-customer="${customer}"]`
+  ).forEach(r => r.classList.toggle("collapsed"));
+}
+
 function sum(t) {
-  return (t["90+"] || 0) + (t["61-90"] || 0) + (t["31-60"] || 0) + (t["1-30"] || 0);
+  return (t["90+"]||0)+(t["61-90"]||0)+(t["31-60"]||0)+(t["1-30"]||0);
 }
 
 function saveForecast(pic, customer, value) {
@@ -267,13 +291,14 @@ function saveForecast(pic, customer, value) {
       customer: customer,
       forecast: Number(value)
     })
-  }).then(showToast);
+  });
 }
 
-function showToast() {
-  const t = document.getElementById("toast");
-  t.style.display = "block";
-  setTimeout(() => t.style.display = "none", 2000);
+function tr(cls, html) {
+  const r = document.createElement("tr");
+  r.className = cls;
+  r.innerHTML = html;
+  return r;
 }
 </script>
 
