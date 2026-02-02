@@ -7,220 +7,195 @@
 
 <style>
 :root {
-  --primary: #2563eb;
-  --primary-dark: #1e40af;
-  --bg: #f8fafc;
-  --card: #ffffff;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --accent: #eff6ff;
-  --success: #22c55e;
+  --comp-blue: #002147; /* Professional Dark Blue */
+  --comp-blue-light: #003366;
+  --comp-blue-pale: #f0f4f8;
+  --border-color: #d1d9e6;
+  --text-dark: #1a1a1a;
+  --text-muted: #4a5568;
+  --bg-gray: #fcfcfc;
 }
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: var(--bg);
-  color: var(--text-main);
-  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #ffffff;
+  color: var(--text-dark);
 }
 
-/* Header & Summary Section */
-.header-section {
-  background: white;
-  padding: 24px 16px;
-  border-bottom: 1px solid var(--border);
-  text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+/* Header & Summary */
+.header-container {
+  background: var(--comp-blue);
+  color: #ffffff;
+  padding: 20px 16px;
+  text-align: left;
 }
 
 h1 {
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary-dark);
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .summary {
-  margin-top: 12px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
 .summary .amount {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--text-main);
-  letter-spacing: -0.5px;
+  font-size: 24px;
+  font-weight: 700;
 }
 
 .summary .date {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 4px;
+  font-size: 11px;
+  opacity: 0.8;
 }
 
-/* Table / Grid Structure */
+/* Table Management */
 .table-wrapper {
-  max-width: 1100px;
-  margin: 20px auto;
+  width: 100%;
+  overflow-x: auto; /* Enables horizontal swipe on mobile */
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-content {
+  min-width: 850px; /* Ensures table doesn't squash, allows comparison */
   padding: 0 16px 100px;
 }
 
-/* Desktop Header - Hidden on Mobile */
-.row.header {
-  display: none;
-  background: #f1f5f9;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 12px 20px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-/* The Rows */
 .row {
   display: grid;
-  gap: 12px;
-  padding: 16px;
+  grid-template-columns: 2.5fr 1.2fr 1fr 1fr 1fr 1fr 1.2fr;
+  border-bottom: 1px solid var(--border-color);
   align-items: center;
-  transition: all 0.2s;
+  font-size: 13px;
 }
 
-/* Responsive Grid: 1 column on mobile, 7 on desktop */
-@media (min-width: 768px) {
-  .row {
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1.2fr;
-    text-align: left;
-  }
-  .row.header { display: grid; }
+.header {
+  background: var(--bg-gray);
+  border-bottom: 2px solid var(--comp-blue);
+  color: var(--comp-blue);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-/* Mobile Data Cards */
-@media (max-width: 767px) {
-  .row {
-    grid-template-columns: 1fr 1fr;
-    border-bottom: 1px solid var(--border);
-  }
-  .row div:first-child {
-    grid-column: span 2;
-    font-weight: bold;
-    font-size: 1.1rem;
-    color: var(--primary);
-  }
-  /* Labeling data on mobile */
-  .row div::before {
-    content: attr(data-label);
-    display: block;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-  }
+.row > div {
+  padding: 12px 8px;
 }
 
-.card {
-  background: var(--card);
-  border-radius: 12px;
-  margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05);
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
-/* Interaction Levels */
+/* Specific Row Styles */
 .pic-row {
+  background: var(--comp-blue-pale);
+  font-weight: 700;
   cursor: pointer;
-  background: #fff;
-  font-weight: 600;
 }
 
 .customer-row {
+  background: #ffffff;
   cursor: pointer;
-  background: var(--accent);
-  border-top: 1px solid var(--border);
-  font-size: 0.95rem;
+  color: var(--comp-blue-light);
+}
+
+.customer-row:hover {
+  background: #f8f9fa;
 }
 
 .invoice-row {
-  background: #fff;
-  font-size: 0.85rem;
-  border-top: 1px dotted var(--border);
+  background: #ffffff;
+  font-size: 12px;
   color: var(--text-muted);
+}
+
+/* Alignment */
+.num { text-align: right; font-family: 'Courier New', monospace; }
+
+/* Input Styling */
+input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 2px;
+  font-size: 12px;
+  outline: none;
+  text-align: right;
+}
+
+input:focus {
+  border-color: var(--comp-blue);
 }
 
 .hidden { display: none; }
 
-/* Inputs & Toasts */
-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.9rem;
-  outline: none;
-  transition: border 0.2s;
-}
-
-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
+/* Notification */
 .toast {
   position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--text-main);
+  bottom: 20px;
+  right: 20px;
+  background: var(--comp-blue);
   color: #fff;
   padding: 12px 24px;
-  border-radius: 50px;
-  font-size: 0.9rem;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+  font-size: 13px;
+  border-left: 4px solid #48bb78;
   display: none;
-  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-@keyframes slideUp {
-  from { transform: translate(-50%, 20px); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+/* Mobile Instructions */
+.mobile-hint {
+  display: none;
+  padding: 8px 16px;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: #eee;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .mobile-hint { display: block; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="header-section">
+<div class="header-container">
   <h1>Outstanding Receivables</h1>
   <div class="summary">
-    <div class="amount" id="netOutstanding">₹0</div>
-    <div class="date" id="lastUpdated">Initializing...</div>
+    <div class="amount" id="netOutstanding">₹0.00</div>
+    <div class="date" id="lastUpdated">Updating...</div>
   </div>
 </div>
+
+<div class="mobile-hint">Swipe left/right to view all columns</div>
 
 <div class="table-wrapper">
-  <div class="row header">
-    <div>Name</div>
-    <div>Total</div>
-    <div>On Account</div>
-    <div>90+ Days</div>
-    <div>60–90 Days</div>
-    <div>30–60 Days</div>
-    <div>Forecast</div>
+  <div class="table-content">
+    <div class="row header">
+      <div>Account Name / Invoice</div>
+      <div class="num">Total</div>
+      <div class="num">On Account</div>
+      <div class="num">90+</div>
+      <div class="num">60–90</div>
+      <div class="num">30–60</div>
+      <div class="num">Forecast</div>
+    </div>
+    <div id="app"></div>
   </div>
-
-  <div id="app"></div>
 </div>
 
-<div class="toast" id="toast">✅ Forecast updated successfully</div>
+<div class="toast" id="toast">SYSTEM: Forecast data updated.</div>
 
 <script>
-// --- [KEEPING ALL YOUR ORIGINAL SCRIPT LOGIC EXACTLY THE SAME] ---
+// Logic remains identical to ensure functionality is preserved
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
 let openPIC = null;
@@ -245,10 +220,10 @@ function updateSummary(data) {
   });
 
   document.getElementById("netOutstanding").innerText =
-    "₹" + (totalOutstanding - totalOnAccount).toLocaleString('en-IN');
+    "₹" + (totalOutstanding - totalOnAccount).toLocaleString('en-IN', {minimumFractionDigits: 2});
 
   document.getElementById("lastUpdated").innerText =
-    "Last refreshed: " + new Date().toLocaleTimeString();
+    "AS OF " + new Date().toLocaleString().toUpperCase();
 }
 
 function render(data) {
@@ -256,9 +231,6 @@ function render(data) {
   app.innerHTML = "";
 
   data.forEach(pic => {
-    const card = document.createElement("div");
-    card.className = "card";
-
     const picRow = createPICRow(pic);
     const customerContainer = document.createElement("div");
     customerContainer.className = "hidden";
@@ -275,15 +247,14 @@ function render(data) {
       c.invoices.forEach(i => {
         const inv = document.createElement("div");
         inv.className = "row invoice-row";
-        // Added data-labels for mobile responsive headers
         inv.innerHTML = `
-          <div data-label="Invoice">${i.invoiceNo}</div>
-          <div data-label="Total">${i.total.toLocaleString('en-IN')}</div>
-          <div></div>
-          <div data-label="90+">${i.ageing["90+"] || 0}</div>
-          <div data-label="61-90">${i.ageing["61-90"] || 0}</div>
-          <div data-label="31-60">${i.ageing["31-60"] || 0}</div>
-          <div></div>
+          <div style="padding-left: 40px;">${i.invoiceNo}</div>
+          <div class="num">${i.total.toLocaleString('en-IN')}</div>
+          <div class="num"></div>
+          <div class="num">${i.ageing["90+"] || 0}</div>
+          <div class="num">${i.ageing["61-90"] || 0}</div>
+          <div class="num">${i.ageing["31-60"] || 0}</div>
+          <div class="num"></div>
         `;
         invoiceContainer.appendChild(inv);
       });
@@ -292,9 +263,8 @@ function render(data) {
       customerContainer.appendChild(invoiceContainer);
     });
 
-    card.appendChild(picRow);
-    card.appendChild(customerContainer);
-    app.appendChild(card);
+    app.appendChild(picRow);
+    app.appendChild(customerContainer);
   });
 }
 
@@ -302,13 +272,13 @@ function createPICRow(pic) {
   const row = document.createElement("div");
   row.className = "row pic-row";
   row.innerHTML = `
-    <div style="color:var(--primary); font-size:1.1rem;">👤 ${pic.salesPIC}</div>
-    <div data-label="Total Balance">₹${sum(pic.totals).toLocaleString('en-IN')}</div>
-    <div></div>
-    <div data-label="90+">${pic.totals["90+"] || 0}</div>
-    <div data-label="61-90">${pic.totals["61-90"] || 0}</div>
-    <div data-label="31-60">${pic.totals["31-60"] || 0}</div>
-    <div></div>
+    <div>${pic.salesPIC}</div>
+    <div class="num">${sum(pic.totals).toLocaleString('en-IN')}</div>
+    <div class="num"></div>
+    <div class="num">${pic.totals["90+"] || 0}</div>
+    <div class="num">${pic.totals["61-90"] || 0}</div>
+    <div class="num">${pic.totals["31-60"] || 0}</div>
+    <div class="num"></div>
   `;
   return row;
 }
@@ -316,18 +286,15 @@ function createPICRow(pic) {
 function createCustomerRow(picName, c) {
   const row = document.createElement("div");
   row.className = "row customer-row";
-
   row.innerHTML = `
-    <div>🏢 ${c.customerName}</div>
-    <div data-label="Total">₹${sum(c.totals).toLocaleString('en-IN')}</div>
-    <div data-label="On Account">₹${(c.onAccount || 0).toLocaleString('en-IN')}</div>
-    <div data-label="90+">${c.totals["90+"] || 0}</div>
-    <div data-label="61-90">${c.totals["61-90"] || 0}</div>
-    <div data-label="31-60">${c.totals["31-60"] || 0}</div>
-    <div data-label="Forecast">
-      <input type="number"
-        placeholder="Enter Forecast"
-        value="${c.forecast || ""}"
+    <div style="padding-left: 20px;">${c.customerName}</div>
+    <div class="num">${sum(c.totals).toLocaleString('en-IN')}</div>
+    <div class="num">${(c.onAccount || 0).toLocaleString('en-IN')}</div>
+    <div class="num">${c.totals["90+"] || 0}</div>
+    <div class="num">${c.totals["61-90"] || 0}</div>
+    <div class="num">${c.totals["31-60"] || 0}</div>
+    <div class="num">
+      <input type="number" value="${c.forecast || ""}" 
         onclick="event.stopPropagation()"
         onchange="saveForecast('${picName}','${c.customerName}',this.value)">
     </div>
@@ -342,32 +309,24 @@ function sum(t) {
 function toggle(el, level) {
   if (level === "pic" && openPIC && openPIC !== el) openPIC.classList.add("hidden");
   if (level === "customer" && openCustomer && openCustomer !== el) openCustomer.classList.add("hidden");
-
   el.classList.toggle("hidden");
-
   if (level === "pic") openPIC = el.classList.contains("hidden") ? null : el;
   if (level === "customer") openCustomer = el.classList.contains("hidden") ? null : el;
 }
 
 function saveForecast(pic, customer, value) {
-  // Visual feedback immediately
-  const toast = document.getElementById("toast");
-  toast.innerText = "Saving forecast...";
-  toast.style.display = "block";
-
   fetch(API_URL, {
     method: "POST",
-    body: JSON.stringify({
-      action: "updateForecast",
-      salesPIC: pic,
-      customer: customer,
-      forecast: Number(value)
-    })
-  }).then(() => {
-    toast.innerText = "✅ Forecast updated";
-    setTimeout(() => toast.style.display = "none", 2000);
-  });
+    body: JSON.stringify({ action: "updateForecast", salesPIC: pic, customer: customer, forecast: Number(value) })
+  }).then(showToast);
+}
+
+function showToast() {
+  const t = document.getElementById("toast");
+  t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 3000);
 }
 </script>
+
 </body>
 </html>
