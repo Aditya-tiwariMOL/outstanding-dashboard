@@ -5,38 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Outstanding Receivables</title>
 
-<style>
-/* ================= THEME ================= */
 :root {
   --mol-blue: #1f4ea3;
   --bg: #f4f6fb;
   --card: #ffffff;
-  --danger: #c62828;
 }
 
-/* ================= BASE ================= */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: var(--bg);
-  color: #111;
 }
 
 /* ================= HEADER ================= */
 h1 {
   text-align: center;
   color: var(--mol-blue);
-  margin: 18px 0 6px;
-  font-size: 26px;
+  margin: 14px 0 4px;
+  font-size: 22px;
 }
 
 .summary {
   text-align: center;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .summary .amount {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: bold;
 }
 
@@ -45,128 +40,124 @@ h1 {
   color: #555;
 }
 
-/* ================= TABLE WRAPPER ================= */
+/* ================= TABLE ================= */
 .table-wrapper {
   overflow-x: auto;
-  padding: 0 16px 40px;
+  padding: 0 8px 30px;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* ================= DESKTOP TABLE ================= */
 .row {
   display: grid;
   grid-template-columns:
-    2.5fr   /* Name */
-    1fr     /* Total */
-    1fr     /* On Account */
-    0.8fr   /* 90+ */
-    0.8fr   /* 60–90 */
-    0.8fr   /* 30–60 */
-    1fr;    /* Forecast */
+    150px   /* Name */
+    60px    /* Total */
+    70px    /* On Account */
+    55px    /* 90+ */
+    55px    /* 60–90 */
+    55px    /* 30–60 */
+    80px;   /* Forecast */
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  min-width: 580px;
+  padding: 6px 6px;
+  gap: 4px;
   font-size: 14px;
+  background: #fff;
 }
 
-/* ================= HEADER ROW ================= */
 .header {
   background: var(--mol-blue);
   color: #fff;
   font-weight: bold;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
-/* ================= ROW TYPES ================= */
+/* ================= CARDS ================= */
 .card {
-  background: var(--card);
-  border-radius: 8px;
-  margin-top: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background: transparent;
+  margin-top: 8px;
 }
 
-.customer {
-  background: #eef3ff;
-}
-
-.invoice {
-  padding-left: 28px;
-  font-size: 13px;
-}
-
-/* ================= HIGHLIGHTS ================= */
-.col-90 {
-  color: var(--danger);
+/* ================= SALES PIC ================= */
+.row:not(.customer):not(.invoice) {
   font-weight: bold;
+}
+
+/* ================= CUSTOMER ================= */
+.customer {
+  background: #f1f5ff;
+}
+
+/* ================= INVOICE ================= */
+.invoice {
+  background: #fafbff;
+  padding-left: 18px;
+  font-size: 13px;
 }
 
 /* ================= INPUT ================= */
 input {
   width: 100%;
-  padding: 6px 8px;
-  font-size: 14px;
+  padding: 3px 4px;
+  font-size: 13px;
   box-sizing: border-box;
-}
-
-/* ================= UTIL ================= */
-.hidden {
-  display: none;
 }
 
 /* ================= TOAST ================= */
 .toast {
   position: fixed;
-  bottom: 18px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--mol-blue);
   color: #fff;
-  padding: 10px 20px;
-  border-radius: 20px;
+  padding: 8px 16px;
+  border-radius: 18px;
+  font-size: 13px;
   display: none;
 }
 
-/* =================================================
-   MOBILE – DENSE TABLE, BIG TEXT, SCROLL
-   ================================================= */
+/* ================= MOBILE OPTIMIZATION ================= */
 @media (max-width: 768px) {
 
   h1 {
-    font-size: 22px;
-  }
-
-  .summary .amount {
     font-size: 20px;
   }
 
-  .table-wrapper {
-    padding: 0 10px 30px;
+  .summary .amount {
+    font-size: 18px;
   }
 
   .row {
-    grid-template-columns:
-      180px
-      90px
-      90px
-      80px
-      80px
-      80px
-      100px;
-    min-width: 700px;
-    font-size: 13px;
-    padding: 10px;
-    gap: 10px;
+    font-size: 15px;          /* BIGGER TEXT */
+    padding: 6px 5px;         /* LESS PADDING */
+    min-width: 560px;         /* LESS SCROLL */
+  }
+
+  .header {
+    font-size: 14px;
+    padding: 8px 6px;
+  }
+
+  .customer,
+  .invoice {
+    background: #fff;         /* FIX background split */
   }
 
   .invoice {
-    font-size: 12px;
+    font-size: 14px;
+    padding-left: 14px;
   }
 
   input {
-    font-size: 13px;
-    padding: 6px;
+    font-size: 14px;
+    padding: 3px 4px;
+  }
+
+  .table-wrapper {
+    padding-right: 0;         /* FIX forecast cut */
   }
 }
-</style>
 </head>
 
 <body>
