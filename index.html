@@ -6,190 +6,183 @@
 <title>Outstanding Receivables</title>
 
 <style>
+/* ================= THEME ================= */
 :root {
-  --comp-blue: #002147;
-  --comp-blue-pale: #f0f4f8;
-  --border-color: #cbd5e1;
-  --text-dark: #0f172a;
+  --mol-blue: #1f4ea3;
+  --bg: #f5f7fb;
+  --border: #e3e6ef;
+  --red: #c62828;
+  --green: #2e7d32;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #ffffff;
-  color: var(--text-dark);
-  -webkit-font-smoothing: antialiased;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: #111;
 }
 
-/* Header Section */
-.header-container {
-  background: var(--comp-blue);
-  color: #ffffff;
-  padding: 10px 12px;
-  border-bottom: 3px solid #003366;
-}
-
+/* ================= HEADER ================= */
 h1 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.9;
+  text-align: center;
+  color: var(--mol-blue);
+  margin: 14px 0 4px;
+  font-size: 22px;
+  font-weight: 600;
 }
 
 .summary {
-  margin-top: 2px;
+  text-align: center;
+  margin-bottom: 14px;
 }
 
 .summary .amount {
-  font-size: 36px;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -1px;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .summary .date {
-  font-size: 10px;
-  font-weight: 600;
-  margin-top: 4px;
-  text-transform: uppercase;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #555;
 }
 
-/* Table Management */
+/* ================= TABLE ================= */
 .table-wrapper {
-  width: 100%;
   overflow-x: auto;
-  overflow-y: hidden;
+  padding: 0 8px 40px;
+  -webkit-overflow-scrolling: touch;
 }
 
-.table-content {
-  /* min-width ensures columns don't collapse, but we keep it tight */
-  min-width: 800px; 
-}
-
-.row {
-  display: grid;
-  /* NAME takes only what it needs, TOTALS follow immediately */
-  grid-template-columns: minmax(220px, 1.5fr) 100px 90px 80px 80px 80px 110px;
-  border-bottom: 1px solid var(--border-color);
-  align-items: center;
-}
-
-.header {
-  background: #f8fafc;
-  color: var(--comp-blue);
-  font-weight: 800;
-  font-size: 11px;
-  text-transform: uppercase;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.row > div {
-  padding: 6px 8px; /* Extremely tight vertical space */
-  white-space: nowrap;
-  font-size: 19px; /* Large easy-to-read text */
-}
-
-/* Content Styles */
-.pic-row {
-  background: var(--comp-blue-pale);
-  font-weight: 800;
-  color: var(--comp-blue);
-  cursor: pointer;
-}
-
-.customer-row {
-  background: #ffffff;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.invoice-row {
-  font-size: 17px !important;
-  color: #475569;
-  background: #fafafa;
-}
-
-.num { 
-  text-align: right; 
-  font-family: 'Roboto Mono', monospace; /* Monospaced for aligning digits */
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-/* Input Box - Contained */
-input {
+table {
+  border-collapse: collapse;
   width: 100%;
-  padding: 4px;
-  border: 1px solid #94a3b8;
-  border-radius: 3px;
-  font-size: 16px;
-  text-align: right;
-  font-weight: 700;
-  color: var(--comp-blue);
+  min-width: 720px; /* desktop full */
   background: #fff;
 }
 
-.hidden { display: none; }
-
-.mobile-hint {
-  padding: 4px;
-  font-size: 11px;
-  background: #f1f5f9;
-  text-align: center;
-  color: var(--comp-blue);
-  font-weight: 700;
-  border-bottom: 1px solid var(--border-color);
+thead th {
+  background: var(--mol-blue);
+  color: #fff;
+  padding: 8px 6px;
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
 }
 
+tbody td {
+  padding: 7px 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* ================= ROW TYPES ================= */
+.pic-row td {
+  font-weight: 700;
+  background: #fff;
+}
+
+.customer-row td {
+  background: #f3f6ff;
+}
+
+.invoice-row td {
+  background: #fafbff;
+  font-size: 13px;
+}
+
+/* ================= COLORS ================= */
+.red {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.green {
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* ================= INPUT ================= */
+input {
+  width: 70px;
+  padding: 4px;
+  font-size: 13px;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+
+  h1 {
+    font-size: 20px;
+  }
+
+  .summary .amount {
+    font-size: 18px;
+  }
+
+  thead th {
+    font-size: 14px;
+    padding: 10px 6px;
+  }
+
+  tbody td {
+    font-size: 15px;
+    padding: 10px 6px;
+  }
+
+  table {
+    min-width: 640px; /* mobile compact */
+  }
+
+  input {
+    font-size: 14px;
+    width: 80px;
+  }
+}
+
+/* ================= TOAST ================= */
 .toast {
   position: fixed;
-  bottom: 20px;
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1e293b;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 600;
+  background: var(--mol-blue);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 13px;
   display: none;
-  z-index: 9999;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header-container">
-  <h1>Outstanding Receivables</h1>
-  <div class="summary">
-    <div class="amount" id="netOutstanding">₹0.00</div>
-    <div class="date" id="lastUpdated">FETCHING...</div>
-  </div>
-</div>
+<h1>Outstanding Receivables</h1>
 
-<div class="mobile-hint">SWIPE LEFT FOR AGEING & FORECAST</div>
+<div class="summary">
+  <div class="amount" id="netOutstanding">—</div>
+  <div class="date" id="lastUpdated">—</div>
+</div>
 
 <div class="table-wrapper">
-  <div class="table-content">
-    <div class="row header">
-      <div>Account Name</div>
-      <div class="num">Total</div>
-      <div class="num">On A/C</div>
-      <div class="num">90+</div>
-      <div class="num">60–90</div>
-      <div class="num">30–60</div>
-      <div class="num">Forecast</div>
-    </div>
-    <div id="app"></div>
-  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Sales PIC</th>
+        <th>Total</th>
+        <th>On Account</th>
+        <th>90+</th>
+        <th>60–90</th>
+        <th>30–60</th>
+        <th>Forecast</th>
+      </tr>
+    </thead>
+    <tbody id="app"></tbody>
+  </table>
 </div>
 
-<div class="toast" id="toast">Update Saved</div>
+<div class="toast" id="toast">Forecast updated</div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
@@ -216,10 +209,10 @@ function updateSummary(data) {
   });
 
   document.getElementById("netOutstanding").innerText =
-    "₹" + (totalOutstanding - totalOnAccount).toLocaleString('en-IN', {minimumFractionDigits: 2});
+    "Net Outstanding: ₹" + (totalOutstanding - totalOnAccount).toLocaleString();
 
   document.getElementById("lastUpdated").innerText =
-    "AS OF: " + new Date().toLocaleString().toUpperCase();
+    "Last updated: " + new Date().toLocaleString();
 }
 
 function render(data) {
@@ -227,93 +220,53 @@ function render(data) {
   app.innerHTML = "";
 
   data.forEach(pic => {
-    const picRow = createPICRow(pic);
-    const customerContainer = document.createElement("div");
-    customerContainer.className = "hidden";
-
-    picRow.onclick = () => toggle(customerContainer, "pic");
+    const picRow = document.createElement("tr");
+    picRow.className = "pic-row";
+    picRow.innerHTML = `
+      <td>${pic.salesPIC}</td>
+      <td>₹${sum(pic.totals)}</td>
+      <td></td>
+      <td class="red">${pic.totals["90+"]}</td>
+      <td>${pic.totals["61-90"]}</td>
+      <td>${pic.totals["31-60"]}</td>
+      <td></td>
+    `;
+    app.appendChild(picRow);
 
     Object.values(pic.customers).forEach(c => {
-      const customerRow = createCustomerRow(pic.salesPIC, c);
-      const invoiceContainer = document.createElement("div");
-      invoiceContainer.className = "hidden";
-
-      customerRow.onclick = () => toggle(invoiceContainer, "customer");
-
-      c.invoices.forEach(i => {
-        const inv = document.createElement("div");
-        inv.className = "row invoice-row";
-        inv.innerHTML = `
-          <div style="padding-left: 20px; font-size:15px;">INV: ${i.invoiceNo}</div>
-          <div class="num">${i.total.toLocaleString('en-IN')}</div>
-          <div class="num"></div>
-          <div class="num">${i.ageing["90+"] || 0}</div>
-          <div class="num">${i.ageing["61-90"] || 0}</div>
-          <div class="num">${i.ageing["31-60"] || 0}</div>
-          <div class="num"></div>
-        `;
-        invoiceContainer.appendChild(inv);
-      });
-
-      customerContainer.appendChild(customerRow);
-      customerContainer.appendChild(invoiceContainer);
+      const custRow = document.createElement("tr");
+      custRow.className = "customer-row";
+      custRow.innerHTML = `
+        <td>${c.customerName}</td>
+        <td>₹${sum(c.totals)}</td>
+        <td class="green">${c.onAccount || 0}</td>
+        <td class="red">${c.totals["90+"]}</td>
+        <td>${c.totals["61-90"]}</td>
+        <td>${c.totals["31-60"]}</td>
+        <td>
+          <input type="number"
+            value="${c.forecast || ""}"
+            onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
+        </td>
+      `;
+      app.appendChild(custRow);
     });
-
-    app.appendChild(picRow);
-    app.appendChild(customerContainer);
   });
-}
-
-function createPICRow(pic) {
-  const row = document.createElement("div");
-  row.className = "row pic-row";
-  row.innerHTML = `
-    <div>${pic.salesPIC}</div>
-    <div class="num">${sum(pic.totals).toLocaleString('en-IN')}</div>
-    <div class="num"></div>
-    <div class="num">${pic.totals["90+"] || 0}</div>
-    <div class="num">${pic.totals["61-90"] || 0}</div>
-    <div class="num">${pic.totals["31-60"] || 0}</div>
-    <div class="num"></div>
-  `;
-  return row;
-}
-
-function createCustomerRow(picName, c) {
-  const row = document.createElement("div");
-  row.className = "row customer-row";
-  row.innerHTML = `
-    <div style="padding-left: 8px;">${c.customerName}</div>
-    <div class="num">${sum(c.totals).toLocaleString('en-IN')}</div>
-    <div class="num">${(c.onAccount || 0).toLocaleString('en-IN')}</div>
-    <div class="num">${c.totals["90+"] || 0}</div>
-    <div class="num">${c.totals["61-90"] || 0}</div>
-    <div class="num">${c.totals["31-60"] || 0}</div>
-    <div class="num">
-      <input type="number" value="${c.forecast || ""}" 
-        onclick="event.stopPropagation()"
-        onchange="saveForecast('${picName}','${c.customerName}',this.value)">
-    </div>
-  `;
-  return row;
 }
 
 function sum(t) {
   return (t["90+"] || 0) + (t["61-90"] || 0) + (t["31-60"] || 0) + (t["1-30"] || 0);
 }
 
-function toggle(el, level) {
-  if (level === "pic" && openPIC && openPIC !== el) openPIC.classList.add("hidden");
-  if (level === "customer" && openCustomer && openCustomer !== el) openCustomer.classList.add("hidden");
-  el.classList.toggle("hidden");
-  if (level === "pic") openPIC = el.classList.contains("hidden") ? null : el;
-  if (level === "customer") openCustomer = el.classList.contains("hidden") ? null : el;
-}
-
 function saveForecast(pic, customer, value) {
   fetch(API_URL, {
     method: "POST",
-    body: JSON.stringify({ action: "updateForecast", salesPIC: pic, customer: customer, forecast: Number(value) })
+    body: JSON.stringify({
+      action: "updateForecast",
+      salesPIC: pic,
+      customer: customer,
+      forecast: Number(value)
+    })
   }).then(showToast);
 }
 
