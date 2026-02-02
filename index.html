@@ -16,86 +16,143 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: var(--bg);
+  color: #000;
 }
 
+/* ---------- HEADER ---------- */
 h1 {
   text-align: center;
   color: var(--mol-blue);
-  margin: 20px 0 8px;
+  margin: 16px 0 6px;
+  font-size: 22px;
 }
 
 .summary {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .summary .amount {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: bold;
 }
 
 .summary .date {
-  font-size: 12px;
+  font-size: 11px;
   color: #555;
 }
 
+/* ---------- TABLE WRAPPER ---------- */
 .table-wrapper {
   overflow-x: auto;
-  padding: 0 12px 40px;
+  padding: 0 8px 30px;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* ---------- ROW BASE ---------- */
 .row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 8px;
-  padding: 10px;
+  grid-template-columns:
+    160px  /* Name */
+    90px   /* Total */
+    90px   /* On Account */
+    70px   /* 90+ */
+    70px   /* 60–90 */
+    70px   /* 30–60 */
+    100px; /* Forecast */
   align-items: center;
-  min-width: 900px;
+  min-width: 650px;
+  padding: 8px 6px;
+  gap: 6px;
+  font-size: 13px;
 }
 
+/* ---------- HEADER ROW ---------- */
 .header {
   background: var(--mol-blue);
   color: #fff;
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   border-radius: 6px;
 }
 
+/* ---------- CARDS ---------- */
 .card {
   background: var(--card);
   border-radius: 6px;
-  margin-top: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  margin-top: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
+/* ---------- SALES PIC ---------- */
+.row.pic {
+  font-weight: bold;
+}
+
+/* ---------- CUSTOMER ---------- */
 .customer {
   background: #eef3ff;
+  padding-left: 14px;
 }
 
+/* ---------- INVOICE ---------- */
 .invoice {
   padding-left: 28px;
-  font-size: 14px;
+  font-size: 12px;
+  color: #333;
 }
 
-.hidden {
-  display: none;
-}
-
+/* ---------- INPUT ---------- */
 input {
   width: 100%;
-  padding: 6px;
+  padding: 5px 6px;
+  font-size: 13px;
   box-sizing: border-box;
 }
 
+/* ---------- STICKY NAME COLUMN ---------- */
+.row > div:first-child {
+  position: sticky;
+  left: 0;
+  background: inherit;
+  z-index: 2;
+}
+
+/* ---------- TOAST ---------- */
 .toast {
   position: fixed;
-  bottom: 20px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--mol-blue);
   color: #fff;
-  padding: 10px 18px;
-  border-radius: 20px;
+  padding: 8px 16px;
+  border-radius: 18px;
+  font-size: 13px;
   display: none;
+}
+
+/* ---------- MOBILE FINE TUNING ---------- */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 20px;
+  }
+
+  .summary .amount {
+    font-size: 16px;
+  }
+
+  .row {
+    font-size: 12px;
+    padding: 6px 4px;
+  }
+
+  input {
+    font-size: 12px;
+    padding: 4px 5px;
+  }
 }
 </style>
 </head>
