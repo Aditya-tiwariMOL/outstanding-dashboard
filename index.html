@@ -8,7 +8,7 @@
 <style>
 :root {
   --mol-blue: #1f4ea3;
-  --bg: #f5f7fb;
+  --bg: #f4f6fb;
   --card: #ffffff;
 }
 
@@ -16,13 +16,12 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: var(--bg);
-  color: #000;
 }
 
 h1 {
   text-align: center;
   color: var(--mol-blue);
-  margin: 20px 0 10px;
+  margin: 20px 0 8px;
 }
 
 .summary {
@@ -42,16 +41,16 @@ h1 {
 
 .table-wrapper {
   overflow-x: auto;
-  padding: 0 10px 30px;
+  padding: 0 12px 40px;
 }
 
 .row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
   gap: 8px;
   padding: 10px;
   align-items: center;
-  min-width: 800px;
+  min-width: 900px;
 }
 
 .header {
@@ -69,11 +68,11 @@ h1 {
 }
 
 .customer {
-  background: #f0f4ff;
+  background: #eef3ff;
 }
 
 .invoice {
-  padding-left: 30px;
+  padding-left: 28px;
   font-size: 14px;
 }
 
@@ -94,7 +93,7 @@ input {
   transform: translateX(-50%);
   background: var(--mol-blue);
   color: #fff;
-  padding: 10px 20px;
+  padding: 10px 18px;
   border-radius: 20px;
   display: none;
 }
@@ -114,10 +113,11 @@ input {
   <div class="row header">
     <div>Name</div>
     <div>Total</div>
+    <div>On Account</div>
     <div>90+</div>
     <div>60–90</div>
     <div>30–60</div>
-    <div>On Account</div>
+    <div>Forecast</div>
   </div>
 
   <div id="app"></div>
@@ -132,28 +132,28 @@ let openPIC = null;
 let openCustomer = null;
 
 fetch(API_URL)
-  .then(r => r.json())
+  .then(res => res.json())
   .then(data => {
     render(data);
     updateSummary(data);
   });
 
 function updateSummary(data) {
-  let total = 0;
-  let onAccount = 0;
+  let totalOutstanding = 0;
+  let totalOnAccount = 0;
 
   data.forEach(p => {
-    total += sum(p.totals);
+    totalOutstanding += sum(p.totals);
     Object.values(p.customers).forEach(c => {
-      onAccount += c.forecast || 0;
+      totalOnAccount += c.onAccount || 0;
     });
   });
 
   document.getElementById("netOutstanding").innerText =
-    "Net Outstanding: ₹" + (total - onAccount).toLocaleString();
+    "Net Outstanding: ₹" + (totalOutstanding - totalOnAccount).toLocaleString();
 
   document.getElementById("lastUpdated").innerText =
-    "Last updated: " + new Date().toLocaleString();
+    "Last refreshed: " + new Date().toLocaleString();
 }
 
 function render(data) {
@@ -164,32 +164,18 @@ function render(data) {
     const card = document.createElement("div");
     card.className = "card";
 
-    const picRow = rowHTML(pic.salesPIC, pic.totals);
+    const picRow = createPICRow(pic);
     const customerContainer = document.createElement("div");
     customerContainer.className = "hidden";
 
     picRow.onclick = () => toggle(customerContainer, "pic");
 
     Object.values(pic.customers).forEach(c => {
-      const customerRow = document.createElement("div");
-      customerRow.className = "row customer";
-      customerRow.innerHTML = `
-        <div>${c.customerName}</div>
-        <div>${sum(c.totals)}</div>
-        <div>${c.totals["90+"]}</div>
-        <div>${c.totals["61-90"]}</div>
-        <div>${c.totals["31-60"]}</div>
-        <div>
-          <input type="number" value="${c.forecast || 0}"
-            onclick="event.stopPropagation()"
-            onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
-        </div>
-      `;
+      const customerRow = createCustomerRow(pic.salesPIC, c);
+      const invoiceContainer = document.createElement("div");
+      invoiceContainer.className = "hidden";
 
-      const invContainer = document.createElement("div");
-      invContainer.className = "hidden";
-
-      customerRow.onclick = () => toggle(invContainer, "customer");
+      customerRow.onclick = () => toggle(invoiceContainer, "customer");
 
       c.invoices.forEach(i => {
         const inv = document.createElement("div");
@@ -197,16 +183,17 @@ function render(data) {
         inv.innerHTML = `
           <div>${i.invoiceNo}</div>
           <div>${i.total}</div>
+          <div></div>
           <div>${i.ageing["90+"]}</div>
           <div>${i.ageing["61-90"]}</div>
           <div>${i.ageing["31-60"]}</div>
           <div></div>
         `;
-        invContainer.appendChild(inv);
+        invoiceContainer.appendChild(inv);
       });
 
       customerContainer.appendChild(customerRow);
-      customerContainer.appendChild(invContainer);
+      customerContainer.appendChild(invoiceContainer);
     });
 
     card.appendChild(picRow);
@@ -215,16 +202,38 @@ function render(data) {
   });
 }
 
-function rowHTML(name, totals) {
+function createPICRow(pic) {
   const row = document.createElement("div");
   row.className = "row";
   row.innerHTML = `
-    <div>${name}</div>
-    <div>${sum(totals)}</div>
-    <div>${totals["90+"]}</div>
-    <div>${totals["61-90"]}</div>
-    <div>${totals["31-60"]}</div>
+    <div>${pic.salesPIC}</div>
+    <div>${sum(pic.totals)}</div>
     <div></div>
+    <div>${pic.totals["90+"]}</div>
+    <div>${pic.totals["61-90"]}</div>
+    <div>${pic.totals["31-60"]}</div>
+    <div></div>
+  `;
+  return row;
+}
+
+function createCustomerRow(picName, c) {
+  const row = document.createElement("div");
+  row.className = "row customer";
+
+  row.innerHTML = `
+    <div>${c.customerName}</div>
+    <div>${sum(c.totals)}</div>
+    <div>${c.onAccount || 0}</div>
+    <div>${c.totals["90+"]}</div>
+    <div>${c.totals["61-90"]}</div>
+    <div>${c.totals["31-60"]}</div>
+    <div>
+      <input type="number"
+        value="${c.forecast || ""}"
+        onclick="event.stopPropagation()"
+        onchange="saveForecast('${picName}','${c.customerName}',this.value)">
+    </div>
   `;
   return row;
 }
@@ -238,6 +247,7 @@ function toggle(el, level) {
   if (level === "customer" && openCustomer && openCustomer !== el) openCustomer.classList.add("hidden");
 
   el.classList.toggle("hidden");
+
   if (level === "pic") openPIC = el.classList.contains("hidden") ? null : el;
   if (level === "customer") openCustomer = el.classList.contains("hidden") ? null : el;
 }
@@ -251,7 +261,7 @@ function saveForecast(pic, customer, value) {
       customer: customer,
       forecast: Number(value)
     })
-  }).then(() => showToast());
+  }).then(showToast);
 }
 
 function showToast() {
