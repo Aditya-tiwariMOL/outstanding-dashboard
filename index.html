@@ -6,37 +6,31 @@
 <title>Outstanding Receivables</title>
 
 <style>
-/* ================= THEME ================= */
 :root {
   --mol-blue: #1f4ea3;
   --bg: #f4f6fb;
   --card: #ffffff;
-  --danger: #c62828;
 }
 
-/* ================= BASE ================= */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: var(--bg);
-  color: #000;
 }
 
-/* ================= HEADER ================= */
 h1 {
   text-align: center;
   color: var(--mol-blue);
-  margin: 16px 0 6px;
-  font-size: 24px;
+  margin: 20px 0 8px;
 }
 
 .summary {
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .summary .amount {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
 }
 
@@ -45,33 +39,20 @@ h1 {
   color: #555;
 }
 
-/* ================= TABLE WRAPPER ================= */
 .table-wrapper {
   overflow-x: auto;
   padding: 0 12px 40px;
-  -webkit-overflow-scrolling: touch;
 }
 
-/* ================= TABLE ROW ================= */
 .row {
   display: grid;
-  grid-template-columns:
-    200px   /* Name */
-    90px    /* Total */
-    100px   /* On Account */
-    80px    /* 90+ */
-    80px    /* 60–90 */
-    80px    /* 30–60 */
-    120px;  /* Forecast */
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
   gap: 8px;
   padding: 10px;
   align-items: center;
   min-width: 900px;
-  font-size: 14px;
-  background: #fff;
 }
 
-/* ================= HEADER ROW ================= */
 .header {
   background: var(--mol-blue);
   color: #fff;
@@ -79,7 +60,6 @@ h1 {
   border-radius: 6px;
 }
 
-/* ================= CARDS ================= */
 .card {
   background: var(--card);
   border-radius: 6px;
@@ -87,44 +67,25 @@ h1 {
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* ================= SALES PIC ================= */
-.pic-row {
-  font-weight: bold;
-  cursor: pointer;
-}
-
-/* ================= CUSTOMER ================= */
 .customer {
   background: #eef3ff;
 }
 
-/* ================= INVOICE ================= */
 .invoice {
   padding-left: 28px;
-  font-size: 13px;
-  background: #fafbff;
-}
-
-/* ================= 90+ HIGHLIGHT ================= */
-.red {
-  color: var(--danger);
-  font-weight: bold;
-}
-
-/* ================= INPUT ================= */
-input {
-  width: 100%;
-  padding: 6px;
   font-size: 14px;
-  box-sizing: border-box;
 }
 
-/* ================= HIDDEN ================= */
 .hidden {
   display: none;
 }
 
-/* ================= TOAST ================= */
+input {
+  width: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
 .toast {
   position: fixed;
   bottom: 20px;
@@ -135,47 +96,6 @@ input {
   padding: 10px 18px;
   border-radius: 20px;
   display: none;
-  font-size: 14px;
-}
-
-/* =================================================
-   MOBILE TABLE (NOT CARDS)
-   ================================================= */
-@media (max-width: 768px) {
-
-  h1 {
-    font-size: 20px;
-  }
-
-  .summary .amount {
-    font-size: 18px;
-  }
-
-  .row {
-    min-width: 640px;
-    font-size: 15px;
-    padding: 8px 6px;
-    gap: 6px;
-  }
-
-  .header {
-    font-size: 14px;
-  }
-
-  .customer,
-  .invoice {
-    background: #fff;
-  }
-
-  .invoice {
-    font-size: 14px;
-    padding-left: 16px;
-  }
-
-  input {
-    font-size: 15px;
-    padding: 5px;
-  }
 }
 </style>
 </head>
@@ -186,7 +106,7 @@ input {
 
 <div class="summary">
   <div class="amount" id="netOutstanding">—</div>
-  <div class="date" id="lastUpdated">Last refreshed: —</div>
+  <div class="date" id="lastUpdated">Last updated: —</div>
 </div>
 
 <div class="table-wrapper">
@@ -244,41 +164,14 @@ function render(data) {
     const card = document.createElement("div");
     card.className = "card";
 
-    const picRow = document.createElement("div");
-    picRow.className = "row pic-row";
-    picRow.innerHTML = `
-      <div>${pic.salesPIC}</div>
-      <div>${sum(pic.totals)}</div>
-      <div></div>
-      <div class="red">${pic.totals["90+"]}</div>
-      <div>${pic.totals["61-90"]}</div>
-      <div>${pic.totals["31-60"]}</div>
-      <div></div>
-    `;
-
+    const picRow = createPICRow(pic);
     const customerContainer = document.createElement("div");
     customerContainer.className = "hidden";
 
     picRow.onclick = () => toggle(customerContainer, "pic");
 
     Object.values(pic.customers).forEach(c => {
-      const customerRow = document.createElement("div");
-      customerRow.className = "row customer";
-      customerRow.innerHTML = `
-        <div>${c.customerName}</div>
-        <div>${sum(c.totals)}</div>
-        <div>${c.onAccount || 0}</div>
-        <div class="red">${c.totals["90+"]}</div>
-        <div>${c.totals["61-90"]}</div>
-        <div>${c.totals["31-60"]}</div>
-        <div>
-          <input type="number"
-            value="${c.forecast || ""}"
-            onclick="event.stopPropagation()"
-            onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
-        </div>
-      `;
-
+      const customerRow = createCustomerRow(pic.salesPIC, c);
       const invoiceContainer = document.createElement("div");
       invoiceContainer.className = "hidden";
 
@@ -291,7 +184,7 @@ function render(data) {
           <div>${i.invoiceNo}</div>
           <div>${i.total}</div>
           <div></div>
-          <div class="red">${i.ageing["90+"]}</div>
+          <div>${i.ageing["90+"]}</div>
           <div>${i.ageing["61-90"]}</div>
           <div>${i.ageing["31-60"]}</div>
           <div></div>
@@ -307,6 +200,42 @@ function render(data) {
     card.appendChild(customerContainer);
     app.appendChild(card);
   });
+}
+
+function createPICRow(pic) {
+  const row = document.createElement("div");
+  row.className = "row";
+  row.innerHTML = `
+    <div>${pic.salesPIC}</div>
+    <div>${sum(pic.totals)}</div>
+    <div></div>
+    <div>${pic.totals["90+"]}</div>
+    <div>${pic.totals["61-90"]}</div>
+    <div>${pic.totals["31-60"]}</div>
+    <div></div>
+  `;
+  return row;
+}
+
+function createCustomerRow(picName, c) {
+  const row = document.createElement("div");
+  row.className = "row customer";
+
+  row.innerHTML = `
+    <div>${c.customerName}</div>
+    <div>${sum(c.totals)}</div>
+    <div>${c.onAccount || 0}</div>
+    <div>${c.totals["90+"]}</div>
+    <div>${c.totals["61-90"]}</div>
+    <div>${c.totals["31-60"]}</div>
+    <div>
+      <input type="number"
+        value="${c.forecast || ""}"
+        onclick="event.stopPropagation()"
+        onchange="saveForecast('${picName}','${c.customerName}',this.value)">
+    </div>
+  `;
+  return row;
 }
 
 function sum(t) {
