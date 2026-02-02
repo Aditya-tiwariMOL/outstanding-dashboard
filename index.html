@@ -6,25 +6,36 @@
 <title>Outstanding Receivables</title>
 
 <style>
+/* =====================
+   THEME
+   ===================== */
 :root {
   --mol-blue: #1f4ea3;
-  --bg: #f4f6fb;
+  --bg: #f5f7fb;
   --card: #ffffff;
+  --border: #e3e6ef;
+  --text-muted: #666;
 }
 
+/* =====================
+   BASE
+   ===================== */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: var(--bg);
-  color: #000;
+  color: #111;
 }
 
-/* ---------- HEADER ---------- */
+/* =====================
+   HEADER
+   ===================== */
 h1 {
   text-align: center;
   color: var(--mol-blue);
-  margin: 16px 0 6px;
+  margin: 16px 0 4px;
   font-size: 22px;
+  font-weight: 600;
 }
 
 .summary {
@@ -34,93 +45,112 @@ h1 {
 
 .summary .amount {
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .summary .date {
   font-size: 11px;
-  color: #555;
+  color: var(--text-muted);
 }
 
-/* ---------- TABLE WRAPPER ---------- */
+/* =====================
+   TABLE WRAPPER
+   ===================== */
 .table-wrapper {
   overflow-x: auto;
-  padding: 0 8px 30px;
-  -webkit-overflow-scrolling: touch;
+  padding: 0 10px 28px;
 }
 
-/* ---------- ROW BASE ---------- */
+/* =====================
+   ROW LAYOUT
+   ===================== */
 .row {
   display: grid;
   grid-template-columns:
-    160px  /* Name */
-    90px   /* Total */
-    90px   /* On Account */
-    70px   /* 90+ */
-    70px   /* 60–90 */
-    70px   /* 30–60 */
-    100px; /* Forecast */
+    180px
+    90px
+    90px
+    70px
+    70px
+    70px
+    100px;
   align-items: center;
-  min-width: 650px;
-  padding: 8px 6px;
-  gap: 6px;
+  min-width: 700px;
+  padding: 8px 10px;
+  gap: 8px;
   font-size: 13px;
+  border-bottom: 1px solid var(--border);
 }
 
-/* ---------- HEADER ROW ---------- */
+/* =====================
+   HEADER ROW
+   ===================== */
 .header {
   background: var(--mol-blue);
   color: #fff;
-  font-weight: bold;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  font-weight: 600;
   border-radius: 6px;
+  border-bottom: none;
 }
 
-/* ---------- CARDS ---------- */
+/* =====================
+   CARDS
+   ===================== */
 .card {
   background: var(--card);
   border-radius: 6px;
   margin-top: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  overflow: hidden;
 }
 
-/* ---------- SALES PIC ---------- */
-.row.pic {
-  font-weight: bold;
+/* =====================
+   SALES PIC
+   ===================== */
+.card > .row {
+  font-weight: 600;
+  background: #fff;
+  cursor: pointer;
 }
 
-/* ---------- CUSTOMER ---------- */
+/* =====================
+   CUSTOMER
+   ===================== */
 .customer {
-  background: #eef3ff;
-  padding-left: 14px;
+  background: #f1f5ff;
+  padding-left: 18px;
+  font-weight: 500;
 }
 
-/* ---------- INVOICE ---------- */
+/* =====================
+   INVOICE
+   ===================== */
 .invoice {
-  padding-left: 28px;
+  padding-left: 36px;
   font-size: 12px;
   color: #333;
+  background: #fafbff;
 }
 
-/* ---------- INPUT ---------- */
+/* =====================
+   INPUT
+   ===================== */
 input {
   width: 100%;
-  padding: 5px 6px;
+  padding: 6px 8px;
   font-size: 13px;
-  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 4px;
 }
 
-/* ---------- STICKY NAME COLUMN ---------- */
-.row > div:first-child {
-  position: sticky;
-  left: 0;
-  background: inherit;
-  z-index: 2;
+input:focus {
+  outline: none;
+  border-color: var(--mol-blue);
 }
 
-/* ---------- TOAST ---------- */
+/* =====================
+   TOAST
+   ===================== */
 .toast {
   position: fixed;
   bottom: 16px;
@@ -128,88 +158,45 @@ input {
   transform: translateX(-50%);
   background: var(--mol-blue);
   color: #fff;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 18px;
   font-size: 13px;
   display: none;
 }
 
-/* ---------- MOBILE FINE TUNING ---------- */
-@media (max-width: 480px) {
-  h1 {
-    font-size: 20px;
-  }
-
-  .summary .amount {
-    font-size: 16px;
-  }
-
-  .row {
-    font-size: 12px;
-    padding: 6px 4px;
-  }
-
-  input {
-    font-size: 12px;
-    padding: 4px 5px;
-  }
-}
-  /* ================================
-   MOBILE ONLY – SAFE COMPRESSION
-   ================================ */
+/* =====================
+   MOBILE
+   ===================== */
 @media (max-width: 768px) {
 
-  /* Page header */
   h1 {
     font-size: 20px;
-    margin: 12px 0 6px;
   }
 
   .summary .amount {
     font-size: 16px;
   }
 
-  .summary .date {
-    font-size: 11px;
-  }
-
-  /* Horizontal scroll only for table */
-  .table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Compact rows WITHOUT changing structure */
   .row {
     font-size: 12px;
-    padding: 6px 6px;
-    gap: 4px;
-    min-width: 720px; /* keeps columns readable */
+    padding: 6px 8px;
+    min-width: 720px;
   }
 
-  /* Header tighter */
-  .header {
-    font-size: 12px;
-  }
-
-  /* Customer indentation preserved */
   .customer {
-    padding-left: 12px;
+    padding-left: 14px;
   }
 
-  /* Invoice rows smaller but still clear */
   .invoice {
-    padding-left: 22px;
+    padding-left: 28px;
     font-size: 11px;
   }
 
-  /* Forecast input compact */
   input {
     font-size: 12px;
-    padding: 4px 6px;
+    padding: 5px 6px;
   }
 }
-
 </style>
 </head>
 
