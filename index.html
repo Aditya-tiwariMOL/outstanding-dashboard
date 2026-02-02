@@ -93,9 +93,9 @@ let openCustomer = null;
 
 fetch(API_URL)
   .then(res => res.json())
-  .then(renderPICs);
+  .then(render);
 
-function renderPICs(data) {
+function render(data) {
   const app = document.getElementById("app");
   app.innerHTML = "";
 
@@ -106,32 +106,32 @@ function renderPICs(data) {
     const picRow = createRow(
       pic.salesPIC,
       pic.totals,
-      false,
       false
     );
-
-    picRow.onclick = () => togglePIC(picCard);
 
     const customerContainer = document.createElement("div");
     customerContainer.className = "hidden";
 
+    picRow.onclick = () => togglePIC(customerContainer);
+
     Object.values(pic.customers).forEach(customer => {
+      const customerBlock = document.createElement("div");
+
       const customerRow = createRow(
         customer.customerName,
         customer.totals,
-        true,
         true,
         customer.forecast,
         pic.salesPIC
       );
 
-      customerRow.onclick = (e) => {
-        e.stopPropagation();
-        toggleCustomer(customerRow);
-      };
-
       const invoiceContainer = document.createElement("div");
       invoiceContainer.className = "hidden";
+
+      customerRow.onclick = (e) => {
+        e.stopPropagation();
+        toggleCustomer(invoiceContainer);
+      };
 
       customer.invoices.forEach(inv => {
         const invRow = document.createElement("div");
@@ -148,9 +148,9 @@ function renderPICs(data) {
         invoiceContainer.appendChild(invRow);
       });
 
-      customerRow.after(invoiceContainer);
-      customerContainer.appendChild(customerRow);
-      customerContainer.appendChild(invoiceContainer);
+      customerBlock.appendChild(customerRow);
+      customerBlock.appendChild(invoiceContainer);
+      customerContainer.appendChild(customerBlock);
     });
 
     picCard.appendChild(picRow);
@@ -159,44 +159,46 @@ function renderPICs(data) {
   });
 }
 
-function createRow(name, totals, isCustomer, showForecast, forecast = 0, picName = "") {
+function createRow(name, totals, isCustomer, forecast = null, picName = "") {
   const row = document.createElement("div");
-  row.className = "row " + (isCustomer ? "customer" : "");
+  row.className = "row" + (isCustomer ? " customer" : "");
 
   row.innerHTML = `
     <div>${name}</div>
-    <div>${sumTotals(totals)}</div>
+    <div>${sum(totals)}</div>
     <div>${totals["90+"]}</div>
     <div>${totals["61-90"]}</div>
     <div>${totals["31-60"]}</div>
     <div>${totals["1-30"]}</div>
     <div>
-      ${showForecast ? `<input class="forecast" type="number" value="${forecast}"
-        onchange="updateForecast('${picName}','${name}',this.value)">` : ""}
+      ${forecast !== null
+        ? `<input type="number" value="${forecast}"
+           onchange="updateForecast('${picName}','${name}',this.value)">`
+        : ""}
     </div>
   `;
   return row;
 }
 
-function sumTotals(t) {
+function sum(t) {
   return t["1-30"] + t["31-60"] + t["61-90"] + t["90+"];
 }
 
-function togglePIC(card) {
-  if (openPIC && openPIC !== card) {
-    openPIC.querySelector("div:nth-child(2)").classList.add("hidden");
+function togglePIC(container) {
+  if (openPIC && openPIC !== container) {
+    openPIC.classList.add("hidden");
   }
-  const content = card.querySelector("div:nth-child(2)");
-  content.classList.toggle("hidden");
-  openPIC = content.classList.contains("hidden") ? null : card;
+  container.classList.toggle("hidden");
+  openPIC = container.classList.contains("hidden") ? null : container;
+  openCustomer = null;
 }
 
-function toggleCustomer(row) {
-  if (openCustomer && openCustomer !== row) {
-    openCustomer.nextSibling.classList.add("hidden");
+function toggleCustomer(container) {
+  if (openCustomer && openCustomer !== container) {
+    openCustomer.classList.add("hidden");
   }
-  row.nextSibling.classList.toggle("hidden");
-  openCustomer = row.nextSibling.classList.contains("hidden") ? null : row;
+  container.classList.toggle("hidden");
+  openCustomer = container.classList.contains("hidden") ? null : container;
 }
 
 function updateForecast(pic, customer, value) {
