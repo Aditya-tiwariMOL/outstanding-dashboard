@@ -176,21 +176,26 @@ input {
 
 /* ================= DRAWER ================= */
 .drawer {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.35);
-  z-index:10000;
-  display:flex;
-  align-items:flex-end;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 10000;
 }
 
 .drawer.hidden { display:none; }
 
 .drawer-content {
-  background:#fff;
-  width:100%;
-  padding:16px;
-  border-radius:14px 14px 0 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background: #fff;
+  padding: 16px;
+  border-radius: 14px 14px 0 0;
+
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .drawer-title {
@@ -411,19 +416,26 @@ function render(data){
         <div>${fmt(c.totals["31-60"])}</div>
         <div>${fmt(c.totals["1-30"])}</div>
         <div>
-          ${
-            isMobile
-              ? `<span style="cursor:pointer"
-                   onclick="event.stopPropagation();
-                   openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">
-                     ${ c.forecast
-      ? `${fmt(c.forecast)} <span style="opacity:.6">✏️</span>`
-      : `<span style="opacity:.7">✏️ Add</span>
-                 </span>`
-              : `<input type="text" value="${c.forecast||""}"
-                   onclick="event.stopPropagation()"
-                   onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">`
-          }
+         ${
+  isMobile
+    ? `<span style="cursor:pointer; white-space:nowrap;"
+         onclick="event.stopPropagation();
+         openDrawer(
+           '${pic.salesPIC}',
+           '${c.customerName}',
+           '${sum(c.totals)}',
+           '${c.forecast || ""}'
+         )">
+         ${
+           c.forecast
+             ? `${fmt(c.forecast)} <span style="opacity:.6">✏️</span>`
+             : `<span style="opacity:.7">✏️ Add</span>`
+         }
+       </span>`
+    : `<input type="text" value="${c.forecast||""}"
+         onclick="event.stopPropagation()"
+         onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">`
+}
         </div>`;
 
       wrap.appendChild(r);
