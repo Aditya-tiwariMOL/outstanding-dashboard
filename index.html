@@ -42,7 +42,10 @@ body {
   box-shadow:0 10px 30px rgba(0,0,0,.15);
 }
 
-.login-box img { max-width:150px; margin-bottom:12px; }
+.login-box img {
+  max-width:150px;
+  margin-bottom:12px;
+}
 
 .login-box h2 {
   font-size:16px;
@@ -111,18 +114,10 @@ body {
 .row {
   display:grid;
   grid-template-columns:
-    2fr    /* Name */
-    1.1fr  /* Total OS */
-    1fr    /* On Acc */
-    0.9fr  /* 90+ */
-    0.9fr  /* 60+ */
-    0.9fr  /* 30+ */
-    0.9fr  /* 1+ */
-    1fr;   /* Fcst */
-
+    2fr 1.1fr 1fr 0.9fr 0.9fr 0.9fr 0.9fr 1fr;
   gap:6px;
   padding:10px;
-  min-width:880px;
+  min-width:900px;
   background:#fff;
   border-bottom:1px solid var(--grid);
   font-size:18px;
@@ -166,6 +161,72 @@ input {
   width:100%;
   padding:6px;
   font-size:16px;
+  box-sizing:border-box;
+}
+
+/* ================= MOBILE GRID FIX ================= */
+@media (max-width:768px) {
+  .row {
+    grid-template-columns:
+      150px 80px 75px 65px 65px 65px 65px 90px;
+    min-width:670px;
+    font-size:15px;
+  }
+}
+
+/* ================= DRAWER ================= */
+.drawer {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:10000;
+  display:flex;
+  align-items:flex-end;
+}
+
+.drawer.hidden { display:none; }
+
+.drawer-content {
+  background:#fff;
+  width:100%;
+  padding:16px;
+  border-radius:14px 14px 0 0;
+}
+
+.drawer-title {
+  font-size:16px;
+  font-weight:bold;
+  margin-bottom:4px;
+}
+
+.drawer-sub {
+  font-size:13px;
+  color:#666;
+  margin-bottom:12px;
+}
+
+.drawer-content input {
+  width:100%;
+  padding:10px;
+  font-size:16px;
+  margin-bottom:14px;
+}
+
+.drawer-actions {
+  display:flex;
+  gap:10px;
+}
+
+.drawer-actions button {
+  flex:1;
+  padding:10px;
+  font-size:15px;
+}
+
+.drawer-actions .primary {
+  background:var(--mol-blue);
+  color:#fff;
+  border:none;
 }
 
 /* ================= TOAST ================= */
@@ -179,29 +240,6 @@ input {
   padding:10px 18px;
   border-radius:20px;
   display:none;
-}
-
-/* ================= MOBILE ================= */
-@media (max-width: 768px) {
-
-  .row {
-    grid-template-columns:
-      150px   /* Name */
-      80px    /* Total OS */
-      75px    /* On Acc */
-      65px    /* 90+ */
-      65px    /* 60+ */
-      65px    /* 30+ */
-      65px    /* 1+ */
-      90px;   /* Fcst */
-
-    gap: 6px;
-    min-width: 670px;  /* important: prevents over-shrinking */
-  }
-
-  .row > div {
-    padding-right: 4px;
-  }
 }
 </style>
 </head>
@@ -243,13 +281,25 @@ input {
     </div>
     <div id="app"></div>
   </div>
+</div>
 
+<!-- DRAWER -->
+<div id="forecastDrawer" class="drawer hidden">
+  <div class="drawer-content">
+    <div class="drawer-title" id="drawerCustomer">—</div>
+    <div class="drawer-sub" id="drawerTotal">—</div>
+    <input type="number" id="drawerInput" placeholder="Enter forecast amount">
+    <div class="drawer-actions">
+      <button onclick="closeDrawer()">Cancel</button>
+      <button class="primary" onclick="saveDrawerForecast()">Save</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast">Forecast updated</div>
 
 <script>
-/* CONFIG */
+/* ================= CONFIG ================= */
 const API_URL =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
@@ -259,19 +309,20 @@ const PASSWORD_HASH =
 const isMobile = window.innerWidth <= 768;
 let preloadedData = null;
 
-/* UTILS */
+/* ================= UTILS ================= */
 const n = v => Number(String(v||0).replace(/,/g,""));
 const fmt = v => isMobile && n(v)>=1000 ? Math.round(n(v)/1000)+"K" : n(v).toLocaleString();
 const sum = t => n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-/* PRELOAD */
+/* ================= PRELOAD ================= */
 fetch(API_URL).then(r=>r.json()).then(d=>preloadedData=d);
 
-/* AUTH */
+/* ================= AUTH ================= */
 async function sha256(t){
   const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
   return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
+
 async function checkPassword(){
   const v=pwd.value.trim();
   if(!v) return;
@@ -283,7 +334,7 @@ async function checkPassword(){
   } else loginError.style.display="block";
 }
 
-/* SUMMARY */
+/* ================= SUMMARY ================= */
 function updateSummary(data){
   let t=0,o=0;
   data.forEach(p=>{
@@ -294,7 +345,28 @@ function updateSummary(data){
   lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
 }
 
-/* RENDER */
+/* ================= DRAWER LOGIC ================= */
+let drawerPIC=null, drawerCustomer=null;
+
+function openDrawer(pic, customer, total, forecast){
+  drawerPIC=pic;
+  drawerCustomer=customer;
+  drawerCustomerEl.innerText=customer;
+  drawerTotal.innerText="Total OS: ₹"+fmt(total);
+  drawerInput.value=forecast||"";
+  forecastDrawer.classList.remove("hidden");
+}
+
+function closeDrawer(){
+  forecastDrawer.classList.add("hidden");
+}
+
+function saveDrawerForecast(){
+  saveForecast(drawerPIC, drawerCustomer, drawerInput.value);
+  closeDrawer();
+}
+
+/* ================= RENDER ================= */
 function render(data){
   app.innerHTML="";
   let openPIC=null;
@@ -322,12 +394,12 @@ function render(data){
       if(openPIC&&openPIC!==wrap)openPIC.classList.add("hidden");
       wrap.classList.toggle("hidden");
       openPIC=wrap.classList.contains("hidden")?null:wrap;
-      wrap.querySelectorAll(".invoice-wrap").forEach(i=>i.classList.add("hidden"));
     };
 
     Object.values(pic.customers).forEach(c=>{
       const r=document.createElement("div");
       r.className="row customer";
+
       r.innerHTML=`
         <div>${c.customerName}</div>
         <div>${fmt(sum(c.totals))}</div>
@@ -337,37 +409,20 @@ function render(data){
         <div>${fmt(c.totals["31-60"])}</div>
         <div>${fmt(c.totals["1-30"])}</div>
         <div>
-          <input type="text" value="${c.forecast||""}"
-          onclick="event.stopPropagation()"
-          onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
+          ${
+            isMobile
+              ? `<span style="cursor:pointer"
+                   onclick="event.stopPropagation();
+                   openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">
+                   ${c.forecast ? fmt(c.forecast) : "✏️"}
+                 </span>`
+              : `<input type="text" value="${c.forecast||""}"
+                   onclick="event.stopPropagation()"
+                   onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">`
+          }
         </div>`;
 
-      const iw=document.createElement("div");
-      iw.className="invoice-wrap hidden";
-
-      r.onclick=()=>{
-        const o=!iw.classList.contains("hidden");
-        wrap.querySelectorAll(".invoice-wrap").forEach(i=>i.classList.add("hidden"));
-        if(!o)iw.classList.remove("hidden");
-      };
-
-      c.invoices.forEach(i=>{
-        const iv=document.createElement("div");
-        iv.className="row invoice";
-        iv.innerHTML=`
-          <div>${i.invoiceNo}</div>
-          <div>${fmt(i.total)}</div>
-          <div></div>
-          <div class="overdue">${fmt(i.ageing["90+"])}</div>
-          <div>${fmt(i.ageing["61-90"])}</div>
-          <div>${fmt(i.ageing["31-60"])}</div>
-          <div>${fmt(i.ageing["1-30"])}</div>
-          <div></div>`;
-        iw.appendChild(iv);
-      });
-
       wrap.appendChild(r);
-      wrap.appendChild(iw);
     });
 
     card.appendChild(picRow);
@@ -376,7 +431,7 @@ function render(data){
   });
 }
 
-/* SAVE */
+/* ================= SAVE ================= */
 function saveForecast(pic,customer,value){
   fetch(API_URL,{
     method:"POST",
