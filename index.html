@@ -90,10 +90,6 @@ body {
   font-weight:600;
 }
 
-.summary {
-  margin-top:6px;
-}
-
 .summary .amount {
   font-size:17px;
   font-weight:600;
@@ -102,7 +98,6 @@ body {
 .summary .date {
   font-size:11px;
   color:#777;
-  margin-top:2px;
 }
 
 /* ================= TABLE ================= */
@@ -157,7 +152,7 @@ body {
 .on-account { color:var(--success); font-weight:bold; }
 .overdue { color:var(--danger); font-weight:bold; }
 
-/* ================= CLEAN EDITABLE LOOK ================= */
+/* ===== Editable Forecast (clean) ===== */
 .editable-value {
   color:var(--mol-blue);
   border-bottom:1px dashed rgba(31,78,163,.4);
@@ -206,7 +201,6 @@ body {
 .drawer-title {
   font-size:16px;
   font-weight:bold;
-  margin-bottom:4px;
 }
 
 .drawer-sub {
@@ -279,14 +273,8 @@ body {
 
   <div class="table-wrapper">
     <div class="row header">
-      <div>Name</div>
-      <div>Total OS</div>
-      <div>On Acc</div>
-      <div>90+</div>
-      <div>60+</div>
-      <div>30+</div>
-      <div>1+</div>
-      <div>Fcst</div>
+      <div>Name</div><div>Total OS</div><div>On Acc</div>
+      <div>90+</div><div>60+</div><div>30+</div><div>1+</div><div>Fcst</div>
     </div>
     <div id="app"></div>
   </div>
@@ -308,6 +296,12 @@ body {
 <div class="toast" id="toast">Forecast updated</div>
 
 <script>
+/* ================= GLOBAL STATE ================= */
+let openCustomer = null;
+let drawerPIC = null;
+let drawerCustomerName = null;
+
+/* ================= CONFIG ================= */
 const API_URL =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
@@ -317,12 +311,15 @@ const PASSWORD_HASH =
 const isMobile = window.innerWidth <= 768;
 let preloadedData = null;
 
+/* ================= UTILS ================= */
 const n = v => Number(String(v||0).replace(/,/g,""));
 const fmt = v => isMobile && n(v)>=1000 ? Math.round(n(v)/1000)+"K" : n(v).toLocaleString();
 const sum = t => n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
+/* ================= PRELOAD ================= */
 fetch(API_URL).then(r=>r.json()).then(d=>preloadedData=d);
 
+/* ================= AUTH ================= */
 async function sha256(t){
   const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
   return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
@@ -337,6 +334,7 @@ async function checkPassword(){
   } else loginError.style.display="block";
 }
 
+/* ================= SUMMARY ================= */
 function updateSummary(data){
   let t=0,o=0;
   data.forEach(p=>{
@@ -347,11 +345,10 @@ function updateSummary(data){
   lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
 }
 
-let drawerPIC=null, drawerCustomer=null;
-
+/* ================= DRAWER ================= */
 function openDrawer(pic, customer, total, forecast){
   drawerPIC = pic;
-  drawerCustomer = customer;
+  drawerCustomerName = customer;
 
   drawerCustomer.innerText = customer;
   drawerTotal.innerText = "Total OS: ₹"+fmt(total);
@@ -370,13 +367,15 @@ function closeDrawer(){
 }
 
 function saveDrawerForecast(){
-  saveForecast(drawerPIC, drawerCustomer, drawerInput.value);
+  saveForecast(drawerPIC, drawerCustomerName, drawerInput.value);
   closeDrawer();
 }
 
+/* ================= RENDER ================= */
 function render(data){
   app.innerHTML="";
   let openPIC=null;
+  openCustomer=null;
 
   data.forEach(pic=>{
     const card=document.createElement("div");
@@ -398,14 +397,18 @@ function render(data){
     wrap.className="hidden";
 
     picRow.onclick=()=>{
-      if(openPIC&&openPIC!==wrap)openPIC.classList.add("hidden");
+      if(openPIC && openPIC!==wrap) openPIC.classList.add("hidden");
       wrap.classList.toggle("hidden");
-      openPIC=wrap.classList.contains("hidden")?null:wrap;
+      openPIC = wrap.classList.contains("hidden") ? null : wrap;
+      openCustomer=null;
     };
 
     Object.values(pic.customers).forEach(c=>{
       const r=document.createElement("div");
       r.className="row customer";
+
+      const invoiceWrap=document.createElement("div");
+      invoiceWrap.className="hidden";
 
       r.innerHTML=`
         <div>${c.customerName}</div>
@@ -416,20 +419,38 @@ function render(data){
         <div>${fmt(c.totals["31-60"])}</div>
         <div>${fmt(c.totals["1-30"])}</div>
         <div>
-          ${
-            isMobile
-              ? `<span class="${c.forecast?'editable-value':'editable-placeholder'}"
-                   onclick="event.stopPropagation();
-                   openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">
-                   ${c.forecast?fmt(c.forecast):'Add'}
-                 </span>`
-              : `<input type="text" value="${c.forecast||""}"
-                   onclick="event.stopPropagation()"
-                   onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">`
-          }
+          <span class="${c.forecast?'editable-value':'editable-placeholder'}"
+            onclick="event.stopPropagation();
+            openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">
+            ${c.forecast?fmt(c.forecast):'Add'}
+          </span>
         </div>`;
 
+      r.onclick=()=>{
+        if(openCustomer && openCustomer!==invoiceWrap){
+          openCustomer.classList.add("hidden");
+        }
+        invoiceWrap.classList.toggle("hidden");
+        openCustomer = invoiceWrap.classList.contains("hidden") ? null : invoiceWrap;
+      };
+
+      c.invoices.forEach(i=>{
+        const inv=document.createElement("div");
+        inv.className="row invoice";
+        inv.innerHTML=`
+          <div>${i.invoiceNo}</div>
+          <div>${fmt(i.total)}</div>
+          <div></div>
+          <div>${fmt(i.ageing["90+"]||0)}</div>
+          <div>${fmt(i.ageing["61-90"]||0)}</div>
+          <div>${fmt(i.ageing["31-60"]||0)}</div>
+          <div>${fmt(i.ageing["1-30"]||0)}</div>
+          <div></div>`;
+        invoiceWrap.appendChild(inv);
+      });
+
       wrap.appendChild(r);
+      wrap.appendChild(invoiceWrap);
     });
 
     card.appendChild(picRow);
@@ -438,6 +459,7 @@ function render(data){
   });
 }
 
+/* ================= SAVE ================= */
 function saveForecast(pic,customer,value){
   const val=n(value);
   fetch(API_URL,{
