@@ -42,22 +42,19 @@ body {
   box-shadow:0 10px 30px rgba(0,0,0,.15);
 }
 
-.login-box img {
-  max-width:150px;
-  margin-bottom:14px;
-}
+.login-box img { max-width:150px; margin-bottom:12px; }
 
 .login-box h2 {
   font-size:16px;
   color:var(--mol-blue);
-  margin-bottom:18px;
+  margin-bottom:16px;
 }
 
 .login-box input,
 .login-box button {
   width:100%;
   max-width:260px;
-  margin:0 auto 14px;
+  margin:0 auto 12px;
   display:block;
   padding:10px;
   font-size:15px;
@@ -80,37 +77,52 @@ body {
 /* ================= HEADER ================= */
 .header-wrap {
   text-align:center;
-  margin:14px 0 10px;
+  margin:16px 0 14px;
 }
 
-h1 {
+.header-wrap h1 {
   margin:0;
-  font-size:22px;
+  font-size:20px;
   color:var(--mol-blue);
+  font-weight:600;
+}
+
+.summary {
+  margin-top:6px;
 }
 
 .summary .amount {
-  font-size:18px;
-  font-weight:bold;
+  font-size:17px;
+  font-weight:600;
 }
 
 .summary .date {
   font-size:11px;
-  color:#666;
+  color:#777;
+  margin-top:2px;
 }
 
 /* ================= TABLE ================= */
 .table-wrapper {
   overflow-x:auto;
-  padding:0 12px 20px;
+  padding:0 12px 30px;
 }
 
 .row {
   display:grid;
-  grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap:8px;
-  padding:12px;
-  min-width:900px;
+  grid-template-columns:
+    2fr    /* Name */
+    1.1fr  /* Total OS */
+    1fr    /* On Acc */
+    0.9fr  /* 90+ */
+    0.9fr  /* 60+ */
+    0.9fr  /* 30+ */
+    0.9fr  /* 1+ */
+    1fr;   /* Fcst */
+
+  gap:6px;
+  padding:10px;
+  min-width:880px;
   background:#fff;
   border-bottom:1px solid var(--grid);
   font-size:18px;
@@ -139,7 +151,7 @@ h1 {
 .customer { background:#eef3ff; }
 
 .invoice {
-  padding-left:20px;
+  padding-left:18px;
   background:#E5FDEB;
   border-left:3px solid rgba(26,127,55,.18);
   font-size:16px;
@@ -154,14 +166,6 @@ input {
   width:100%;
   padding:6px;
   font-size:16px;
-}
-
-/* ================= NOTE ================= */
-.total-note {
-  font-size:11px;
-  color:#777;
-  text-align:center;
-  margin:6px 12px 30px;
 }
 
 /* ================= TOAST ================= */
@@ -179,14 +183,14 @@ input {
 
 /* ================= MOBILE ================= */
 @media (max-width:768px) {
-  h1 { font-size:18px; }
+  .header-wrap h1 { font-size:18px; }
   .summary .amount { font-size:16px; }
-  .summary .date { font-size:10px; }
+
   .row {
     font-size:15px;
-    padding:12px 6px;
-    gap:6px;
-    min-width:740px;
+    padding:9px 6px;
+    gap:5px;
+    min-width:820px;
   }
 }
 </style>
@@ -194,7 +198,7 @@ input {
 
 <body>
 
-<!-- 🔐 LOGIN -->
+<!-- LOGIN -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png">
@@ -205,7 +209,7 @@ input {
   </div>
 </div>
 
-<!-- ================= APP ================= -->
+<!-- APP -->
 <div id="appContainer" style="display:none;">
 
   <div class="header-wrap">
@@ -219,18 +223,15 @@ input {
   <div class="table-wrapper">
     <div class="row header">
       <div>Name</div>
-      <div>Total</div>
-      <div>On Account</div>
+      <div>Total OS</div>
+      <div>On Acc</div>
       <div>90+</div>
-      <div>60–90</div>
-      <div>30–60</div>
-      <div>Forecast</div>
+      <div>60+</div>
+      <div>30+</div>
+      <div>1+</div>
+      <div>Fcst</div>
     </div>
     <div id="app"></div>
-  </div>
-
-  <div class="total-note">
-    * Total outstanding includes 1–30 days bucket (not displayed separately).
   </div>
 
 </div>
@@ -238,74 +239,53 @@ input {
 <div class="toast" id="toast">Forecast updated</div>
 
 <script>
-/* ================= CONFIG ================= */
+/* CONFIG */
 const API_URL =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
-/* SHA-256 hash of MOL2026 */
 const PASSWORD_HASH =
 "46d29dfc245f5708edf4d74c58551f5d4bcf0284690b478ecf7e8c021cb0c2f5";
 
 const isMobile = window.innerWidth <= 768;
 let preloadedData = null;
 
-/* ================= UTILS ================= */
-function toNumber(v){
-  if(v==null||v==="") return 0;
-  return Number(String(v).replace(/,/g,""));
-}
-function formatNumber(v){
-  const n=toNumber(v);
-  if(!isMobile) return n.toLocaleString();
-  return n>=1000?Math.round(n/1000)+"K":n;
-}
-function sum(t){
-  return toNumber(t["90+"])+toNumber(t["61-90"])+toNumber(t["31-60"])+toNumber(t["1-30"]);
-}
+/* UTILS */
+const n = v => Number(String(v||0).replace(/,/g,""));
+const fmt = v => isMobile && n(v)>=1000 ? Math.round(n(v)/1000)+"K" : n(v).toLocaleString();
+const sum = t => n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-/* ================= PRELOAD DATA ================= */
-fetch(API_URL)
-  .then(r=>r.json())
-  .then(d=>preloadedData=d);
+/* PRELOAD */
+fetch(API_URL).then(r=>r.json()).then(d=>preloadedData=d);
 
-/* ================= AUTH ================= */
-async function sha256(txt){
-  const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(txt));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+/* AUTH */
+async function sha256(t){
+  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
-
 async function checkPassword(){
-  const input=document.getElementById("pwd").value.trim();
-  if(!input) return;
-
-  const h=await sha256(input);
-  if(h===PASSWORD_HASH){
-    showApp();
-  } else {
-    document.getElementById("loginError").style.display="block";
-  }
+  const v=pwd.value.trim();
+  if(!v) return;
+  if(await sha256(v)===PASSWORD_HASH){
+    loginOverlay.style.display="none";
+    appContainer.style.display="block";
+    render(preloadedData);
+    updateSummary(preloadedData);
+  } else loginError.style.display="block";
 }
 
-function showApp(){
-  document.getElementById("loginOverlay").style.display="none";
-  document.getElementById("appContainer").style.display="block";
-  render(preloadedData);
-  updateSummary(preloadedData);
-}
-
-/* ================= APP LOGIC ================= */
+/* SUMMARY */
 function updateSummary(data){
   let t=0,o=0;
   data.forEach(p=>{
     t+=sum(p.totals);
-    Object.values(p.customers).forEach(c=>o+=toNumber(c.onAccount));
+    Object.values(p.customers).forEach(c=>o+=n(c.onAccount));
   });
-  netOutstanding.innerText="Net Outstanding: ₹"+formatNumber(t-o);
+  netOutstanding.innerText="Net Outstanding: ₹"+fmt(t-o);
   lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
 }
 
+/* RENDER */
 function render(data){
-  const app=document.getElementById("app");
   app.innerHTML="";
   let openPIC=null;
 
@@ -317,11 +297,12 @@ function render(data){
     picRow.className="row";
     picRow.innerHTML=`
       <div>${pic.salesPIC}</div>
-      <div>${formatNumber(sum(pic.totals))}</div>
+      <div>${fmt(sum(pic.totals))}</div>
       <div></div>
-      <div class="overdue">${formatNumber(pic.totals["90+"])}</div>
-      <div>${formatNumber(pic.totals["61-90"])}</div>
-      <div>${formatNumber(pic.totals["31-60"])}</div>
+      <div class="overdue">${fmt(pic.totals["90+"])}</div>
+      <div>${fmt(pic.totals["61-90"])}</div>
+      <div>${fmt(pic.totals["31-60"])}</div>
+      <div>${fmt(pic.totals["1-30"])}</div>
       <div></div>`;
 
     const wrap=document.createElement("div");
@@ -339,11 +320,12 @@ function render(data){
       r.className="row customer";
       r.innerHTML=`
         <div>${c.customerName}</div>
-        <div>${formatNumber(sum(c.totals))}</div>
-        <div class="on-account">${formatNumber(c.onAccount)}</div>
-        <div class="overdue">${formatNumber(c.totals["90+"])}</div>
-        <div>${formatNumber(c.totals["61-90"])}</div>
-        <div>${formatNumber(c.totals["31-60"])}</div>
+        <div>${fmt(sum(c.totals))}</div>
+        <div class="on-account">${fmt(c.onAccount)}</div>
+        <div class="overdue">${fmt(c.totals["90+"])}</div>
+        <div>${fmt(c.totals["61-90"])}</div>
+        <div>${fmt(c.totals["31-60"])}</div>
+        <div>${fmt(c.totals["1-30"])}</div>
         <div>
           <input type="text" value="${c.forecast||""}"
           onclick="event.stopPropagation()"
@@ -364,11 +346,12 @@ function render(data){
         iv.className="row invoice";
         iv.innerHTML=`
           <div>${i.invoiceNo}</div>
-          <div>${formatNumber(i.total)}</div>
+          <div>${fmt(i.total)}</div>
           <div></div>
-          <div class="overdue">${formatNumber(i.ageing["90+"])}</div>
-          <div>${formatNumber(i.ageing["61-90"])}</div>
-          <div>${formatNumber(i.ageing["31-60"])}</div>
+          <div class="overdue">${fmt(i.ageing["90+"])}</div>
+          <div>${fmt(i.ageing["61-90"])}</div>
+          <div>${fmt(i.ageing["31-60"])}</div>
+          <div>${fmt(i.ageing["1-30"])}</div>
           <div></div>`;
         iw.appendChild(iv);
       });
@@ -383,6 +366,7 @@ function render(data){
   });
 }
 
+/* SAVE */
 function saveForecast(pic,customer,value){
   fetch(API_URL,{
     method:"POST",
@@ -390,7 +374,7 @@ function saveForecast(pic,customer,value){
       action:"updateForecast",
       salesPIC:pic,
       customer,
-      forecast:toNumber(value)
+      forecast:n(value)
     })
   }).then(()=>{
     toast.style.display="block";
