@@ -416,7 +416,9 @@ function render(data){
               ? `<span style="cursor:pointer"
                    onclick="event.stopPropagation();
                    openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">
-                   ${c.forecast ? fmt(c.forecast) : "✏️"}
+                     ${ c.forecast
+      ? `${fmt(c.forecast)} <span style="opacity:.6">✏️</span>`
+      : `<span style="opacity:.7">✏️ Add</span>
                  </span>`
               : `<input type="text" value="${c.forecast||""}"
                    onclick="event.stopPropagation()"
