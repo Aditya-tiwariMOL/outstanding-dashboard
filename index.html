@@ -349,14 +349,16 @@ function updateSummary(data){
 let drawerPIC=null, drawerCustomer=null;
 
 function openDrawer(pic, customer, total, forecast){
-  drawerPIC=pic;
-  drawerCustomer=customer;
-  drawerCustomerEl.innerText=customer;
-  drawerTotal.innerText="Total OS: ₹"+fmt(total);
-  drawerInput.value=forecast||"";
-  forecastDrawer.classList.remove("hidden");
-}
+  drawerPIC = pic;
+  drawerCustomer = customer;
 
+  document.getElementById("drawerCustomer").innerText = customer;
+  document.getElementById("drawerTotal").innerText =
+    "Total OS: ₹" + fmt(total);
+
+  document.getElementById("drawerInput").value = forecast || "";
+  document.getElementById("forecastDrawer").classList.remove("hidden");
+}
 function closeDrawer(){
   forecastDrawer.classList.add("hidden");
 }
