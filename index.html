@@ -12,7 +12,7 @@
   --card: #ffffff;
   --success: #1a7f37;
   --danger: #c62828;
-  --grid: rgba(0,0,0,0.06); /* very subtle */
+  --grid: rgba(0,0,0,0.06);
 }
 
 /* ================= BASE ================= */
@@ -41,7 +41,6 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
 }
 
 .summary .amount {
@@ -68,13 +67,12 @@ h1 {
   align-items: center;
   min-width: 900px;
   font-size: 18px;
-  line-height: 1.4;
   background: #fff;
-  border-bottom: 1px solid var(--grid); /* row line */
+  border-bottom: 1px solid var(--grid);
 }
 
 .row > div {
-  border-right: 1px solid var(--grid); /* column line */
+  border-right: 1px solid var(--grid);
   padding-right: 6px;
 }
 
@@ -89,12 +87,12 @@ h1 {
   border-radius: 6px;
 }
 
+/* 🔥 IMPORTANT FIX: NO overflow clipping */
 .card {
   background: var(--card);
   border-radius: 6px;
   margin-top: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  overflow: hidden;
 }
 
 .customer {
@@ -126,7 +124,6 @@ input {
   width: 100%;
   padding: 6px;
   font-size: 16px;
-  box-sizing: border-box;
 }
 
 /* ================= TOAST ================= */
@@ -154,6 +151,11 @@ input {
     padding: 12px 6px;
     gap: 6px;
     min-width: 740px;
+  }
+
+  /* Softer grid on mobile */
+  .row > div {
+    border-right: 1px solid rgba(0,0,0,0.04);
   }
 
   .row > div:first-child {
@@ -244,15 +246,11 @@ function render(data) {
       if (openPIC && openPIC !== customerContainer) {
         openPIC.classList.add("hidden");
       }
-      const willOpen = customerContainer.classList.contains("hidden");
-      customerContainer.classList.toggle("hidden");
-      openPIC = willOpen ? customerContainer : null;
+      const open = customerContainer.classList.toggle("hidden") === false;
+      openPIC = open ? customerContainer : null;
 
-      // RESET invoices when reopening PIC
-      if (willOpen) {
-        customerContainer.querySelectorAll(".invoice-container")
-          .forEach(ic => ic.classList.add("hidden"));
-      }
+      customerContainer.querySelectorAll(".invoice-container")
+        .forEach(ic => ic.classList.add("hidden"));
     };
 
     Object.values(pic.customers).forEach(c => {
@@ -316,12 +314,10 @@ function saveForecast(pic, customer, value) {
   fetch(API_URL, {
     method: "POST",
     body: JSON.stringify({ action:"updateForecast", salesPIC:pic, customer, forecast:Number(value) })
-  }).then(showToast);
-}
-
-function showToast() {
-  toast.style.display = "block";
-  setTimeout(() => toast.style.display = "none", 2000);
+  }).then(() => {
+    toast.style.display = "block";
+    setTimeout(() => toast.style.display = "none", 2000);
+  });
 }
 </script>
 
