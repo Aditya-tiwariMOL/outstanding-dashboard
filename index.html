@@ -9,9 +9,8 @@
 :root {
   --mol-blue: #1f4ea3;
   --bg: #f4f6fb;
-  --text: #111;
-  --red: #c62828;
-  --green: #2e7d32;
+  --card: #ffffff;
+  --success: #1a7f37;
 }
 
 /* ================= BASE ================= */
@@ -19,22 +18,22 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: var(--bg);
-  color: var(--text);
 }
 
+/* ================= HEADER ================= */
 h1 {
   text-align: center;
   color: var(--mol-blue);
-  margin: 14px 0 6px;
+  margin: 18px 0 6px;
 }
 
 .summary {
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .summary .amount {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
 }
 
@@ -46,100 +45,95 @@ h1 {
 /* ================= TABLE ================= */
 .table-wrapper {
   overflow-x: auto;
-  padding: 0 8px 40px;
+  padding: 0 12px 40px;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 760px;
+.row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 12px;               /* +20% height */
+  align-items: center;
+  min-width: 900px;
+  font-size: 18px;             /* +30% desktop */
+  line-height: 1.4;
   background: #fff;
 }
 
-thead th {
+.header {
   background: var(--mol-blue);
   color: #fff;
   font-weight: bold;
-  padding: 10px 8px;
-  text-align: left;
-  font-size: 14px;
-  white-space: nowrap;
+  border-radius: 6px;
 }
 
-tbody td {
-  padding: 8px 8px;
-  font-size: 14px;
-  border-bottom: 1px solid #e0e0e0;
-  white-space: nowrap;
+.card {
+  background: var(--card);
+  border-radius: 6px;
+  margin-top: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* ================= ROW TYPES ================= */
-.pic-row {
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.customer-row {
+.customer {
   background: #eef3ff;
-  cursor: pointer;
 }
 
-.invoice-row {
-  background: #fafbff;
-  font-size: 13px;
+.invoice {
+  padding-left: 28px;
+  font-size: 16px;
 }
 
-.invoice-row td:first-child {
-  padding-left: 26px;
+.hidden {
+  display: none;
 }
-
-.customer-row td:first-child {
-  padding-left: 14px;
-}
-
-/* ================= COLORS ================= */
-.red { color: var(--red); font-weight: bold; }
-.green { color: var(--green); font-weight: bold; }
 
 /* ================= INPUT ================= */
 input {
-  width: 70px;
-  padding: 4px;
-  font-size: 13px;
+  width: 100%;
+  padding: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
 }
 
-/* ================= TOGGLE ================= */
-.collapsed {
+.save-indicator {
+  font-size: 12px;
+  color: var(--success);
+  margin-top: 4px;
+  display: none;
+}
+
+/* ================= TOAST ================= */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--mol-blue);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 20px;
   display: none;
 }
 
 /* ================= MOBILE ================= */
 @media (max-width: 768px) {
-  h1 {
-    font-size: 20px;
+
+  .row {
+    font-size: 15px;            /* +15% mobile */
+    padding: 14px 10px;         /* +20% height */
+    min-width: 760px;
   }
 
-  .summary .amount {
-    font-size: 18px;
-  }
-
-  table {
-    min-width: 620px;
-  }
-
-  thead th {
-    font-size: 13px;
-    padding: 8px 6px;
-  }
-
-  tbody td {
-    font-size: 15px;      /* Bigger text */
-    padding: 6px 6px;     /* Less padding */
+  /* Wrap name after ~3 words */
+  .row > div:first-child {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   input {
-    font-size: 14px;
-    width: 60px;
+    font-size: 15px;
   }
 }
 </style>
@@ -155,24 +149,27 @@ input {
 </div>
 
 <div class="table-wrapper">
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Total</th>
-        <th>On Account</th>
-        <th>90+</th>
-        <th>60–90</th>
-        <th>30–60</th>
-        <th>Forecast</th>
-      </tr>
-    </thead>
-    <tbody id="app"></tbody>
-  </table>
+  <div class="row header">
+    <div>Name</div>
+    <div>Total</div>
+    <div>On Account</div>
+    <div>90+</div>
+    <div>60–90</div>
+    <div>30–60</div>
+    <div>Forecast</div>
+  </div>
+
+  <div id="app"></div>
 </div>
+
+<div class="toast" id="toast">Forecast updated</div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+
+let openPIC = null;
+let openCustomer = null;
+const isMobile = window.innerWidth <= 768;
 
 fetch(API_URL)
   .then(res => res.json())
@@ -181,19 +178,25 @@ fetch(API_URL)
     updateSummary(data);
   });
 
+function formatNumber(val) {
+  if (!isMobile) return val.toLocaleString();
+  if (val >= 1000) return Math.round(val / 1000) + "K";
+  return val;
+}
+
 function updateSummary(data) {
-  let total = 0;
-  let onAccount = 0;
+  let totalOutstanding = 0;
+  let totalOnAccount = 0;
 
   data.forEach(p => {
-    total += sum(p.totals);
+    totalOutstanding += sum(p.totals);
     Object.values(p.customers).forEach(c => {
-      onAccount += c.onAccount || 0;
+      totalOnAccount += c.onAccount || 0;
     });
   });
 
   document.getElementById("netOutstanding").innerText =
-    "Net Outstanding: ₹" + (total - onAccount).toLocaleString();
+    "Net Outstanding: ₹" + formatNumber(totalOutstanding - totalOnAccount);
 
   document.getElementById("lastUpdated").innerText =
     "Last refreshed: " + new Date().toLocaleString();
@@ -204,85 +207,104 @@ function render(data) {
   app.innerHTML = "";
 
   data.forEach(pic => {
-    // PIC ROW
-    const picRow = tr("pic-row", `
-      <td>${pic.salesPIC}</td>
-      <td>${sum(pic.totals)}</td>
-      <td></td>
-      <td class="red">${pic.totals["90+"]}</td>
-      <td>${pic.totals["61-90"]}</td>
-      <td>${pic.totals["31-60"]}</td>
-      <td></td>
-    `);
+    const card = document.createElement("div");
+    card.className = "card";
 
-    picRow.onclick = () => togglePIC(pic.salesPIC);
-    picRow.dataset.pic = pic.salesPIC;
-    app.appendChild(picRow);
+    const picRow = createPICRow(pic);
+    const customerContainer = document.createElement("div");
+    customerContainer.className = "hidden";
+
+    picRow.onclick = () => toggle(customerContainer, "pic");
 
     Object.values(pic.customers).forEach(c => {
-      // CUSTOMER ROW
-      const custRow = tr("customer-row collapsed", `
-        <td>${c.customerName}</td>
-        <td>${sum(c.totals)}</td>
-        <td class="green">${c.onAccount || 0}</td>
-        <td class="red">${c.totals["90+"]}</td>
-        <td>${c.totals["61-90"]}</td>
-        <td>${c.totals["31-60"]}</td>
-        <td>
-          <input type="number"
-            value="${c.forecast || ""}"
-            onclick="event.stopPropagation()"
-            onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
-        </td>
-      `);
+      const customerRow = createCustomerRow(pic.salesPIC, c);
+      const invoiceContainer = document.createElement("div");
+      invoiceContainer.className = "hidden";
 
-      custRow.dataset.pic = pic.salesPIC;
-      custRow.dataset.customer = c.customerName;
-      custRow.onclick = () => toggleCustomer(pic.salesPIC, c.customerName);
-      app.appendChild(custRow);
+      customerRow.onclick = () => toggle(invoiceContainer, "customer");
 
-      // INVOICES
       c.invoices.forEach(i => {
-        const invRow = tr("invoice-row collapsed", `
-          <td>${i.invoiceNo}</td>
-          <td>${i.total}</td>
-          <td></td>
-          <td class="red">${i.ageing["90+"]}</td>
-          <td>${i.ageing["61-90"]}</td>
-          <td>${i.ageing["31-60"]}</td>
-          <td></td>
-        `);
-
-        invRow.dataset.pic = pic.salesPIC;
-        invRow.dataset.customer = c.customerName;
-        app.appendChild(invRow);
+        const inv = document.createElement("div");
+        inv.className = "row invoice";
+        inv.innerHTML = `
+          <div>${i.invoiceNo}</div>
+          <div>${formatNumber(i.total)}</div>
+          <div></div>
+          <div>${formatNumber(i.ageing["90+"] || 0)}</div>
+          <div>${formatNumber(i.ageing["61-90"] || 0)}</div>
+          <div>${formatNumber(i.ageing["31-60"] || 0)}</div>
+          <div></div>
+        `;
+        invoiceContainer.appendChild(inv);
       });
+
+      customerContainer.appendChild(customerRow);
+      customerContainer.appendChild(invoiceContainer);
     });
+
+    card.appendChild(picRow);
+    card.appendChild(customerContainer);
+    app.appendChild(card);
   });
 }
 
-function togglePIC(pic) {
-  document.querySelectorAll(".customer-row").forEach(r => r.classList.add("collapsed"));
-  document.querySelectorAll(".invoice-row").forEach(r => r.classList.add("collapsed"));
-
-  document.querySelectorAll(`.customer-row[data-pic="${pic}"]`)
-    .forEach(r => r.classList.toggle("collapsed"));
+function createPICRow(pic) {
+  const row = document.createElement("div");
+  row.className = "row";
+  row.innerHTML = `
+    <div>${pic.salesPIC}</div>
+    <div>${formatNumber(sum(pic.totals))}</div>
+    <div></div>
+    <div>${formatNumber(pic.totals["90+"] || 0)}</div>
+    <div>${formatNumber(pic.totals["61-90"] || 0)}</div>
+    <div>${formatNumber(pic.totals["31-60"] || 0)}</div>
+    <div></div>
+  `;
+  return row;
 }
 
-function toggleCustomer(pic, customer) {
-  document.querySelectorAll(`.invoice-row[data-pic="${pic}"]`)
-    .forEach(r => r.classList.add("collapsed"));
+function createCustomerRow(picName, c) {
+  const row = document.createElement("div");
+  row.className = "row customer";
 
-  document.querySelectorAll(
-    `.invoice-row[data-pic="${pic}"][data-customer="${customer}"]`
-  ).forEach(r => r.classList.toggle("collapsed"));
+  const saveMsg = document.createElement("div");
+  saveMsg.className = "save-indicator";
+  saveMsg.innerText = "✔ Saved";
+
+  row.innerHTML = `
+    <div>${c.customerName}</div>
+    <div>${formatNumber(sum(c.totals))}</div>
+    <div>${formatNumber(c.onAccount || 0)}</div>
+    <div>${formatNumber(c.totals["90+"] || 0)}</div>
+    <div>${formatNumber(c.totals["61-90"] || 0)}</div>
+    <div>${formatNumber(c.totals["31-60"] || 0)}</div>
+    <div>
+      <input type="number"
+        value="${c.forecast || ""}"
+        onclick="event.stopPropagation()"
+        onchange="saveForecast('${picName}','${c.customerName}',this.value,this)">
+    </div>
+  `;
+
+  row.querySelector("div:last-child").appendChild(saveMsg);
+  return row;
 }
 
 function sum(t) {
-  return (t["90+"]||0)+(t["61-90"]||0)+(t["31-60"]||0)+(t["1-30"]||0);
+  return (t["90+"] || 0) + (t["61-90"] || 0) + (t["31-60"] || 0) + (t["1-30"] || 0);
 }
 
-function saveForecast(pic, customer, value) {
+function toggle(el, level) {
+  if (level === "pic" && openPIC && openPIC !== el) openPIC.classList.add("hidden");
+  if (level === "customer" && openCustomer && openCustomer !== el) openCustomer.classList.add("hidden");
+
+  el.classList.toggle("hidden");
+
+  if (level === "pic") openPIC = el.classList.contains("hidden") ? null : el;
+  if (level === "customer") openCustomer = el.classList.contains("hidden") ? null : el;
+}
+
+function saveForecast(pic, customer, value, inputEl) {
   fetch(API_URL, {
     method: "POST",
     body: JSON.stringify({
@@ -291,14 +313,18 @@ function saveForecast(pic, customer, value) {
       customer: customer,
       forecast: Number(value)
     })
+  }).then(() => {
+    showToast();
+    const msg = inputEl.parentElement.querySelector(".save-indicator");
+    msg.style.display = "block";
+    setTimeout(() => msg.style.display = "none", 2000);
   });
 }
 
-function tr(cls, html) {
-  const r = document.createElement("tr");
-  r.className = cls;
-  r.innerHTML = html;
-  return r;
+function showToast() {
+  const t = document.getElementById("toast");
+  t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 2000);
 }
 </script>
 
