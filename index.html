@@ -157,14 +157,20 @@ body {
 .on-account { color:var(--success); font-weight:bold; }
 .overdue { color:var(--danger); font-weight:bold; }
 
-input {
-  width:100%;
-  padding:6px;
-  font-size:16px;
-  box-sizing:border-box;
+/* ================= CLEAN EDITABLE LOOK ================= */
+.editable-value {
+  color:var(--mol-blue);
+  border-bottom:1px dashed rgba(31,78,163,.4);
+  cursor:pointer;
 }
 
-/* ================= MOBILE GRID FIX ================= */
+.editable-placeholder {
+  color:#999;
+  font-style:italic;
+  cursor:pointer;
+}
+
+/* ================= MOBILE GRID ================= */
 @media (max-width:768px) {
   .row {
     grid-template-columns:
@@ -176,26 +182,25 @@ input {
 
 /* ================= DRAWER ================= */
 .drawer {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.35);
-  z-index: 10000;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:10000;
 }
 
 .drawer.hidden { display:none; }
 
 .drawer-content {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-
-  background: #fff;
-  padding: 16px;
-  border-radius: 14px 14px 0 0;
-
-  max-height: 90vh;
-  overflow-y: auto;
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  padding:16px;
+  border-radius:14px 14px 0 0;
+  max-height:90vh;
+  overflow-y:auto;
+  padding-bottom:env(safe-area-inset-bottom);
 }
 
 .drawer-title {
@@ -264,7 +269,6 @@ input {
 
 <!-- APP -->
 <div id="appContainer" style="display:none;">
-
   <div class="header-wrap">
     <h1>Outstanding Receivables</h1>
     <div class="summary">
@@ -304,7 +308,6 @@ input {
 <div class="toast" id="toast">Forecast updated</div>
 
 <script>
-/* ================= CONFIG ================= */
 const API_URL =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
@@ -314,24 +317,19 @@ const PASSWORD_HASH =
 const isMobile = window.innerWidth <= 768;
 let preloadedData = null;
 
-/* ================= UTILS ================= */
 const n = v => Number(String(v||0).replace(/,/g,""));
 const fmt = v => isMobile && n(v)>=1000 ? Math.round(n(v)/1000)+"K" : n(v).toLocaleString();
 const sum = t => n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-/* ================= PRELOAD ================= */
 fetch(API_URL).then(r=>r.json()).then(d=>preloadedData=d);
 
-/* ================= AUTH ================= */
 async function sha256(t){
   const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
   return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
 async function checkPassword(){
-  const v=pwd.value.trim();
-  if(!v) return;
-  if(await sha256(v)===PASSWORD_HASH){
+  if(await sha256(pwd.value.trim())===PASSWORD_HASH){
     loginOverlay.style.display="none";
     appContainer.style.display="block";
     render(preloadedData);
@@ -339,7 +337,6 @@ async function checkPassword(){
   } else loginError.style.display="block";
 }
 
-/* ================= SUMMARY ================= */
 function updateSummary(data){
   let t=0,o=0;
   data.forEach(p=>{
@@ -350,20 +347,24 @@ function updateSummary(data){
   lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
 }
 
-/* ================= DRAWER LOGIC ================= */
 let drawerPIC=null, drawerCustomer=null;
 
 function openDrawer(pic, customer, total, forecast){
   drawerPIC = pic;
   drawerCustomer = customer;
 
-  document.getElementById("drawerCustomer").innerText = customer;
-  document.getElementById("drawerTotal").innerText =
-    "Total OS: ₹" + fmt(total);
+  drawerCustomer.innerText = customer;
+  drawerTotal.innerText = "Total OS: ₹"+fmt(total);
 
-  document.getElementById("drawerInput").value = forecast || "";
-  document.getElementById("forecastDrawer").classList.remove("hidden");
+  drawerInput.value = forecast || "";
+  forecastDrawer.classList.remove("hidden");
+
+  requestAnimationFrame(()=>{
+    drawerInput.focus();
+    drawerInput.scrollIntoView({block:"center"});
+  });
 }
+
 function closeDrawer(){
   forecastDrawer.classList.add("hidden");
 }
@@ -373,7 +374,6 @@ function saveDrawerForecast(){
   closeDrawer();
 }
 
-/* ================= RENDER ================= */
 function render(data){
   app.innerHTML="";
   let openPIC=null;
@@ -416,26 +416,17 @@ function render(data){
         <div>${fmt(c.totals["31-60"])}</div>
         <div>${fmt(c.totals["1-30"])}</div>
         <div>
-         ${
-  isMobile
-    ? `<span style="cursor:pointer; white-space:nowrap;"
-         onclick="event.stopPropagation();
-         openDrawer(
-           '${pic.salesPIC}',
-           '${c.customerName}',
-           '${sum(c.totals)}',
-           '${c.forecast || ""}'
-         )">
-         ${
-           c.forecast
-             ? `${fmt(c.forecast)} <span style="opacity:.6">✏️</span>`
-             : `<span style="opacity:.7">✏️ Add</span>`
-         }
-       </span>`
-    : `<input type="text" value="${c.forecast||""}"
-         onclick="event.stopPropagation()"
-         onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">`
-}
+          ${
+            isMobile
+              ? `<span class="${c.forecast?'editable-value':'editable-placeholder'}"
+                   onclick="event.stopPropagation();
+                   openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">
+                   ${c.forecast?fmt(c.forecast):'Add'}
+                 </span>`
+              : `<input type="text" value="${c.forecast||""}"
+                   onclick="event.stopPropagation()"
+                   onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">`
+          }
         </div>`;
 
       wrap.appendChild(r);
@@ -447,17 +438,26 @@ function render(data){
   });
 }
 
-/* ================= SAVE ================= */
 function saveForecast(pic,customer,value){
+  const val=n(value);
   fetch(API_URL,{
     method:"POST",
     body:JSON.stringify({
       action:"updateForecast",
       salesPIC:pic,
       customer,
-      forecast:n(value)
+      forecast:val
     })
   }).then(()=>{
+    preloadedData.forEach(p=>{
+      if(p.salesPIC===pic){
+        Object.values(p.customers).forEach(c=>{
+          if(c.customerName===customer) c.forecast=val;
+        });
+      }
+    });
+    render(preloadedData);
+    updateSummary(preloadedData);
     toast.style.display="block";
     setTimeout(()=>toast.style.display="none",2000);
   });
