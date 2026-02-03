@@ -182,25 +182,25 @@ input {
 }
 
 /* ================= MOBILE ================= */
-@media (max-width:768px) {
+@media (max-width: 768px) {
 
   .row {
-    /* Name grows, numbers shrink to content */
     grid-template-columns:
-      minmax(140px, 1.8fr)   /* Name */
-      minmax(70px, auto)     /* Total OS */
-      minmax(70px, auto)     /* On Acc */
-      minmax(55px, auto)     /* 90+ */
-      minmax(55px, auto)     /* 60+ */
-      minmax(55px, auto)     /* 30+ */
-      minmax(55px, auto)     /* 1+ */
-      minmax(70px, auto);    /* Fcst */
+      150px   /* Name */
+      80px    /* Total OS */
+      75px    /* On Acc */
+      65px    /* 90+ */
+      65px    /* 60+ */
+      65px    /* 30+ */
+      65px    /* 1+ */
+      80px;   /* Fcst */
 
-    column-gap: 4px;         /* tighter */
+    gap: 6px;
+    min-width: 650px;  /* important: prevents over-shrinking */
   }
 
   .row > div {
-    padding-right: 4px;      /* reduce dead padding */
+    padding-right: 4px;
   }
 }
 </style>
