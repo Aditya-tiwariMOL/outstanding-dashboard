@@ -201,7 +201,6 @@ input {
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
-
 const isMobile = window.innerWidth <= 768;
 
 fetch(API_URL)
@@ -239,6 +238,9 @@ function render(data) {
   const app = document.getElementById("app");
   app.innerHTML = "";
 
+  let openPIC = null;
+  let openCustomer = null;
+
   data.forEach(pic => {
     const card = document.createElement("div");
     card.className = "card";
@@ -258,13 +260,17 @@ function render(data) {
     const customerContainer = document.createElement("div");
     customerContainer.className = "hidden";
 
-    picRow.onclick = () => customerContainer.classList.toggle("hidden");
+    picRow.onclick = () => {
+      if (openPIC && openPIC !== customerContainer) openPIC.classList.add("hidden");
+      customerContainer.classList.toggle("hidden");
+      openPIC = customerContainer.classList.contains("hidden") ? null : customerContainer;
+    };
 
     Object.values(pic.customers).forEach(c => {
-      const row = document.createElement("div");
-      row.className = "row customer";
+      const customerRow = document.createElement("div");
+      customerRow.className = "row customer";
 
-      row.innerHTML = `
+      customerRow.innerHTML = `
         <div>${c.customerName}</div>
         <div>${formatNumber(sum(c.totals))}</div>
         <div class="on-account">${formatNumber(c.onAccount || 0)}</div>
@@ -275,10 +281,18 @@ function render(data) {
           <input type="number"
             value="${c.forecast || ""}"
             onclick="event.stopPropagation()"
-            onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value,this)">
+            onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
         </div>
       `;
-      customerContainer.appendChild(row);
+
+      const invoiceContainer = document.createElement("div");
+      invoiceContainer.className = "hidden";
+
+      customerRow.onclick = () => {
+        if (openCustomer && openCustomer !== invoiceContainer) openCustomer.classList.add("hidden");
+        invoiceContainer.classList.toggle("hidden");
+        openCustomer = invoiceContainer.classList.contains("hidden") ? null : invoiceContainer;
+      };
 
       c.invoices.forEach(i => {
         const inv = document.createElement("div");
@@ -292,8 +306,11 @@ function render(data) {
           <div>${formatNumber(i.ageing["31-60"] || 0)}</div>
           <div></div>
         `;
-        customerContainer.appendChild(inv);
+        invoiceContainer.appendChild(inv);
       });
+
+      customerContainer.appendChild(customerRow);
+      customerContainer.appendChild(invoiceContainer);
     });
 
     card.appendChild(picRow);
