@@ -9,7 +9,7 @@
 :root {
   --mol-blue:#1f4ea3;
   --bg:#f4f6fb;
-  --card:#fff;
+  --card:#ffffff;
   --success:#1a7f37;
   --danger:#c62828;
   --grid:rgba(0,0,0,0.06);
@@ -21,7 +21,7 @@ body {
   background:var(--bg);
 }
 
-/* ===== HEADER ===== */
+/* ================= HEADER ================= */
 .header-wrap {
   text-align:center;
   margin:14px 0 12px;
@@ -37,15 +37,16 @@ h1 {
   font-size:18px;
   font-weight:bold;
 }
+
 .summary .date {
   font-size:11px;
   color:#666;
 }
 
-/* ===== TABLE ===== */
+/* ================= TABLE ================= */
 .table-wrapper {
   overflow-x:auto;
-  padding:0 12px 40px;
+  padding:0 12px 20px;
 }
 
 .row {
@@ -79,26 +80,46 @@ h1 {
   box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
-.customer { background:#eef3ff; }
+.customer {
+  background:#eef3ff;
+}
 
 .invoice {
   padding-left:20px;
-  background:#E5FDEB;
-  border-left:3px solid rgba(26,127,55,.18);
+  background:#E8F1E9;
+  border-left:3px solid rgba(26,127,55,0.18);
   font-size:16px;
 }
 
 .hidden { display:none; }
 
-.on-account { color:var(--success); font-weight:bold; }
-.overdue { color:var(--danger); font-weight:bold; }
+/* ================= COLORS ================= */
+.on-account {
+  color:var(--success);
+  font-weight:bold;
+}
 
+.overdue {
+  color:var(--danger);
+  font-weight:bold;
+}
+
+/* ================= INPUT ================= */
 input {
   width:100%;
   padding:6px;
   font-size:16px;
 }
 
+/* ================= NOTE ================= */
+.total-note {
+  font-size:11px;
+  color:#777;
+  text-align:center;
+  margin:6px 12px 30px;
+}
+
+/* ================= TOAST ================= */
 .toast {
   position:fixed;
   bottom:20px;
@@ -111,7 +132,7 @@ input {
   display:none;
 }
 
-/* ===== MOBILE ===== */
+/* ================= MOBILE ================= */
 @media (max-width:768px) {
   h1 { font-size:18px; }
   .summary .amount { font-size:16px; }
@@ -122,6 +143,10 @@ input {
     padding:12px 6px;
     gap:6px;
     min-width:740px;
+  }
+
+  .total-note {
+    font-size:10px;
   }
 }
 </style>
@@ -147,7 +172,12 @@ input {
     <div>30–60</div>
     <div>Forecast</div>
   </div>
+
   <div id="app"></div>
+</div>
+
+<div class="total-note">
+  * Total outstanding includes 1–30 days bucket (not displayed separately).
 </div>
 
 <div class="toast" id="toast">Forecast updated</div>
@@ -169,26 +199,34 @@ function formatNumber(val) {
 }
 
 function sum(t) {
-  return toNumber(t["90+"]) + toNumber(t["61-90"]) +
-         toNumber(t["31-60"]) + toNumber(t["1-30"]);
+  return toNumber(t["90+"]) +
+         toNumber(t["61-90"]) +
+         toNumber(t["31-60"]) +
+         toNumber(t["1-30"]);
 }
 
 /* ===== FETCH ===== */
 fetch(API_URL)
   .then(r => r.json())
-  .then(d => { render(d); updateSummary(d); });
+  .then(d => {
+    render(d);
+    updateSummary(d);
+  });
 
 function updateSummary(data) {
   let total = 0, onAcc = 0;
+
   data.forEach(p => {
     total += sum(p.totals);
     Object.values(p.customers).forEach(c => {
       onAcc += toNumber(c.onAccount);
     });
   });
-  netOutstanding.innerText =
+
+  document.getElementById("netOutstanding").innerText =
     "Net Outstanding: ₹" + formatNumber(total - onAcc);
-  lastUpdated.innerText =
+
+  document.getElementById("lastUpdated").innerText =
     "Last refreshed: " + new Date().toLocaleString();
 }
 
@@ -218,8 +256,9 @@ function render(data) {
     customerWrap.className = "hidden";
 
     picRow.onclick = () => {
-      if (openPIC && openPIC !== customerWrap)
+      if (openPIC && openPIC !== customerWrap) {
         openPIC.classList.add("hidden");
+      }
       customerWrap.classList.toggle("hidden");
       openPIC = customerWrap.classList.contains("hidden") ? null : customerWrap;
       customerWrap.querySelectorAll(".invoice-wrap")
@@ -289,8 +328,9 @@ function saveForecast(pic, customer, value) {
       forecast: toNumber(value)
     })
   }).then(() => {
-    toast.style.display = "block";
-    setTimeout(() => toast.style.display = "none", 2000);
+    const t = document.getElementById("toast");
+    t.style.display = "block";
+    setTimeout(() => t.style.display = "none", 2000);
   });
 }
 </script>
