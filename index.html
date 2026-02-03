@@ -7,164 +7,121 @@
 
 <style>
 :root {
-  --mol-blue: #1f4ea3;
-  --bg: #f4f6fb;
-  --card: #ffffff;
-  --success: #1a7f37;
-  --danger: #c62828;
-  --grid: rgba(0,0,0,0.06);
+  --mol-blue:#1f4ea3;
+  --bg:#f4f6fb;
+  --card:#fff;
+  --success:#1a7f37;
+  --danger:#c62828;
+  --grid:rgba(0,0,0,0.06);
 }
 
-/* ================= BASE ================= */
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: var(--bg);
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
 }
 
-/* ================= HEADER ================= */
+/* ===== HEADER ===== */
 .header-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin: 14px 0 12px;
+  text-align:center;
+  margin:14px 0 12px;
 }
 
 h1 {
-  margin: 0;
-  font-size: 22px;
-  color: var(--mol-blue);
-}
-
-.summary {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin:0;
+  font-size:22px;
+  color:var(--mol-blue);
 }
 
 .summary .amount {
-  font-size: 18px;
-  font-weight: bold;
+  font-size:18px;
+  font-weight:bold;
 }
-
 .summary .date {
-  font-size: 11px;
-  color: #666;
+  font-size:11px;
+  color:#666;
 }
 
-/* ================= TABLE ================= */
+/* ===== TABLE ===== */
 .table-wrapper {
-  overflow-x: auto;
-  padding: 0 12px 40px;
+  overflow-x:auto;
+  padding:0 12px 40px;
 }
 
 .row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 8px;
-  padding: 12px;
-  align-items: center;
-  min-width: 900px;
-  font-size: 18px;
-  background: #fff;
-  border-bottom: 1px solid var(--grid);
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  gap:8px;
+  padding:12px;
+  min-width:900px;
+  background:#fff;
+  border-bottom:1px solid var(--grid);
+  font-size:18px;
 }
 
 .row > div {
-  border-right: 1px solid var(--grid);
-  padding-right: 6px;
+  border-right:1px solid var(--grid);
+  padding-right:6px;
 }
-
-.row > div:last-child {
-  border-right: none;
-}
+.row > div:last-child { border-right:none; }
 
 .header {
-  background: var(--mol-blue);
-  color: #fff;
-  font-weight: bold;
-  border-radius: 6px;
+  background:var(--mol-blue);
+  color:#fff;
+  font-weight:bold;
+  border-radius:6px;
 }
 
-/* 🔥 IMPORTANT FIX: NO overflow clipping */
 .card {
-  background: var(--card);
-  border-radius: 6px;
-  margin-top: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background:var(--card);
+  border-radius:6px;
+  margin-top:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
 }
 
-.customer {
-  background: #eef3ff;
-}
+.customer { background:#eef3ff; }
 
 .invoice {
-  padding-left: 20px;
-  font-size: 16px;
-  background: #E5FDEB;
-  border-left: 3px solid rgba(31,78,163,0.15);
+  padding-left:20px;
+  background:#E5FDEB;
+  border-left:3px solid rgba(26,127,55,.18);
+  font-size:16px;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display:none; }
 
-/* ================= COLORS ================= */
-.on-account {
-  color: var(--success);
-  font-weight: bold;
-}
+.on-account { color:var(--success); font-weight:bold; }
+.overdue { color:var(--danger); font-weight:bold; }
 
-.overdue {
-  color: var(--danger);
-  font-weight: bold;
-}
-
-/* ================= INPUT ================= */
 input {
-  width: 100%;
-  padding: 6px;
-  font-size: 16px;
+  width:100%;
+  padding:6px;
+  font-size:16px;
 }
 
-/* ================= TOAST ================= */
 .toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--mol-blue);
-  color: #fff;
-  padding: 10px 18px;
-  border-radius: 20px;
-  display: none;
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--mol-blue);
+  color:#fff;
+  padding:10px 18px;
+  border-radius:20px;
+  display:none;
 }
 
-/* ================= MOBILE ================= */
-@media (max-width: 768px) {
-
-  h1 { font-size: 18px; }
-  .summary .amount { font-size: 16px; }
-  .summary .date { font-size: 10px; }
+/* ===== MOBILE ===== */
+@media (max-width:768px) {
+  h1 { font-size:18px; }
+  .summary .amount { font-size:16px; }
+  .summary .date { font-size:10px; }
 
   .row {
-    font-size: 15px;
-    padding: 12px 6px;
-    gap: 6px;
-    min-width: 740px;
-  }
-
-  /* Softer grid on mobile */
-  .row > div {
-    border-right: 1px solid rgba(0,0,0,0.04);
-  }
-
-  .row > div:first-child {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-size:15px;
+    padding:12px 6px;
+    gap:6px;
+    min-width:740px;
   }
 }
 </style>
@@ -176,7 +133,7 @@ input {
   <h1>Outstanding Receivables</h1>
   <div class="summary">
     <div class="amount" id="netOutstanding">—</div>
-    <div class="date" id="lastUpdated">Last updated: —</div>
+    <div class="date" id="lastUpdated">—</div>
   </div>
 </div>
 
@@ -190,7 +147,6 @@ input {
     <div>30–60</div>
     <div>Forecast</div>
   </div>
-
   <div id="app"></div>
 </div>
 
@@ -200,29 +156,46 @@ input {
 const API_URL = "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 const isMobile = window.innerWidth <= 768;
 
+/* ===== NUMBER SAFETY ===== */
+function toNumber(val) {
+  if (val === null || val === undefined || val === "") return 0;
+  return Number(String(val).replace(/,/g, ""));
+}
+
+function formatNumber(val) {
+  const n = toNumber(val);
+  if (!isMobile) return n.toLocaleString();
+  return n >= 1000 ? Math.round(n / 1000) + "K" : n;
+}
+
+function sum(t) {
+  return toNumber(t["90+"]) + toNumber(t["61-90"]) +
+         toNumber(t["31-60"]) + toNumber(t["1-30"]);
+}
+
+/* ===== FETCH ===== */
 fetch(API_URL)
   .then(r => r.json())
   .then(d => { render(d); updateSummary(d); });
 
-function formatNumber(v) {
-  if (!isMobile) return v.toLocaleString();
-  return v >= 1000 ? Math.round(v / 1000) + "K" : v;
-}
-
 function updateSummary(data) {
-  let out = 0, onAcc = 0;
+  let total = 0, onAcc = 0;
   data.forEach(p => {
-    out += sum(p.totals);
-    Object.values(p.customers).forEach(c => onAcc += c.onAccount || 0);
+    total += sum(p.totals);
+    Object.values(p.customers).forEach(c => {
+      onAcc += toNumber(c.onAccount);
+    });
   });
-  netOutstanding.innerText = "Net Outstanding: ₹" + formatNumber(out - onAcc);
-  lastUpdated.innerText = "Last refreshed: " + new Date().toLocaleString();
+  netOutstanding.innerText =
+    "Net Outstanding: ₹" + formatNumber(total - onAcc);
+  lastUpdated.innerText =
+    "Last refreshed: " + new Date().toLocaleString();
 }
 
+/* ===== RENDER ===== */
 function render(data) {
   const app = document.getElementById("app");
   app.innerHTML = "";
-
   let openPIC = null;
 
   data.forEach(pic => {
@@ -235,87 +208,86 @@ function render(data) {
       <div>${pic.salesPIC}</div>
       <div>${formatNumber(sum(pic.totals))}</div>
       <div></div>
-      <div class="overdue">${formatNumber(pic.totals["90+"] || 0)}</div>
-      <div>${formatNumber(pic.totals["61-90"] || 0)}</div>
-      <div>${formatNumber(pic.totals["31-60"] || 0)}</div>
+      <div class="overdue">${formatNumber(pic.totals["90+"])}</div>
+      <div>${formatNumber(pic.totals["61-90"])}</div>
+      <div>${formatNumber(pic.totals["31-60"])}</div>
       <div></div>
     `;
 
-    const customerContainer = document.createElement("div");
-    customerContainer.className = "hidden";
+    const customerWrap = document.createElement("div");
+    customerWrap.className = "hidden";
 
     picRow.onclick = () => {
-      if (openPIC && openPIC !== customerContainer) {
+      if (openPIC && openPIC !== customerWrap)
         openPIC.classList.add("hidden");
-      }
-      const open = customerContainer.classList.toggle("hidden") === false;
-      openPIC = open ? customerContainer : null;
-
-      customerContainer.querySelectorAll(".invoice-container")
-        .forEach(ic => ic.classList.add("hidden"));
+      customerWrap.classList.toggle("hidden");
+      openPIC = customerWrap.classList.contains("hidden") ? null : customerWrap;
+      customerWrap.querySelectorAll(".invoice-wrap")
+        .forEach(i => i.classList.add("hidden"));
     };
 
     Object.values(pic.customers).forEach(c => {
-      const customerRow = document.createElement("div");
-      customerRow.className = "row customer";
-      customerRow.innerHTML = `
+      const cRow = document.createElement("div");
+      cRow.className = "row customer";
+      cRow.innerHTML = `
         <div>${c.customerName}</div>
         <div>${formatNumber(sum(c.totals))}</div>
-        <div class="on-account">${formatNumber(c.onAccount || 0)}</div>
-        <div class="overdue">${formatNumber(c.totals["90+"] || 0)}</div>
-        <div>${formatNumber(c.totals["61-90"] || 0)}</div>
-        <div>${formatNumber(c.totals["31-60"] || 0)}</div>
+        <div class="on-account">${formatNumber(c.onAccount)}</div>
+        <div class="overdue">${formatNumber(c.totals["90+"])}</div>
+        <div>${formatNumber(c.totals["61-90"])}</div>
+        <div>${formatNumber(c.totals["31-60"])}</div>
         <div>
-          <input type="number"
+          <input type="text"
             value="${c.forecast || ""}"
             onclick="event.stopPropagation()"
             onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
         </div>
       `;
 
-      const invoiceContainer = document.createElement("div");
-      invoiceContainer.className = "invoice-container hidden";
+      const invWrap = document.createElement("div");
+      invWrap.className = "invoice-wrap hidden";
 
-      customerRow.onclick = () => {
-        const isOpen = !invoiceContainer.classList.contains("hidden");
-        customerContainer.querySelectorAll(".invoice-container")
-          .forEach(ic => ic.classList.add("hidden"));
-        if (!isOpen) invoiceContainer.classList.remove("hidden");
+      cRow.onclick = () => {
+        const open = !invWrap.classList.contains("hidden");
+        customerWrap.querySelectorAll(".invoice-wrap")
+          .forEach(i => i.classList.add("hidden"));
+        if (!open) invWrap.classList.remove("hidden");
       };
 
       c.invoices.forEach(i => {
-        const inv = document.createElement("div");
-        inv.className = "row invoice";
-        inv.innerHTML = `
+        const r = document.createElement("div");
+        r.className = "row invoice";
+        r.innerHTML = `
           <div>${i.invoiceNo}</div>
           <div>${formatNumber(i.total)}</div>
           <div></div>
-          <div class="overdue">${formatNumber(i.ageing["90+"] || 0)}</div>
-          <div>${formatNumber(i.ageing["61-90"] || 0)}</div>
-          <div>${formatNumber(i.ageing["31-60"] || 0)}</div>
+          <div class="overdue">${formatNumber(i.ageing["90+"])}</div>
+          <div>${formatNumber(i.ageing["61-90"])}</div>
+          <div>${formatNumber(i.ageing["31-60"])}</div>
           <div></div>
         `;
-        invoiceContainer.appendChild(inv);
+        invWrap.appendChild(r);
       });
 
-      customerContainer.appendChild(customerRow);
-      customerContainer.appendChild(invoiceContainer);
+      customerWrap.appendChild(cRow);
+      customerWrap.appendChild(invWrap);
     });
 
     card.appendChild(picRow);
-    card.appendChild(customerContainer);
+    card.appendChild(customerWrap);
     app.appendChild(card);
   });
 }
 
-function sum(t) {
-  return (t["90+"]||0)+(t["61-90"]||0)+(t["31-60"]||0)+(t["1-30"]||0);
-}
-
 function saveForecast(pic, customer, value) {
   fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action:"updateForecast", salesPIC:pic, customer, forecast:Number(value) })
+    method:"POST",
+    body:JSON.stringify({
+      action:"updateForecast",
+      salesPIC:pic,
+      customer:customer,
+      forecast: toNumber(value)
+    })
   }).then(() => {
     toast.style.display = "block";
     setTimeout(() => toast.style.display = "none", 2000);
