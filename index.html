@@ -21,7 +21,7 @@ body {
   background:var(--bg);
 }
 
-/* ================= LOGIN ================= */
+/* LOGIN */
 .login-overlay {
   position:fixed;
   inset:0;
@@ -31,7 +31,6 @@ body {
   justify-content:center;
   z-index:9999;
 }
-
 .login-box {
   background:#fff;
   padding:30px 26px;
@@ -41,75 +40,29 @@ body {
   text-align:center;
   box-shadow:0 10px 30px rgba(0,0,0,.15);
 }
-
-.login-box img {
-  max-width:150px;
-  margin-bottom:12px;
+.login-box img { max-width:150px; margin-bottom:12px; }
+.login-box h2 { font-size:16px; color:var(--mol-blue); margin-bottom:16px; }
+.login-box input, .login-box button {
+  width:100%; max-width:260px; margin:0 auto 12px;
+  display:block; padding:10px; font-size:15px;
 }
-
-.login-box h2 {
-  font-size:16px;
-  color:var(--mol-blue);
-  margin-bottom:16px;
-}
-
-.login-box input,
 .login-box button {
-  width:100%;
-  max-width:260px;
-  margin:0 auto 12px;
-  display:block;
-  padding:10px;
-  font-size:15px;
+  background:var(--mol-blue); color:#fff;
+  border:none; border-radius:4px; cursor:pointer;
 }
+.login-error { color:#c62828; font-size:12px; display:none; }
 
-.login-box button {
-  background:var(--mol-blue);
-  color:#fff;
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
-}
+/* HEADER */
+.header-wrap { text-align:center; margin:16px 0 14px; }
+.header-wrap h1 { margin:0; font-size:20px; color:var(--mol-blue); font-weight:600; }
+.summary .amount { font-size:17px; font-weight:600; }
+.summary .date { font-size:11px; color:#777; }
 
-.login-error {
-  color:#c62828;
-  font-size:12px;
-  display:none;
-}
-
-/* ================= HEADER ================= */
-.header-wrap {
-  text-align:center;
-  margin:16px 0 14px;
-}
-
-.header-wrap h1 {
-  margin:0;
-  font-size:20px;
-  color:var(--mol-blue);
-  font-weight:600;
-}
-
-.summary .amount {
-  font-size:17px;
-  font-weight:600;
-}
-
-.summary .date {
-  font-size:11px;
-  color:#777;
-}
-
-/* ================= TABLE ================= */
-.table-wrapper {
-  overflow-x:auto;
-  padding:0 12px 30px;
-}
-
+/* TABLE */
+.table-wrapper { overflow-x:auto; padding:0 12px 30px; }
 .row {
   display:grid;
-  grid-template-columns:
-    2fr 1.1fr 1fr 0.9fr 0.9fr 0.9fr 0.9fr 1fr;
+  grid-template-columns:2fr 1.1fr 1fr 0.9fr 0.9fr 0.9fr 0.9fr 1fr;
   gap:6px;
   padding:10px;
   min-width:900px;
@@ -117,11 +70,7 @@ body {
   border-bottom:1px solid var(--grid);
   font-size:18px;
 }
-
-.row > div {
-  border-right:1px solid var(--grid);
-  padding-right:6px;
-}
+.row > div { border-right:1px solid var(--grid); padding-right:6px; }
 .row > div:last-child { border-right:none; }
 
 .header {
@@ -130,64 +79,55 @@ body {
   font-weight:bold;
   border-radius:6px;
 }
-
 .card {
   background:#fff;
   border-radius:6px;
   margin-top:10px;
   box-shadow:0 2px 6px rgba(0,0,0,.08);
 }
-
 .customer { background:#eef3ff; }
-
 .invoice {
   padding-left:18px;
   background:#E5FDEB;
   border-left:3px solid rgba(26,127,55,.18);
   font-size:16px;
 }
-
 .hidden { display:none; }
-
 .on-account { color:var(--success); font-weight:bold; }
 .overdue { color:var(--danger); font-weight:bold; }
 
+/* Forecast styles */
 .editable-value {
   color:var(--mol-blue);
   border-bottom:1px dashed rgba(31,78,163,.4);
   cursor:pointer;
 }
-
 .editable-placeholder {
   color:#999;
   font-style:italic;
   cursor:pointer;
 }
 
+/* MOBILE */
 @media (max-width:768px) {
   .row {
-    grid-template-columns:
-      150px 80px 75px 65px 65px 65px 65px 90px;
+    grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px;
     min-width:670px;
     font-size:15px;
   }
 }
 
-/* ================= DRAWER ================= */
+/* DRAWER (MOBILE ONLY) */
 .drawer {
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.35);
   z-index:10000;
 }
-
 .drawer.hidden { display:none; }
-
 .drawer-content {
   position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
+  bottom:0; left:0; right:0;
   background:#fff;
   padding:16px;
   border-radius:14px 14px 0 0;
@@ -195,43 +135,18 @@ body {
   overflow-y:auto;
   padding-bottom:env(safe-area-inset-bottom);
 }
-
-.drawer-title {
-  font-size:16px;
-  font-weight:bold;
-}
-
-.drawer-sub {
-  font-size:13px;
-  color:#666;
-  margin-bottom:12px;
-}
-
+.drawer-title { font-size:16px; font-weight:bold; }
+.drawer-sub { font-size:13px; color:#666; margin-bottom:12px; }
 .drawer-content input {
-  width:100%;
-  padding:10px;
-  font-size:16px;
-  margin-bottom:14px;
+  width:100%; padding:10px; font-size:16px; margin-bottom:14px;
 }
-
-.drawer-actions {
-  display:flex;
-  gap:10px;
-}
-
-.drawer-actions button {
-  flex:1;
-  padding:10px;
-  font-size:15px;
-}
-
+.drawer-actions { display:flex; gap:10px; }
+.drawer-actions button { flex:1; padding:10px; font-size:15px; }
 .drawer-actions .primary {
-  background:var(--mol-blue);
-  color:#fff;
-  border:none;
+  background:var(--mol-blue); color:#fff; border:none;
 }
 
-/* ================= TOAST ================= */
+/* TOAST */
 .toast {
   position:fixed;
   bottom:20px;
@@ -294,13 +209,12 @@ body {
 <div class="toast" id="toast">Forecast updated</div>
 
 <script>
-/* ================= GLOBAL STATE ================= */
+/* GLOBAL STATE */
 let openCustomer = null;
 let drawerPIC = null;
 let drawerCustomerName = null;
 let preloadedData = null;
 
-/* ================= CONFIG ================= */
 const API_URL =
 "https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
@@ -308,16 +222,12 @@ const PASSWORD_HASH =
 "46d29dfc245f5708edf4d74c58551f5d4bcf0284690b478ecf7e8c021cb0c2f5";
 
 const isMobile = window.innerWidth <= 768;
-
-/* ================= DATA PROMISE ================= */
 const dataPromise = fetch(API_URL).then(r => r.json());
 
-/* ================= UTILS ================= */
 const n = v => Number(String(v||0).replace(/,/g,""));
 const fmt = v => isMobile && n(v)>=1000 ? Math.round(n(v)/1000)+"K" : n(v).toLocaleString();
 const sum = t => n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-/* ================= AUTH ================= */
 async function sha256(t){
   const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
   return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
@@ -328,19 +238,14 @@ async function checkPassword(){
     loginError.style.display="block";
     return;
   }
-
   loginOverlay.style.display="none";
   appContainer.style.display="block";
 
-  if(!preloadedData){
-    preloadedData = await dataPromise;
-  }
-
+  if(!preloadedData) preloadedData = await dataPromise;
   render(preloadedData);
   updateSummary(preloadedData);
 }
 
-/* ================= SUMMARY ================= */
 function updateSummary(data){
   let t=0,o=0;
   data.forEach(p=>{
@@ -351,33 +256,24 @@ function updateSummary(data){
   lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
 }
 
-/* ================= DRAWER ================= */
+/* DRAWER */
 function openDrawer(pic, customer, total, forecast){
+  if(!isMobile) return;   // 🔴 DESKTOP NEVER USES DRAWER
   drawerPIC = pic;
   drawerCustomerName = customer;
-
   drawerCustomer.innerText = customer;
   drawerTotal.innerText = "Total OS: ₹"+fmt(total);
-
   drawerInput.value = forecast || "";
   forecastDrawer.classList.remove("hidden");
-
-  requestAnimationFrame(()=>{
-    drawerInput.focus();
-    drawerInput.scrollIntoView({block:"center"});
-  });
+  requestAnimationFrame(()=>drawerInput.focus());
 }
-
-function closeDrawer(){
-  forecastDrawer.classList.add("hidden");
-}
-
+function closeDrawer(){ forecastDrawer.classList.add("hidden"); }
 function saveDrawerForecast(){
   saveForecast(drawerPIC, drawerCustomerName, drawerInput.value);
   closeDrawer();
 }
 
-/* ================= RENDER ================= */
+/* RENDER */
 function render(data){
   app.innerHTML="";
   let openPIC=null;
@@ -398,7 +294,6 @@ function render(data){
       <div>${fmt(pic.totals["31-60"])}</div>
       <div>${fmt(pic.totals["1-30"])}</div>
       <div></div>`;
-
     const wrap=document.createElement("div");
     wrap.className="hidden";
 
@@ -412,7 +307,6 @@ function render(data){
     Object.values(pic.customers).forEach(c=>{
       const r=document.createElement("div");
       r.className="row customer";
-
       const invoiceWrap=document.createElement("div");
       invoiceWrap.className="hidden";
 
@@ -425,40 +319,22 @@ function render(data){
         <div>${fmt(c.totals["31-60"])}</div>
         <div>${fmt(c.totals["1-30"])}</div>
         <div>
-  ${
-    isMobile
-      ? `
-        <span class="${c.forecast?'editable-value':'editable-placeholder'}"
-          onclick="event.stopPropagation();
-          openDrawer(
-            '${pic.salesPIC}',
-            '${c.customerName}',
-            '${sum(c.totals)}',
-            '${c.forecast||""}'
-          )">
-          ${c.forecast ? fmt(c.forecast) : 'Add'}
-        </span>
-      `
-      : `
-        <input type="text"
-          value="${c.forecast || ''}"
-          placeholder="Enter"
-          onclick="event.stopPropagation()"
-          onchange="saveForecast(
-            '${pic.salesPIC}',
-            '${c.customerName}',
-            this.value
-          )"
-          style="
-            width:100%;
-            padding:6px;
-            font-size:14px;
-            box-sizing:border-box;
-          "
-        />
-      `
-  }
-</div>
+          ${
+            isMobile
+              ? `<span class="${c.forecast?'editable-value':'editable-placeholder'}"
+                   onclick="event.stopPropagation();
+                   openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">
+                   ${c.forecast?fmt(c.forecast):'Add'}
+                 </span>`
+              : `<input type="text"
+                   value="${c.forecast||''}"
+                   placeholder="Enter"
+                   onclick="event.stopPropagation()"
+                   onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)"
+                   style="width:100%;padding:6px;font-size:14px;box-sizing:border-box;">`
+          }
+        </div>`;
+
       r.onclick=()=>{
         if(openCustomer && openCustomer!==invoiceWrap){
           openCustomer.classList.add("hidden");
@@ -492,7 +368,7 @@ function render(data){
   });
 }
 
-/* ================= SAVE ================= */
+/* SAVE */
 function saveForecast(pic,customer,value){
   const val=n(value);
   fetch(API_URL,{
