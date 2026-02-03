@@ -425,13 +425,40 @@ function render(data){
         <div>${fmt(c.totals["31-60"])}</div>
         <div>${fmt(c.totals["1-30"])}</div>
         <div>
-          <span class="${c.forecast?'editable-value':'editable-placeholder'}"
-            onclick="event.stopPropagation();
-            openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">
-            ${c.forecast?fmt(c.forecast):'Add'}
-          </span>
-        </div>`;
-
+  ${
+    isMobile
+      ? `
+        <span class="${c.forecast?'editable-value':'editable-placeholder'}"
+          onclick="event.stopPropagation();
+          openDrawer(
+            '${pic.salesPIC}',
+            '${c.customerName}',
+            '${sum(c.totals)}',
+            '${c.forecast||""}'
+          )">
+          ${c.forecast ? fmt(c.forecast) : 'Add'}
+        </span>
+      `
+      : `
+        <input type="text"
+          value="${c.forecast || ''}"
+          placeholder="Enter"
+          onclick="event.stopPropagation()"
+          onchange="saveForecast(
+            '${pic.salesPIC}',
+            '${c.customerName}',
+            this.value
+          )"
+          style="
+            width:100%;
+            padding:6px;
+            font-size:14px;
+            box-sizing:border-box;
+          "
+        />
+      `
+  }
+</div>
       r.onclick=()=>{
         if(openCustomer && openCustomer!==invoiceWrap){
           openCustomer.classList.add("hidden");
