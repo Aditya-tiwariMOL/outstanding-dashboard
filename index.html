@@ -56,27 +56,52 @@ body {
 }
 .login-error { color:#c62828; font-size:12px; display:none; }
 
-/* HEADER & SUMMARY */
-.header-wrap { text-align:center; margin:16px 0 14px; }
-.header-wrap h1 { margin:0; font-size:20px; color:var(--mol-blue); font-weight:600; }
-.summary .amount { font-size:17px; font-weight:600; }
-.summary .date { font-size:11px; color:#777; }
+/* NEW MODERN HEADER */
+.header-wrap {
+  background: #fff;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--grid);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+.title-area { display: flex; flex-direction: column; gap: 2px; }
+.title-area h1 {
+  margin: 0; font-size: 18px; color: var(--mol-blue);
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.date-status {
+  font-size: 11px; color: #888;
+  display: flex; align-items: center; gap: 5px;
+}
+.date-status::before {
+  content: ''; width: 6px; height: 6px;
+  background: #22c55e; border-radius: 50%; display: inline-block;
+}
+.summary-badge {
+  background: #eef3ff; padding: 8px 16px;
+  border-radius: 8px; border: 1px solid rgba(31, 78, 163, 0.1); text-align: right;
+}
+.summary-label {
+  display: block; font-size: 10px; color: var(--mol-blue);
+  font-weight: bold; text-transform: uppercase; margin-bottom: 2px;
+}
+.amount-highlight { font-size: 20px; font-weight: 700; color: var(--mol-blue); }
 
 /* TABLE STYLES */
 .table-wrapper { overflow-x:auto; padding:0 12px 30px; }
 .row {
   display:grid;
   grid-template-columns:2fr 1.1fr 1fr 0.9fr 0.9fr 0.9fr 0.9fr 1fr;
-  gap:6px;
-  padding:10px;
-  min-width:900px;
-  background:#fff;
-  border-bottom:1px solid var(--grid);
-  font-size:18px; 
+  gap:6px; padding:10px; min-width:900px;
+  background:#fff; border-bottom:1px solid var(--grid); font-size:18px; 
 }
 .row > div { border-right:1px solid var(--grid); padding-right:6px; }
 .row > div:last-child { border-right:none; }
-
 .header { background:var(--mol-blue); color:#fff; font-weight:bold; border-radius:6px; }
 .card { background:#fff; border-radius:6px; margin-top:10px; box-shadow:0 2px 6px rgba(0,0,0,.08); }
 .customer { background:#eef3ff; }
@@ -85,27 +110,25 @@ body {
 .on-account { color:var(--success); font-weight:bold; }
 .overdue { color:var(--danger); font-weight:bold; }
 
-/* DASHBOARD LAYOUT - Reduced padding for more space */
+/* DASHBOARD LAYOUT */
 #dashboard { padding: 15px 8px 60px; max-width: 1200px; margin: 0 auto; }
 .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
 .chart-box { 
-    background: #fff; 
-    padding: 12px 8px; /* Reduced side padding */
-    border-radius: 12px; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-    border: 1px solid rgba(0,0,0,0.03);
-    display: flex;
-    flex-direction: column;
-    min-height: 420px;
+    background: #fff; padding: 12px 8px; border-radius: 12px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03);
+    display: flex; flex-direction: column; min-height: 420px;
 }
 .chart-box.tall { min-height: 600px; }
 
 @media (max-width:768px) {
+  .header-wrap { flex-direction: column; text-align: center; padding: 12px; }
+  .summary-badge { width: 100%; text-align: center; }
   .row { grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px; min-width:670px; font-size:15px; }
   .dashboard-grid { grid-template-columns: 1fr; }
   .chart-box.tall { min-height: 550px; }
 }
 
+/* DRAWER & TOAST */
 .drawer { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; }
 .drawer.hidden { display:none; }
 .drawer-content { position:absolute; bottom:0; left:0; right:0; background:#fff; padding:16px; border-radius:14px 14px 0 0; max-height:90vh; overflow-y:auto; }
@@ -130,10 +153,13 @@ body {
 
 <div id="appContainer" style="display:none;">
   <div class="header-wrap">
-    <h1>Outstanding Receivables</h1>
-    <div class="summary">
-      <div class="amount" id="netOutstanding">—</div>
-      <div class="date" id="lastUpdated">—</div>
+    <div class="title-area">
+      <h1>Receivables Dashboard</h1>
+      <div class="date-status" id="lastUpdated">Syncing...</div>
+    </div>
+    <div class="summary-badge">
+      <span class="summary-label">Net Outstanding</span>
+      <div class="amount-highlight" id="netOutstanding">₹0</div>
     </div>
   </div>
 
@@ -186,13 +212,11 @@ const n=v=>Number(String(v||0).replace(/,/g,""));
 const fmt=v=>isMobile&&n(v)>=1000?Math.round(n(v)/1000)+"K":n(v).toLocaleString();
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-/** * Splits long names into multi-line arrays for Chart.js 
- * Wraps after every 2-3 words depending on length
- */
+// Labels wrap to 2 lines to save horizontal space
 const wrapLabel = (str) => {
     const words = str.split(' ');
     if (words.length <= 2) return str;
-    return [words.slice(0, 2).join(' '), words.slice(2, 4).join(' ') + (words.length > 4 ? '...' : '')];
+    return [words.slice(0, 2).join(' '), words.slice(2, 4).join(' ') + (words.length > 4 ? '..' : '')];
 };
 
 async function sha256(t){
@@ -218,8 +242,8 @@ function updateSummary(data){
     t+=sum(p.totals);
     Object.values(p.customers).forEach(c=>o+=n(c.onAccount));
   });
-  netOutstanding.innerText="Net Outstanding: ₹"+fmt(t-o);
-  lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
+  netOutstanding.innerText="₹"+(t-o).toLocaleString();
+  lastUpdated.innerText="Refreshed: "+new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 }
 
 function getAgeingTotals(data){
@@ -243,27 +267,26 @@ function renderDashboard(data){
   const titleSize = isMobile ? 18 : 22;
   const colors = { blue:'#3b82f6', red:'#ef4444', orange:'#f59e0b', yellow:'#eab308', green:'#22c55e' };
 
-  // 1. AGEING DOUGHNUT
-  const [a1,a2,a3,a4] = getAgeingTotals(data);
-  const totalAge = a1+a2+a3+a4;
   ageingChartObj = new Chart(document.getElementById('ageingChart'),{
     type:"doughnut",
     plugins:[ChartDataLabels],
     data:{
       labels:["1-30 Days","31-60 Days","61-90 Days","90+ Days"],
-      datasets:[{ data:[a1,a2,a3,a4], backgroundColor:[colors.green, colors.yellow, colors.orange, colors.red], borderWidth:4, borderColor:'#fff' }]
+      datasets:[{ data:getAgeingTotals(data), backgroundColor:[colors.green, colors.yellow, colors.orange, colors.red], borderWidth:4, borderColor:'#fff' }]
     },
     options:{
       maintainAspectRatio:false, cutout:"50%", 
       plugins:{
         legend:{ position:"bottom", labels:{ usePointStyle:true, padding:10, font:{size: labelSize} } },
         title:{ display:true, text:'Ageing Distribution', font:{size: titleSize, weight:'bold'} },
-        datalabels:{ color:"#fff", font:{weight:'bold', size: labelSize}, formatter:(val)=>(((val/totalAge)*100).toFixed(1))+"%" }
+        datalabels:{ color:"#fff", font:{weight:'bold', size: labelSize}, formatter:(val, ctx)=>{
+          const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+          return ((val/sum)*100).toFixed(1) + "%";
+        }}
       }
     }
   });
 
-  // 2. PIC BAR (Two-line wrap)
   const pic = getPICOutstanding(data);
   picChartObj = new Chart(document.getElementById('picChart'),{
     type:"bar",
@@ -274,7 +297,7 @@ function renderDashboard(data){
     },
     options:{
       maintainAspectRatio:false, indexAxis:'y', 
-      layout:{ padding:{ right: 55, left: 5, top: 0, bottom: 0 } }, 
+      layout:{ padding:{ right: 55, left: 5 } }, 
       plugins:{
         legend:{ display:false },
         title:{ display:true, text:"Top 10 Sales PIC", font:{size: titleSize, weight:'bold'}, padding:15 },
@@ -284,14 +307,10 @@ function renderDashboard(data){
           formatter: (v)=> `₹${Math.round(v/1000)}K`
         }
       },
-      scales:{ 
-        x:{ display:false }, 
-        y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500', lineHeight: 1.1}, padding:8 } } 
-      }
+      scales:{ x:{ display:false }, y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500', lineHeight: 1.1}, padding:8 } } }
     }
   });
 
-  // 3. DEFAULTERS (Two-line wrap)
   const top = getTopDefaulters(data);
   defaulterChartObj = new Chart(document.getElementById('defaulterChart'),{
     type:"bar",
@@ -302,7 +321,7 @@ function renderDashboard(data){
     },
     options:{
       maintainAspectRatio:false, indexAxis:"y", 
-      layout:{ padding:{ right: 55, left: 5, top: 0, bottom: 0 } },
+      layout:{ padding:{ right: 55, left: 5 } },
       plugins:{
         legend:{ display:false },
         title:{ display:true, text:"Top 10 Defaulters (90+ Days)", font:{size: titleSize, weight:'bold', color:colors.red}, padding:15 },
@@ -312,10 +331,7 @@ function renderDashboard(data){
           formatter: (v)=> `₹${Math.round(v/1000)}K`
         }
       },
-      scales:{ 
-        x:{ display:false }, 
-        y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500', lineHeight: 1.1}, padding:8 } } 
-      }
+      scales:{ x:{ display:false }, y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500', lineHeight: 1.1}, padding:8 } } }
     }
   });
 }
