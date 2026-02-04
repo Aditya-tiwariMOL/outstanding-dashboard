@@ -80,50 +80,33 @@ font-size:12px;
 display:none;
 }
 
-/* ================= HEADER ================= */
+<!-- HEADER -->
 
-.modern-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
+<div class="kpi-header">
 
-background:#fff;
-padding:14px 18px;
-border-radius:10px;
-margin:15px 12px;
+  <div class="kpi-left">
 
-box-shadow:0 2px 8px rgba(0,0,0,.05);
-}
+    <h1>Outstanding Receivables</h1>
 
-.header-left h1{
-margin:0;
-font-size:20px;
-color:var(--mol-blue);
-}
+    <div class="updated" id="lastUpdated">—</div>
 
-.header-left .updated{
-font-size:11px;
-color:#64748b;
-margin-top:4px;
-}
+  </div>
 
-.net-box{
-background:#eef3ff;
-padding:10px 16px;
-border-radius:8px;
-text-align:right;
-}
+  <div class="kpi-right">
 
-.net-label{
-font-size:11px;
-color:#475569;
-}
+    <div class="kpi-card">
+      <div class="kpi-label">Net Outstanding</div>
+      <div class="kpi-value" id="netOutstanding">—</div>
+    </div>
 
-.net-value{
-font-size:18px;
-font-weight:600;
-color:#1e40af;
-}
+    <div class="kpi-card forecast">
+      <div class="kpi-label">Forecast Receivables</div>
+      <div class="kpi-value" id="forecastOutstanding">—</div>
+    </div>
+
+  </div>
+
+</div>
 
 /* ================= TABLE ================= */
 
@@ -322,7 +305,93 @@ padding:10px 18px;
 border-radius:20px;
 display:none;
 }
+  
+/* ================= KPI HEADER ================= */
 
+.kpi-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  background:#fff;
+  padding:18px 20px;
+  border-radius:12px;
+  margin:16px 12px;
+
+  box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+
+/* Left */
+
+.kpi-left h1{
+  margin:0;
+  font-size:22px;
+  color:var(--mol-blue);
+  font-weight:600;
+}
+
+.kpi-left .updated{
+  font-size:12px;
+  color:#64748b;
+  margin-top:6px;
+}
+
+/* Right */
+
+.kpi-right{
+  display:flex;
+  gap:12px;
+}
+
+.kpi-card{
+  background:#eef3ff;
+  padding:12px 18px;
+  border-radius:10px;
+  min-width:170px;
+  text-align:right;
+}
+
+.kpi-card.forecast{
+  background:#ecfeff;
+}
+
+.kpi-label{
+  font-size:12px;
+  color:#475569;
+}
+
+.kpi-value{
+  font-size:19px;
+  font-weight:600;
+  color:#1e40af;
+  margin-top:4px;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+
+  .kpi-header{
+    flex-direction:column;
+    gap:12px;
+    text-align:center;
+  }
+
+  .kpi-left h1{
+    font-size:20px;
+  }
+
+  /* KPI side by side */
+  .kpi-right{
+    width:100%;
+  }
+
+  .kpi-card{
+    flex:1;
+    text-align:center;
+    padding:10px 8px;
+  }
+}
 </style>
 </head>
 
@@ -480,18 +549,44 @@ renderDashboard(preloadedData);
 
 function updateSummary(data){
 
-let t=0,o=0;
+  let t = 0;   // Total Outstanding
+  let o = 0;   // On Account
+  let f = 0;   // Forecast
 
-data.forEach(p=>{
-t+=sum(p.totals);
-Object.values(p.customers).forEach(c=>o+=n(c.onAccount));
-});
+  data.forEach(p=>{
 
-netOutstanding.innerText="₹"+fmt(t-o);
-lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
+    t += sum(p.totals);
+
+    Object.values(p.customers).forEach(c=>{
+      o += n(c.onAccount);
+      f += n(c.forecast || 0);
+    });
+
+  });
+
+  /* Net Outstanding */
+  netOutstanding.innerText = "₹" + fmt(t - o);
+
+  /* Forecast Outstanding */
+  forecastOutstanding.innerText = "₹" + fmt(f);
+
+  /* Date / Time */
+  const now = new Date();
+
+  if(window.innerWidth <= 768){
+
+    // Mobile: Date only
+    lastUpdated.innerText =
+      now.toLocaleDateString();
+
+  }else{
+
+    // Desktop: Date + Time
+    lastUpdated.innerText =
+      "Last refreshed: " + now.toLocaleString();
+  }
 
 }
-
 /* ================= TABLE ================= */
 
 function render(data){
