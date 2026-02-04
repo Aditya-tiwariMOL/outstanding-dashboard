@@ -7,7 +7,8 @@
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  
 <style>
 :root {
   --mol-blue:#1f4ea3;
@@ -167,7 +168,16 @@ body {
 }
 
 .chart-box canvas {
-  max-height:260px;
+  width:100% !important;
+  height:auto !important;
+  max-height:none;
+  min-height:220px;
+}
+
+@media (max-width:768px){
+  .chart-box canvas{
+    min-height:260px;
+  }
 }
 
 @media (max-width:768px){
@@ -371,10 +381,17 @@ function getAgeingTotals(data){
 }
 
 function getPICOutstanding(data){
-  return data.map(p=>({
-    name:p.salesPIC,
-    total:sum(p.totals)
+
+  const list = data.map(p=>({
+    name: p.salesPIC,
+    total: sum(p.totals)
   }));
+
+  // Sort High → Low
+  list.sort((a,b)=>b.total-a.total);
+
+  // Top 10 only
+  return list.slice(0,10);
 }
 
 function getTopDefaulters(data){
@@ -404,11 +421,15 @@ function renderDashboard(data){
   if(picChartObj) picChartObj.destroy();
   if(defaulterChartObj) defaulterChartObj.destroy();
 
-  /* AGEING */
-  const[a1,a2,a3,a4]=getAgeingTotals(data);
 
-  ageingChartObj=new Chart(ageingChart,{
+  /* ================= AGEING PIE ================= */
+
+  const [a1,a2,a3,a4] = getAgeingTotals(data);
+  const totalAge = a1+a2+a3+a4;
+
+  ageingChartObj = new Chart(ageingChart,{
     type:"doughnut",
+    plugins:[ChartDataLabels],
     data:{
       labels:["1-30","31-60","61-90","90+"],
       datasets:[{
@@ -416,50 +437,107 @@ function renderDashboard(data){
         backgroundColor:["#4caf50","#ffb300","#fb8c00","#e53935"]
       }]
     },
-    options:{plugins:{legend:{position:"bottom"}}}
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{ position:"bottom" },
+
+        datalabels:{
+          color:"#fff",
+          font:{ weight:"bold", size:12 },
+          formatter:(val)=>{
+            if(val===0) return "";
+            const pct = ((val/totalAge)*100).toFixed(1);
+            return pct+"%\n₹"+(val/1000).toFixed(0)+"K";
+          }
+        }
+      }
+    }
   });
 
-  /* PIC */
-  const pic=getPICOutstanding(data);
 
-  picChartObj=new Chart(picChart,{
+  /* ================= PIC BAR ================= */
+
+  const pic = getPICOutstanding(data);
+
+  picChartObj = new Chart(picChart,{
     type:"bar",
+    plugins:[ChartDataLabels],
     data:{
-      labels:pic.map(p=>p.name),
+      labels: pic.map(p=>p.name),
       datasets:[{
-        data:pic.map(p=>p.total),
+        data: pic.map(p=>p.total),
         backgroundColor:"#1f4ea3"
       }]
     },
     options:{
-      plugins:{legend:{display:false}},
-      scales:{y:{beginAtZero:true}}
+      responsive:true,
+      plugins:{
+        legend:{ display:false },
+
+        datalabels:{
+          anchor:"end",
+          align:"top",
+          color:"#000",
+          font:{ size:11, weight:"bold" },
+          formatter:(v)=> "₹"+Math.round(v/1000)+"K"
+        }
+      },
+      scales:{
+        y:{
+          beginAtZero:true,
+          ticks:{
+            callback:(v)=>"₹"+(v/1000)+"K"
+          }
+        }
+      }
     }
   });
 
-  /* TOP DEFAULTERS */
-  const top=getTopDefaulters(data);
 
-  defaulterChartObj=new Chart(defaulterChart,{
+  /* ================= TOP DEFAULTERS ================= */
+
+  const top = getTopDefaulters(data);
+
+  defaulterChartObj = new Chart(defaulterChart,{
     type:"bar",
+    plugins:[ChartDataLabels],
     data:{
-      labels:top.map(t=>t.name),
+      labels: top.map(t=>t.name),
       datasets:[{
-        data:top.map(t=>t.amount),
+        data: top.map(t=>t.amount),
         backgroundColor:"#c62828"
       }]
     },
     options:{
       indexAxis:"y",
+      responsive:true,
       plugins:{
-        legend:{display:false},
+        legend:{ display:false },
+
         title:{
           display:true,
           text:"Top 10 Defaulters (90+ Days)"
+        },
+
+        datalabels:{
+          color:"#000",
+          anchor:"end",
+          align:"right",
+          font:{ size:11, weight:"bold" },
+          formatter:(v)=>"₹"+Math.round(v/1000)+"K"
+        }
+      },
+      scales:{
+        x:{
+          ticks:{
+            callback:(v)=>"₹"+(v/1000)+"K"
+          }
         }
       }
     }
   });
+
 }
 
 /* RENDER */
