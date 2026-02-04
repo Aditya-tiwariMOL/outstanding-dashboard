@@ -12,7 +12,6 @@
 :root {
   --mol-blue: #1f4ea3;
   --mol-light: #eef3ff;
-  --mol-accent: #3b82f6;
   --bg: #f8fafc;
   --card: #ffffff;
   --text-main: #1e293b;
@@ -23,36 +22,14 @@
 }
 
 * { box-sizing: border-box; }
+body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); overflow-x: hidden; }
 
-body {
-  margin: 0;
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text-main);
-  line-height: 1.5;
-  overflow-x: hidden; /* Prevent horizontal scroll */
-}
-
-/* LOGIN SECTION */
-.login-overlay {
-  position: fixed; inset: 0; background: var(--bg);
-  display: flex; align-items: center; justify-content: center; z-index: 9999;
-}
-.login-box {
-  background: #fff; padding: 40px; border-radius: 12px;
-  width: 90%; max-width: 400px; text-align: center;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-.login-box img { max-width: 180px; margin-bottom: 20px; }
-.login-box h2 { font-size: 18px; color: var(--mol-blue); margin-bottom: 24px; font-weight: 700; }
-.login-box input {
-  width: 100%; padding: 12px; margin-bottom: 16px;
-  border: 1px solid #ddd; border-radius: 6px; font-size: 16px;
-}
-.login-box button {
-  width: 100%; padding: 12px; background: var(--mol-blue);
-  color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;
-}
+/* LOGIN */
+.login-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.login-box { background: #fff; padding: 40px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px rgba(0,0,0,0.1); }
+.login-box img { max-width: 150px; margin-bottom: 20px; }
+.login-box input { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ddd; border-radius: 6px; }
+.login-box button { width: 100%; padding: 12px; background: var(--mol-blue); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
 
 /* STANDARDIZED HEADER */
 .header-wrap {
@@ -61,54 +38,45 @@ body {
   margin-bottom: 25px; gap: 15px;
 }
 .title-area h1 { margin: 0; font-size: 22px; color: var(--mol-blue); font-weight: 700; }
-.date-status { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-.date-status::before { content: ''; width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block; }
+.date-status { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+.date-status::before { content: ''; width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
 
 .summary-badge {
   background: var(--mol-light); padding: 10px 20px; border-radius: 10px;
-  border: 1px solid rgba(31, 78, 163, 0.15); min-width: 200px; text-align: right;
+  border: 1px solid rgba(31, 78, 163, 0.15); min-width: 220px; text-align: right;
 }
-.summary-label { font-size: 11px; color: var(--mol-blue); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+.summary-label { font-size: 11px; color: var(--mol-blue); font-weight: 800; text-transform: uppercase; }
 .amount-highlight { font-size: 22px; font-weight: 800; color: var(--mol-blue); }
 
-/* DATA TABLE */
+/* TABLE & ACCORDION */
 .table-wrapper { overflow-x: auto; padding: 0 20px 40px; }
 .row {
   display: grid; grid-template-columns: 2fr 1fr 1fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr;
   gap: 10px; padding: 14px; min-width: 1000px;
-  background: #fff; border-bottom: 1px solid var(--grid); font-size: 15px; align-items: center;
+  background: #fff; border-bottom: 1px solid var(--grid); font-size: 15px; align-items: center; cursor: pointer;
 }
-.header { background: var(--mol-blue); color: #fff; font-weight: 600; border-radius: 8px 8px 0 0; border: none; }
-.card { background: #fff; border-radius: 8px; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.customer { background: #fcfdfe; }
+.header { background: var(--mol-blue); color: #fff; font-weight: 600; border-radius: 8px 8px 0 0; cursor: default; }
+.card { background: #fff; border-radius: 8px; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+.customer-row { background: #f8fafc; padding-left: 25px; border-left: 4px solid var(--mol-blue); }
+.invoice-row { background: #fff; padding-left: 45px; font-size: 13px; border-bottom: 1px dashed var(--grid); color: var(--text-muted); }
 .overdue { color: var(--danger); font-weight: 700; }
 
-/* DASHBOARD - Standardized Sizes */
+/* DASHBOARD */
 #dashboard { padding: 0 20px 60px; max-width: 1300px; margin: 0 auto; }
-.section-title { text-align: center; color: var(--mol-blue); font-size: 20px; font-weight: 700; margin-bottom: 25px; }
-.dashboard-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
-
+.dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .chart-box { 
-    background: #fff; padding: 20px; border-radius: 12px; 
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid var(--grid);
-    height: 400px; /* Fixed height for consistency */
-    display: flex; flex-direction: column;
+    background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--grid);
+    height: 400px; display: flex; flex-direction: column;
 }
 
-/* MOBILE RESPONSIVENESS */
 @media (max-width: 768px) {
-  .header-wrap { flex-direction: column; text-align: center; padding: 15px; gap: 12px; }
-  .summary-badge { width: 100%; text-align: center; min-width: unset; }
-  .title-area h1 { font-size: 20px; }
+  .header-wrap { flex-direction: column; text-align: center; }
+  .summary-badge { width: 100%; text-align: center; }
   .dashboard-grid { grid-template-columns: 1fr; }
-  .chart-box { height: 350px; padding: 15px 10px; }
-  .table-wrapper { padding: 0 10px 30px; }
-  .row { font-size: 13px; min-width: 800px; padding: 10px; }
+  .row { min-width: 850px; }
 }
 
-/* UTILS */
 .hidden { display: none; }
-.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--mol-blue); color: #fff; padding: 12px 24px; border-radius: 30px; display: none; z-index: 10001; }
 </style>
 </head>
 
@@ -116,11 +84,10 @@ body {
 
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
-    <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png" alt="MOL Logo">
-    <h2>Access Dashboard</h2>
+    <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png">
+    <h2>MOL Receivables</h2>
     <input type="password" id="pwd" placeholder="Enter Access Code">
     <button onclick="checkPassword()">Log In</button>
-    <div id="loginError" style="color:var(--danger); font-size:13px; margin-top:10px; display:none;">Invalid credentials</div>
   </div>
 </div>
 
@@ -145,42 +112,23 @@ body {
   </div>
 
   <div id="dashboard">
-    <h2 class="section-title">Visual Analytics</h2>
+    <h2 style="text-align:center; color:var(--mol-blue); margin: 40px 0 20px;">Visual Analytics</h2>
     <div class="dashboard-grid">
-      <div class="chart-box">
-        <canvas id="ageingChart"></canvas>
-      </div>
-      <div class="chart-box">
-        <canvas id="picChart"></canvas>
-      </div>
+      <div class="chart-box"><canvas id="ageingChart"></canvas></div>
+      <div class="chart-box"><canvas id="picChart"></canvas></div>
     </div>
-    <div class="chart-box" style="margin-top:20px; height: 500px;">
-      <canvas id="defaulterChart"></canvas>
-    </div>
+    <div class="chart-box" style="margin-top:20px; height: 500px;"><canvas id="defaulterChart"></canvas></div>
   </div>
 </div>
 
-<div class="toast" id="toast">Changes saved successfully</div>
-
 <script>
-let preloadedData=null, ageingChartObj=null, picChartObj=null, defaulterChartObj=null;
+let preloadedData=null;
 const API_URL="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 const PASSWORD_HASH="9f7259520fecfc4f2ae2c2627cd625197070aa7a73d90938c680f8b5aaba747a";
-const isMobile=window.innerWidth<=768;
-
-// MOL Color Shades
-const MOL_PALETTE = ['#1f4ea3', '#2b65cc', '#4a85ee', '#7da9f5', '#adc9f9'];
 
 const n=v=>Number(String(v||0).replace(/,/g,""));
 const fmt=v=>n(v).toLocaleString('en-IN');
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
-
-const wrapLabel = (str) => {
-    if (!str) return "";
-    const words = str.split(' ');
-    if (words.length <= 2) return str;
-    return [words.slice(0, 2).join(' '), words.slice(2, 4).join(' ') + (words.length > 4 ? '..' : '')];
-};
 
 async function sha256(t){
   const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
@@ -188,12 +136,8 @@ async function sha256(t){
 }
 
 async function checkPassword(){
-  const input = document.getElementById('pwd').value;
-  if(await sha256(input) !== PASSWORD_HASH){
-    document.getElementById('loginError').style.display="block"; return;
-  }
-  document.getElementById('loginOverlay').style.display="none";
-  document.getElementById('appContainer').style.display="block";
+  if(await sha256(pwd.value.trim()) !== PASSWORD_HASH){ alert("Wrong Code"); return; }
+  loginOverlay.style.display="none"; appContainer.style.display="block";
   const data = await fetch(API_URL).then(r=>r.json());
   preloadedData = data;
   render(data);
@@ -207,103 +151,118 @@ function updateSummary(data){
     t += sum(p.totals);
     Object.values(p.customers).forEach(c => o += n(c.onAccount));
   });
-  document.getElementById('netOutstanding').innerText = "₹" + fmt(t-o);
-  document.getElementById('lastUpdated').innerText = "Refreshed: " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-}
-
-function renderDashboard(data){
-  const ctxAge = document.getElementById('ageingChart');
-  const ctxPic = document.getElementById('picChart');
-  const ctxDef = document.getElementById('defaulterChart');
-
-  const labelCfg = { color: '#444', font: { size: isMobile ? 10 : 12, weight: '600' }};
-
-  // 1. Ageing Doughnut
-  const a = [0,0,0,0];
-  data.forEach(p=>{ a[0]+=n(p.totals["1-30"]); a[1]+=n(p.totals["31-60"]); a[2]+=n(p.totals["61-90"]); a[3]+=n(p.totals["90+"]); });
-  
-  ageingChartObj = new Chart(ctxAge, {
-    type: 'doughnut',
-    plugins: [ChartDataLabels],
-    data: {
-      labels: ["1-30", "31-60", "61-90", "90+ Days"],
-      datasets: [{ data: a, backgroundColor: MOL_PALETTE, borderWidth: 2 }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      plugins: {
-        title: { display: true, text: 'Ageing Analysis', color: '#1f4ea3', font: {size: 16, weight: 'bold'} },
-        legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 11} } },
-        datalabels: { color: '#fff', formatter: (v, c) => {
-          let s = c.dataset.data.reduce((x,y)=>x+y,0);
-          return ((v/s)*100).toFixed(0) + '%';
-        }}
-      }
-    }
-  });
-
-  // 2. PIC Bar (Shades of Blue)
-  const picData = data.map(p=>({name: p.salesPIC, val: sum(p.totals)})).sort((a,b)=>b.val-a.val).slice(0,8);
-  picChartObj = new Chart(ctxPic, {
-    type: 'bar',
-    plugins: [ChartDataLabels],
-    data: {
-      labels: picData.map(d=>wrapLabel(d.name)),
-      datasets: [{ data: picData.map(d=>d.val), backgroundColor: '#1f4ea3' }]
-    },
-    options: {
-      indexAxis: 'y', maintainAspectRatio: false,
-      scales: { x: { display: false }, y: { grid: { display: false } } },
-      plugins: {
-        legend: { display: false },
-        title: { display: true, text: 'Top Performance (PIC)', color: '#1f4ea3', font: {size: 16, weight: 'bold'} },
-        datalabels: { ...labelCfg, anchor: 'end', align: 'right', formatter: v => '₹'+Math.round(v/1000)+'K' }
-      }
-    }
-  });
-
-  // 3. Defaulters
-  const defs = [];
-  data.forEach(p=>Object.values(p.customers).forEach(c=>{ if(n(c.totals["90+"])>0) defs.push({n:c.customerName, v:n(c.totals["90+"])}); }));
-  const topDefs = defs.sort((a,b)=>b.v-a.v).slice(0,10);
-  
-  defaulterChartObj = new Chart(ctxDef, {
-    type: 'bar',
-    plugins: [ChartDataLabels],
-    data: {
-      labels: topDefs.map(d=>wrapLabel(d.n)),
-      datasets: [{ data: topDefs.map(d=>d.v), backgroundColor: '#dc2626' }]
-    },
-    options: {
-      indexAxis: 'y', maintainAspectRatio: false,
-      scales: { x: { display: false }, y: { grid: { display: false } } },
-      plugins: {
-        legend: { display: false },
-        title: { display: true, text: 'Top 10 Defaulters (90+ Days)', color: '#dc2626', font: {size: 16, weight: 'bold'} },
-        datalabels: { ...labelCfg, anchor: 'end', align: 'right', formatter: v => '₹'+fmt(v) }
-      }
-    }
-  });
+  netOutstanding.innerText = "₹" + fmt(t-o);
+  lastUpdated.innerText = "Refreshed: " + new Date().toLocaleTimeString();
 }
 
 function render(data){
   const app = document.getElementById('app');
   app.innerHTML = "";
+  let openPICGroup = null;
+  let openCustGroup = null;
+
   data.forEach(pic => {
     const card = document.createElement('div'); card.className = "card";
-    const row = document.createElement('div'); row.className = "row";
-    row.innerHTML = `
+    
+    // PIC ROW
+    const picRow = document.createElement('div'); 
+    picRow.className = "row";
+    picRow.innerHTML = `
       <div style="font-weight:700; color:var(--mol-blue)">${pic.salesPIC}</div>
-      <div>${fmt(sum(pic.totals))}</div>
-      <div>-</div>
+      <div>${fmt(sum(pic.totals))}</div><div>-</div>
       <div class="overdue">${fmt(pic.totals["90+"])}</div>
-      <div>${fmt(pic.totals["61-90"])}</div>
-      <div>${fmt(pic.totals["31-60"])}</div>
-      <div>${fmt(pic.totals["1-30"])}</div>
-      <div>-</div>
+      <div>${fmt(pic.totals["61-90"])}</div><div>${fmt(pic.totals["31-60"])}</div>
+      <div>${fmt(pic.totals["1-30"])}</div><div>-</div>
     `;
-    card.appendChild(row);
+
+    const picCustomersWrap = document.createElement('div');
+    picCustomersWrap.className = "hidden";
+
+    picRow.onclick = () => {
+      if(openPICGroup && openPICGroup !== picCustomersWrap) openPICGroup.classList.add('hidden');
+      picCustomersWrap.classList.toggle('hidden');
+      openPICGroup = picCustomersWrap.classList.contains('hidden') ? null : picCustomersWrap;
+    };
+
+    // CUSTOMER ROWS
+    Object.values(pic.customers).forEach(cust => {
+      const custRow = document.createElement('div');
+      custRow.className = "row customer-row";
+      custRow.innerHTML = `
+        <div>${cust.customerName}</div>
+        <div>${fmt(sum(cust.totals))}</div>
+        <div style="color:var(--success)">${fmt(cust.onAccount)}</div>
+        <div class="overdue">${fmt(cust.totals["90+"])}</div>
+        <div>${fmt(cust.totals["61-90"])}</div><div>${fmt(cust.totals["31-60"])}</div>
+        <div>${fmt(cust.totals["1-30"])}</div>
+        <div style="font-size:12px; color:var(--mol-blue)">${cust.forecast ? '₹'+fmt(cust.forecast) : 'Add'}</div>
+      `;
+
+      const invWrap = document.createElement('div');
+      invWrap.className = "hidden";
+
+      custRow.onclick = (e) => {
+        e.stopPropagation();
+        if(openCustGroup && openCustGroup !== invWrap) openCustGroup.classList.add('hidden');
+        invWrap.classList.toggle('hidden');
+        openCustGroup = invWrap.classList.contains('hidden') ? null : invWrap;
+      };
+
+      // INVOICE ROWS
+      cust.invoices.forEach(inv => {
+        const invRow = document.createElement('div');
+        invRow.className = "row invoice-row";
+        invRow.innerHTML = `
+          <div>Inv: ${inv.invoiceNo}</div>
+          <div>${fmt(inv.total)}</div><div>-</div>
+          <div class="${inv.ageing['90+'] ? 'overdue' : ''}">${fmt(inv.ageing['90+']||0)}</div>
+          <div>${fmt(inv.ageing['61-90']||0)}</div><div>${fmt(inv.ageing['31-60']||0)}</div>
+          <div>${fmt(inv.ageing['1-30']||0)}</div><div></div>
+        `;
+        invWrap.appendChild(invRow);
+      });
+
+      picCustomersWrap.appendChild(custRow);
+      picCustomersWrap.appendChild(invWrap);
+    });
+
+    card.appendChild(picRow);
+    card.appendChild(picCustomersWrap);
     app.appendChild(card);
+  });
+}
+
+function renderDashboard(data){
+  const wrapLabel = (str) => {
+    const words = str.split(' ');
+    return words.length <= 2 ? str : [words.slice(0, 2).join(' '), words.slice(2, 4).join(' ') + (words.length > 4 ? '..' : '')];
+  };
+
+  // Ageing Chart
+  const a = [0,0,0,0];
+  data.forEach(p=>{ a[0]+=n(p.totals["1-30"]); a[1]+=n(p.totals["31-60"]); a[2]+=n(p.totals["61-90"]); a[3]+=n(p.totals["90+"]); });
+  new Chart(document.getElementById('ageingChart'), {
+    type: 'doughnut', plugins: [ChartDataLabels],
+    data: { labels: ["1-30", "31-60", "61-90", "90+"], datasets: [{ data: a, backgroundColor: ['#adc9f9','#4a85ee','#1f4ea3','#dc2626'] }] },
+    options: { maintainAspectRatio:false, plugins: { title:{display:true, text:'Ageing Distribution'}, datalabels:{color:'#fff', formatter:(v,c)=>{let s=c.dataset.data.reduce((x,y)=>x+y,0); return ((v/s)*100).toFixed(0)+'%';}} } }
+  });
+
+  // PIC Chart
+  const picData = data.map(p=>({name: p.salesPIC, val: sum(p.totals)})).sort((a,b)=>b.val-a.val).slice(0,8);
+  new Chart(document.getElementById('picChart'), {
+    type: 'bar', plugins: [ChartDataLabels],
+    data: { labels: picData.map(d=>wrapLabel(d.name)), datasets: [{ data: picData.map(d=>d.val), backgroundColor: '#1f4ea3' }] },
+    options: { indexAxis:'y', maintainAspectRatio:false, plugins:{legend:{display:false}, title:{display:true, text:'Top PICs'}}, scales:{x:{display:false}} }
+  });
+
+  // Defaulters Chart
+  const defs = [];
+  data.forEach(p=>Object.values(p.customers).forEach(c=>{ if(n(c.totals["90+"])>0) defs.push({n:c.customerName, v:n(c.totals["90+"])}); }));
+  const topDefs = defs.sort((a,b)=>b.v-a.v).slice(0,10);
+  new Chart(document.getElementById('defaulterChart'), {
+    type: 'bar', plugins: [ChartDataLabels],
+    data: { labels: topDefs.map(d=>wrapLabel(d.n)), datasets: [{ data: topDefs.map(d=>d.v), backgroundColor: '#dc2626' }] },
+    options: { indexAxis:'y', maintainAspectRatio:false, plugins:{legend:{display:false}, title:{display:true, text:'Top 10 Defaulters (90+ Days)'}}, scales:{x:{display:false}} }
   });
 }
 </script>
