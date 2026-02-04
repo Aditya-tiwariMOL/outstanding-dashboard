@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>MOL Outstanding Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 <style>
+
 :root{
 --mol-blue:#1f4ea3;
 --bg:#f4f6fb;
@@ -17,6 +19,8 @@
 --grid:rgba(0,0,0,.06);
 }
 
+/* ================= BASE ================= */
+
 body{
 margin:0;
 font-family:'Segoe UI',Arial,sans-serif;
@@ -24,7 +28,7 @@ background:var(--bg);
 color:#333;
 }
 
-/* LOGIN */
+/* ================= LOGIN ================= */
 
 .login-overlay{
 position:fixed;
@@ -76,30 +80,52 @@ font-size:12px;
 display:none;
 }
 
-/* HEADER */
+/* ================= HEADER ================= */
 
-.header-wrap{
-text-align:center;
-margin:16px 0;
+.modern-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+background:#fff;
+padding:14px 18px;
+border-radius:10px;
+margin:15px 12px;
+
+box-shadow:0 2px 8px rgba(0,0,0,.05);
 }
 
-.header-wrap h1{
+.header-left h1{
 margin:0;
 font-size:20px;
 color:var(--mol-blue);
 }
 
-.summary .amount{
-font-size:17px;
-font-weight:600;
-}
-
-.summary .date{
+.header-left .updated{
 font-size:11px;
-color:#777;
+color:#64748b;
+margin-top:4px;
 }
 
-/* TABLE */
+.net-box{
+background:#eef3ff;
+padding:10px 16px;
+border-radius:8px;
+text-align:right;
+}
+
+.net-label{
+font-size:11px;
+color:#475569;
+}
+
+.net-value{
+font-size:18px;
+font-weight:600;
+color:#1e40af;
+}
+
+/* ================= TABLE ================= */
 
 .table-wrapper{
 overflow-x:auto;
@@ -159,7 +185,24 @@ color:var(--danger);
 font-weight:bold;
 }
 
-/* DASHBOARD */
+/* Forecast input */
+
+.row input[type="text"]{
+height:36px;
+padding:6px 10px;
+font-size:14px;
+border-radius:6px;
+border:1px solid #cbd5e1;
+box-sizing:border-box;
+}
+
+.row input[type="text"]:focus{
+outline:none;
+border-color:var(--mol-blue);
+box-shadow:0 0 0 2px rgba(31,78,163,.15);
+}
+
+/* ================= DASHBOARD ================= */
 
 #dashboard{
 padding:20px 12px 50px;
@@ -190,14 +233,14 @@ border:1px solid rgba(0,0,0,.04);
 height:320px;
 }
 
-.chart-box.tall{
-height:380px;
-}
+.chart-box.tall{height:380px;}
 
 .chart-box canvas{
 width:100%!important;
 height:100%!important;
 }
+
+/* ================= MOBILE ================= */
 
 @media(max-width:768px){
 
@@ -214,9 +257,20 @@ grid-template-columns:1fr;
 .chart-box{height:300px;}
 .chart-box.tall{height:350px;}
 
+.modern-header{
+flex-direction:column;
+align-items:flex-start;
+gap:10px;
 }
 
-/* DRAWER */
+.net-box{
+width:100%;
+text-align:left;
+}
+
+}
+
+/* ================= DRAWER ================= */
 
 .drawer{
 position:fixed;
@@ -268,6 +322,7 @@ padding:10px 18px;
 border-radius:20px;
 display:none;
 }
+
 </style>
 </head>
 
@@ -276,26 +331,44 @@ display:none;
 <!-- LOGIN -->
 
 <div class="login-overlay" id="loginOverlay">
+
 <div class="login-box">
 <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png">
+
 <h2>MOL LOGISTICS (INDIA) PVT LTD</h2>
+
 <input type="password" id="pwd" placeholder="Enter access code">
+
 <button onclick="checkPassword()">Submit</button>
+
 <div class="login-error" id="loginError">Invalid access code</div>
 </div>
+
 </div>
 
 <!-- APP -->
 
 <div id="appContainer" style="display:none;">
 
-<div class="header-wrap">
+<!-- HEADER -->
+
+<div class="modern-header">
+
+<div class="header-left">
 <h1>Outstanding Receivables</h1>
-<div class="summary">
-<div class="amount" id="netOutstanding">—</div>
-<div class="date" id="lastUpdated">—</div>
+<div class="updated" id="lastUpdated">—</div>
+</div>
+
+<div class="header-right">
+<div class="net-box">
+<div class="net-label">Net Outstanding</div>
+<div class="net-value" id="netOutstanding">—</div>
 </div>
 </div>
+
+</div>
+
+<!-- TABLE -->
 
 <div class="table-wrapper">
 
@@ -359,7 +432,7 @@ placeholder="Enter forecast">
 
 <script>
 
-/* CONFIG */
+/* ================= CONFIG ================= */
 
 let preloadedData=null;
 let ageingChartObj=null;
@@ -378,7 +451,7 @@ const n=v=>Number(String(v||0).replace(/,/g,""));
 const fmt=v=>isMobile&&n(v)>=1000?Math.round(n(v)/1000)+"K":n(v).toLocaleString();
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-/* LOGIN */
+/* ================= LOGIN ================= */
 
 async function sha256(t){
 const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
@@ -403,7 +476,7 @@ renderDashboard(preloadedData);
 
 }
 
-/* SUMMARY */
+/* ================= SUMMARY ================= */
 
 function updateSummary(data){
 
@@ -414,12 +487,12 @@ t+=sum(p.totals);
 Object.values(p.customers).forEach(c=>o+=n(c.onAccount));
 });
 
-netOutstanding.innerText="Net Outstanding: ₹"+fmt(t-o);
+netOutstanding.innerText="₹"+fmt(t-o);
 lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
 
 }
 
-/* TABLE */
+/* ================= TABLE ================= */
 
 function render(data){
 
@@ -489,6 +562,10 @@ ${c.forecast?fmt(c.forecast):'Add'}
 
 `<input type="text"
 value="${c.forecast||''}"
+
+onclick="event.stopPropagation()"
+onfocus="event.stopPropagation()"
+
 onchange="saveForecast('${pic.salesPIC}',
 '${c.customerName}',this.value)">`
 }
@@ -538,7 +615,7 @@ app.appendChild(card);
 
 }
 
-/* CHART HELPERS */
+/* ================= HELPERS ================= */
 
 function getAgeingTotals(data){
 
@@ -584,7 +661,7 @@ return list.sort((a,b)=>b.amount-a.amount).slice(0,10);
 
 }
 
-/* DASHBOARD */
+/* ================= DASHBOARD ================= */
 
 function renderDashboard(data){
 
@@ -749,7 +826,7 @@ y:{grid:{display:false}}
 
 }
 
-/* DRAWER */
+/* ================= DRAWER ================= */
 
 let drawerPIC,drawerCustomerName;
 
