@@ -98,13 +98,13 @@ body {
     flex-direction: column;
     min-height: 420px;
 }
-.chart-box.tall { min-height: 550px; }
+.chart-box.tall { min-height: 580px; }
 
 @media (max-width:768px) {
   .row { grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px; min-width:670px; font-size:15px; }
   .dashboard-grid { grid-template-columns: 1fr; }
-  .chart-box { min-height: 420px; }
-  .chart-box.tall { min-height: 550px; }
+  .chart-box { min-height: 420px; padding: 15px; }
+  .chart-box.tall { min-height: 580px; }
 }
 
 /* DRAWER & TOAST */
@@ -188,8 +188,8 @@ const n=v=>Number(String(v||0).replace(/,/g,""));
 const fmt=v=>isMobile&&n(v)>=1000?Math.round(n(v)/1000)+"K":n(v).toLocaleString();
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-// Truncation Helper
-const truncate = (str, len) => (str.length > len) ? str.substring(0, len) + "..." : str;
+// Improved Truncation Helper
+const truncate = (str, len) => (str.length > len) ? str.substring(0, len) + ".." : str;
 
 async function sha256(t){
   const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
@@ -237,7 +237,7 @@ function renderDashboard(data){
 
   const labelSize = isMobile ? 12 : 17;
   const titleSize = isMobile ? 18 : 22;
-  const nameLimit = isMobile ? 10 : 20; // Show only 10 chars on mobile
+  const nameLimit = isMobile ? 10 : 22; 
   const colors = { blue:'#3b82f6', red:'#ef4444', orange:'#f59e0b', yellow:'#eab308', green:'#22c55e' };
 
   // 1. AGEING DOUGHNUT
@@ -251,8 +251,7 @@ function renderDashboard(data){
       datasets:[{ data:[a1,a2,a3,a4], backgroundColor:[colors.green, colors.yellow, colors.orange, colors.red], borderWidth:4, borderColor:'#fff' }]
     },
     options:{
-      maintainAspectRatio:false, 
-      cutout:"50%", 
+      maintainAspectRatio:false, cutout:"50%", 
       plugins:{
         legend:{ position:"bottom", labels:{ usePointStyle:true, padding:15, font:{size: labelSize} } },
         title:{ display:true, text:'Ageing Distribution', font:{size: titleSize, weight:'bold'} },
@@ -261,56 +260,58 @@ function renderDashboard(data){
     }
   });
 
-  // 2. PIC BAR
+  // 2. PIC BAR (Reduced padding to extend bars)
   const pic = getPICOutstanding(data);
   picChartObj = new Chart(document.getElementById('picChart'),{
     type:"bar",
     plugins:[ChartDataLabels],
     data:{ 
         labels: pic.map(p => truncate(p.name, nameLimit)), 
-        datasets:[{ data: pic.map(p=>p.total), backgroundColor: colors.blue, borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] 
+        datasets:[{ data: pic.map(p=>p.total), backgroundColor: colors.blue, borderRadius:4, categoryPercentage:0.8, barPercentage:0.95 }] 
     },
     options:{
-      maintainAspectRatio:false, indexAxis:'y', layout:{ padding:{ right: 80 } },
+      maintainAspectRatio:false, indexAxis:'y', 
+      layout:{ padding:{ right: 55, left: 0 } }, // Reduced dead space
       plugins:{
         legend:{ display:false },
         title:{ display:true, text:"Top 10 Sales PIC", font:{size: titleSize, weight:'bold'}, padding:15 },
         datalabels:{
-          display: true, color: '#444', anchor: 'end', align:'right', offset: 5,
+          display: true, color: '#444', anchor: 'end', align:'right', offset: 4,
           font:{ size: labelSize, weight:'600' },
           formatter: (v)=> `₹${Math.round(v/1000)}K`
         }
       },
       scales:{ 
         x:{ display:false }, 
-        y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:10 } } 
+        y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:8 } } 
       }
     }
   });
 
-  // 3. DEFAULTERS
+  // 3. DEFAULTERS (Reduced padding to extend bars)
   const top = getTopDefaulters(data);
   defaulterChartObj = new Chart(document.getElementById('defaulterChart'),{
     type:"bar",
     plugins:[ChartDataLabels],
     data:{ 
         labels: top.map(t => truncate(t.name, nameLimit)), 
-        datasets:[{ data: top.map(t=>t.amount), backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] 
+        datasets:[{ data: top.map(t=>t.amount), backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius:4, categoryPercentage:0.8, barPercentage:0.95 }] 
     },
     options:{
-      maintainAspectRatio:false, indexAxis:"y", layout:{ padding:{ right: 80 } },
+      maintainAspectRatio:false, indexAxis:"y", 
+      layout:{ padding:{ right: 55, left: 0 } }, // Reduced dead space
       plugins:{
         legend:{ display:false },
         title:{ display:true, text:"Top 10 Defaulters (90+ Days)", font:{size: titleSize, weight:'bold', color:colors.red}, padding:15 },
         datalabels:{
-          display: true, color: colors.red, anchor: 'end', align:'right', offset: 5,
+          display: true, color: colors.red, anchor: 'end', align:'right', offset: 4,
           font:{ size: labelSize, weight:'600' },
           formatter: (v)=> `₹${Math.round(v/1000)}K`
         }
       },
       scales:{ 
         x:{ display:false }, 
-        y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:10 } } 
+        y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:8 } } 
       }
     }
   });
