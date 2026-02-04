@@ -381,7 +381,6 @@ display:none;
 </div>
 
 </div>
-
 </div>
 
 <!-- TABLE -->
@@ -519,6 +518,392 @@ lastUpdated.innerText=now.toLocaleDateString();
 }else{
 lastUpdated.innerText="Last refreshed: "+now.toLocaleString();
 }
+
+}
+
+/* TABLE */
+
+function render(data){
+
+app.innerHTML="";
+let openPIC=null,openCustomer=null;
+
+data.forEach(pic=>{
+
+const card=document.createElement("div");
+card.className="card";
+
+const picRow=document.createElement("div");
+picRow.className="row";
+
+picRow.innerHTML=`
+<div>${pic.salesPIC}</div>
+<div>${fmt(sum(pic.totals))}</div>
+<div></div>
+<div class="overdue">${fmt(pic.totals["90+"])}</div>
+<div>${fmt(pic.totals["61-90"])}</div>
+<div>${fmt(pic.totals["31-60"])}</div>
+<div>${fmt(pic.totals["1-30"])}</div>
+<div></div>
+`;
+
+const wrap=document.createElement("div");
+wrap.className="hidden";
+
+picRow.onclick=()=>{
+if(openPIC&&openPIC!==wrap)openPIC.classList.add("hidden");
+wrap.classList.toggle("hidden");
+openPIC=wrap.classList.contains("hidden")?null:wrap;
+};
+
+Object.values(pic.customers).forEach(c=>{
+
+const r=document.createElement("div");
+r.className="row customer";
+
+const invWrap=document.createElement("div");
+invWrap.className="hidden";
+
+r.innerHTML=`
+<div>${c.customerName}</div>
+<div>${fmt(sum(c.totals))}</div>
+<div class="on-account">${fmt(c.onAccount)}</div>
+<div class="overdue">${fmt(c.totals["90+"])}</div>
+<div>${fmt(c.totals["61-90"])}</div>
+<div>${fmt(c.totals["31-60"])}</div>
+<div>${fmt(c.totals["1-30"])}</div>
+
+<div>
+${
+isMobile?
+`<span onclick="event.stopPropagation();
+openDrawer('${pic.salesPIC}','${c.customerName}',
+'${sum(c.totals)}','${c.forecast||""}')">
+${c.forecast?fmt(c.forecast):'Add'}
+</span>`:
+
+`<input type="text"
+value="${c.forecast||''}"
+onclick="event.stopPropagation()"
+onfocus="event.stopPropagation()"
+onchange="saveForecast('${pic.salesPIC}',
+'${c.customerName}',this.value)">`
+}
+</div>
+`;
+
+r.onclick=()=>{
+if(openCustomer&&openCustomer!==invWrap)openCustomer.classList.add("hidden");
+invWrap.classList.toggle("hidden");
+openCustomer=invWrap.classList.contains("hidden")?null:invWrap;
+};
+
+c.invoices.forEach(i=>{
+
+const inv=document.createElement("div");
+inv.className="row invoice";
+
+inv.innerHTML=`
+<div>${i.invoiceNo}</div>
+<div>${fmt(i.total)}</div>
+<div></div>
+<div>${fmt(i.ageing["90+"]||0)}</div>
+<div>${fmt(i.ageing["61-90"]||0)}</div>
+<div>${fmt(i.ageing["31-60"]||0)}</div>
+<div>${fmt(i.ageing["1-30"]||0)}</div>
+<div></div>
+`;
+
+invWrap.appendChild(inv);
+});
+
+wrap.appendChild(r);
+wrap.appendChild(invWrap);
+
+});
+
+card.appendChild(picRow);
+card.appendChild(wrap);
+app.appendChild(card);
+
+});
+
+}
+
+/* DASHBOARD */
+
+function getAgeingTotals(data){
+
+let a1=0,a2=0,a3=0,a4=0;
+
+data.forEach(p=>{
+a4+=n(p.totals["90+"]);
+a3+=n(p.totals["61-90"]);
+a2+=n(p.totals["31-60"]);
+a1+=n(p.totals["1-30"]);
+});
+
+return[a1,a2,a3,a4];
+}
+
+function getPICOutstanding(data){
+return data.map(p=>({name:p.salesPIC,total:sum(p.totals)}))
+.sort((a,b)=>b.total-a.total)
+.slice(0,10);
+}
+
+function getTopDefaulters(data){
+
+const list=[];
+
+data.forEach(p=>{
+Object.values(p.customers).forEach(c=>{
+if(n(c.totals["90+"])>0){
+list.push({name:c.customerName,amount:n(c.totals["90+"])});
+}
+});
+});
+
+return list.sort((a,b)=>b.amount-a.amount).slice(0,10);
+}
+
+function renderDashboard(data){
+
+if(ageingChartObj)ageingChartObj.destroy();
+if(picChartObj)picChartObj.destroy();
+if(defaulterChartObj)defaulterChartObj.destroy();
+
+const labelSize=isMobile?11:13;
+const titleSize=isMobile?15:17;
+const nameLimit=isMobile?10:18;
+
+const blues=['#60a5fa','#3b82f6','#2563eb','#1e40af'];
+
+/* DONUT */
+
+const[a1,a2,a3,a4]=getAgeingTotals(data);
+const total=a1+a2+a3+a4;
+
+ageingChartObj=new Chart(ageingChart,{
+
+type:"doughnut",
+plugins:[ChartDataLabels],
+
+data:{
+labels:["1-30","31-60","61-90","90+"],
+datasets:[{
+data:[a1,a2,a3,a4],
+backgroundColor:blues,
+borderWidth:3,
+borderColor:"#fff"
+}]
+},
+
+options:{
+maintainAspectRatio:false,
+cutout:"55%",
+
+plugins:{
+
+legend:{position:"bottom"},
+
+title:{
+display:true,
+text:"Ageing Distribution",
+font:{size:titleSize,weight:"bold"}
+},
+
+datalabels:{
+color:"#fff",
+formatter:v=>((v/total)*100).toFixed(1)+"%"
+}
+
+}
+}
+
+});
+
+/* PIC */
+
+const pic=getPICOutstanding(data);
+
+picChartObj=new Chart(picChart,{
+
+type:"bar",
+plugins:[ChartDataLabels],
+
+data:{
+labels:pic.map(p=>p.name.substring(0,nameLimit)),
+datasets:[{
+data:pic.map(p=>p.total),
+backgroundColor:'#2563eb',
+borderRadius:4
+}]
+},
+
+options:{
+maintainAspectRatio:false,
+indexAxis:'y',
+
+layout:{padding:{right:20}},
+
+plugins:{
+
+legend:{display:false},
+
+title:{
+display:true,
+text:"Top 10 Sales PIC",
+font:{size:titleSize,weight:"bold"}
+},
+
+datalabels:{
+color:'#444',
+anchor:'end',
+align:'right',
+formatter:v=>`₹${Math.round(v/1000)}K`
+}
+
+},
+
+scales:{
+x:{display:false},
+y:{grid:{display:false}}
+}
+
+}
+
+});
+
+/* DEFAULTERS */
+
+const top=getTopDefaulters(data);
+
+defaulterChartObj=new Chart(defaulterChart,{
+
+type:"bar",
+plugins:[ChartDataLabels],
+
+data:{
+
+labels: top.map(t=>{
+
+const words=t.name.split(" ");
+
+if(words.length<=4){
+
+const l1=words.slice(0,2).join(" ");
+const l2=words.slice(2).join(" ");
+
+return l2?[l1,l2]:[l1];
+}
+
+const l1=words.slice(0,2).join(" ");
+const l2=words.slice(2,4).join(" ")+"...";
+
+return[l1,l2];
+
+}),
+
+datasets:[{
+data:top.map(t=>t.amount),
+backgroundColor:'#ef4444',
+borderRadius:4
+}]
+},
+
+options:{
+maintainAspectRatio:false,
+indexAxis:'y',
+
+layout:{padding:{right:20}},
+
+plugins:{
+
+legend:{display:false},
+
+title:{
+display:true,
+text:"Top 10 Defaulters (90+ Days)",
+font:{size:titleSize,weight:"bold"},
+color:'#ef4444'
+},
+
+datalabels:{
+color:'#ef4444',
+anchor:'end',
+align:'right',
+formatter:v=>`₹${Math.round(v/1000)}K`
+}
+
+},
+
+scales:{
+x:{display:false},
+y:{grid:{display:false}}
+}
+
+}
+
+});
+
+}
+
+/* DRAWER */
+
+let drawerPIC,drawerCustomerName;
+
+function openDrawer(pic,cust,tot,fcst){
+
+drawerPIC=pic;
+drawerCustomerName=cust;
+
+drawerCustomer.innerText=cust;
+drawerTotal.innerText="Total: ₹"+fmt(tot);
+
+drawerInput.value=fcst;
+
+forecastDrawer.classList.remove("hidden");
+}
+
+function closeDrawer(){
+forecastDrawer.classList.add("hidden");
+}
+
+function saveDrawerForecast(){
+saveForecast(drawerPIC,drawerCustomerName,drawerInput.value);
+closeDrawer();
+}
+
+function saveForecast(pic,cust,val){
+
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+action:"updateForecast",
+salesPIC:pic,
+customer:cust,
+forecast:n(val)
+})
+})
+.then(()=>{
+
+preloadedData.forEach(p=>{
+if(p.salesPIC===pic){
+Object.values(p.customers).forEach(c=>{
+if(c.customerName===cust)c.forecast=n(val);
+});
+}
+});
+
+render(preloadedData);
+updateSummary(preloadedData);
+renderDashboard(preloadedData);
+
+toast.style.display="block";
+setTimeout(()=>toast.style.display="none",2000);
+
+});
 
 }
 
