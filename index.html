@@ -789,12 +789,32 @@ type:"bar",
 plugins:[ChartDataLabels],
 
 data:{
-labels:top.map(t=>t.name.substring(0,nameLimit)),
-datasets:[{
-data:top.map(t=>t.amount),
-backgroundColor:'#ef4444',
-borderRadius:4
-}]
+
+  labels: top.map(t => {
+
+    const words = t.name.split(" ");
+
+    if (words.length <= 4) {
+
+      const line1 = words.slice(0,2).join(" ");
+      const line2 = words.slice(2).join(" ");
+
+      return line2
+        ? [line1, line2]
+        : [line1];
+    }
+
+    const line1 = words.slice(0,2).join(" ");
+    const line2 = words.slice(2,4).join(" ") + "...";
+
+    return [line1, line2];
+  }),
+
+  datasets:[{
+    data: top.map(t=>t.amount),
+    backgroundColor:'#ef4444',
+    borderRadius:4
+  }]
 },
 
 options:{
