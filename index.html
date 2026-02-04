@@ -293,64 +293,34 @@ body{
 <body>
 
 <!-- LOGIN -->
-
 <div class="login-overlay" id="loginOverlay">
-
 <div class="login-box">
-
 <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png">
-
 <h3>MOL LOGISTICS (INDIA) PVT LTD</h3>
-
 <input type="password" id="pwd" placeholder="Enter access code">
-
 <button onclick="checkPassword()">Submit</button>
-
 <div class="login-error" id="loginError">Invalid access code</div>
-
 </div>
 </div>
 
 <!-- APP -->
-
 <div id="appContainer" style="display:none;">
 
 <div class="header-wrap">
-
 <h1>Receivables Dashboard</h1>
-
 <div class="summary">
-
 <div class="amount" id="netOutstanding">—</div>
 <div class="date" id="lastUpdated">—</div>
-
 </div>
 </div>
-
-
-<!-- TABLE -->
 
 <div class="table-wrapper">
-
 <div class="row header">
-
-<div>Name</div>
-<div>Total OS</div>
-<div>On Acc</div>
-<div>90+</div>
-<div>60+</div>
-<div>30+</div>
-<div>1+</div>
-<div>Fcst</div>
-
+<div>Name</div><div>Total OS</div><div>On Acc</div>
+<div>90+</div><div>60+</div><div>30+</div><div>1+</div><div>Fcst</div>
 </div>
-
 <div id="app"></div>
-
 </div>
-
-
-<!-- DASHBOARD -->
 
 <div id="dashboard">
 
@@ -375,41 +345,31 @@ Visual Analytics
 </div>
 
 </div>
-
 </div>
 
-
 <!-- DRAWER -->
-
 <div id="forecastDrawer" class="drawer hidden">
-
 <div class="drawer-content">
 
 <div id="drawerCustomer" style="font-weight:600;"></div>
-
 <div id="drawerTotal" style="font-size:13px;color:#666;"></div>
 
 <input type="number" id="drawerInput"
 style="width:100%;padding:10px;margin-top:10px;">
 
 <div class="drawer-actions">
-
 <button onclick="closeDrawer()">Cancel</button>
-
 <button class="primary" onclick="saveDrawerForecast()">Save</button>
-
 </div>
 
 </div>
 </div>
-
 
 <div class="toast" id="toast">Forecast Updated</div>
 
-
 <script>
 
-/* ================= YOUR ORIGINAL SCRIPT ================= */
+/* ================= FULL SCRIPT ================= */
 
 let preloadedData=null, ageingChartObj=null, picChartObj=null, defaulterChartObj=null;
 
@@ -428,9 +388,11 @@ const fmt=v=>isMobile&&n(v)>=1000?Math.round(n(v)/1000)+"K":n(v).toLocaleString(
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
 
+/* PASSWORD */
+
 async function sha256(t){
-  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
-  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
+return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
 
@@ -467,13 +429,323 @@ Object.values(p.customers).forEach(c=>o+=n(c.onAccount));
 });
 
 netOutstanding.innerText="₹"+fmt(t-o);
-lastUpdated.innerText="Refreshed: "+new Date().toLocaleString();
+lastUpdated.innerText="Updated: "+new Date().toLocaleString();
 
 }
 
 
-/* REST OF YOUR ORIGINAL JS CONTINUES HERE */
-/* (render(), charts, drawer, forecast functions unchanged) */
+/* RENDER TABLE */
+
+function render(data){
+
+app.innerHTML="";
+
+let openPIC=null;
+let openCustomer=null;
+
+data.forEach(pic=>{
+
+const card=document.createElement("div");
+card.className="card";
+
+const picRow=document.createElement("div");
+picRow.className="row";
+
+picRow.innerHTML=`
+<div>${pic.salesPIC}</div>
+<div>${fmt(sum(pic.totals))}</div>
+<div></div>
+<div class="overdue">${fmt(pic.totals["90+"])}</div>
+<div>${fmt(pic.totals["61-90"])}</div>
+<div>${fmt(pic.totals["31-60"])}</div>
+<div>${fmt(pic.totals["1-30"])}</div>
+<div></div>
+`;
+
+const wrap=document.createElement("div");
+wrap.className="hidden";
+
+picRow.onclick=()=>{
+
+if(openPIC && openPIC!==wrap)
+openPIC.classList.add("hidden");
+
+wrap.classList.toggle("hidden");
+openPIC=wrap.classList.contains("hidden")?null:wrap;
+
+};
+
+
+Object.values(pic.customers).forEach(c=>{
+
+const r=document.createElement("div");
+r.className="row customer";
+
+const invWrap=document.createElement("div");
+invWrap.className="hidden";
+
+r.innerHTML=`
+<div>${c.customerName}</div>
+<div>${fmt(sum(c.totals))}</div>
+<div class="on-account">${fmt(c.onAccount)}</div>
+<div class="overdue">${fmt(c.totals["90+"])}</div>
+<div>${fmt(c.totals["61-90"])}</div>
+<div>${fmt(c.totals["31-60"])}</div>
+<div>${fmt(c.totals["1-30"])}</div>
+<div>
+<span onclick="event.stopPropagation();
+openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')"
+style="color:#2563eb;cursor:pointer;">
+${c.forecast?fmt(c.forecast):'Add'}
+</span>
+</div>
+`;
+
+r.onclick=()=>{
+
+if(openCustomer && openCustomer!==invWrap)
+openCustomer.classList.add("hidden");
+
+invWrap.classList.toggle("hidden");
+openCustomer=invWrap.classList.contains("hidden")?null:invWrap;
+
+};
+
+
+c.invoices.forEach(i=>{
+
+const inv=document.createElement("div");
+inv.className="row invoice";
+
+inv.innerHTML=`
+<div>${i.invoiceNo}</div>
+<div>${fmt(i.total)}</div>
+<div></div>
+<div>${fmt(i.ageing["90+"]||0)}</div>
+<div>${fmt(i.ageing["61-90"]||0)}</div>
+<div>${fmt(i.ageing["31-60"]||0)}</div>
+<div>${fmt(i.ageing["1-30"]||0)}</div>
+<div></div>
+`;
+
+invWrap.appendChild(inv);
+
+});
+
+wrap.appendChild(r);
+wrap.appendChild(invWrap);
+
+});
+
+card.appendChild(picRow);
+card.appendChild(wrap);
+app.appendChild(card);
+
+});
+
+}
+
+
+/* DASHBOARD HELPERS */
+
+function getAgeingTotals(data){
+
+let a1=0,a2=0,a3=0,a4=0;
+
+data.forEach(p=>{
+a4+=n(p.totals["90+"]);
+a3+=n(p.totals["61-90"]);
+a2+=n(p.totals["31-60"]);
+a1+=n(p.totals["1-30"]);
+});
+
+return[a1,a2,a3,a4];
+
+}
+
+function getPICOutstanding(data){
+
+return data.map(p=>({
+name:p.salesPIC,
+total:sum(p.totals)
+})).sort((a,b)=>b.total-a.total).slice(0,10);
+
+}
+
+function getTopDefaulters(data){
+
+const list=[];
+
+data.forEach(p=>{
+Object.values(p.customers).forEach(c=>{
+if(n(c.totals["90+"])>0)
+list.push({name:c.customerName,amount:n(c.totals["90+"])});
+});
+});
+
+return list.sort((a,b)=>b.amount-a.amount).slice(0,10);
+
+}
+
+
+/* DASHBOARD */
+
+function renderDashboard(data){
+
+if(ageingChartObj) ageingChartObj.destroy();
+if(picChartObj) picChartObj.destroy();
+if(defaulterChartObj) defaulterChartObj.destroy();
+
+const colors={
+green:'#22c55e',
+yellow:'#eab308',
+orange:'#f59e0b',
+red:'#ef4444',
+blue:'#3b82f6'
+};
+
+
+/* AGEING */
+
+const [a1,a2,a3,a4]=getAgeingTotals(data);
+
+ageingChartObj=new Chart(ageingChart,{
+type:"doughnut",
+plugins:[ChartDataLabels],
+data:{
+labels:["1-30","31-60","61-90","90+"],
+datasets:[{
+data:[a1,a2,a3,a4],
+backgroundColor:[colors.green,colors.yellow,colors.orange,colors.red]
+}]
+},
+options:{
+maintainAspectRatio:false,
+plugins:{
+legend:{position:"bottom"},
+title:{display:true,text:"Ageing"},
+datalabels:{color:"#fff"}
+}
+}
+});
+
+
+/* PIC */
+
+const pic=getPICOutstanding(data);
+
+picChartObj=new Chart(picChart,{
+type:"bar",
+plugins:[ChartDataLabels],
+data:{
+labels:pic.map(p=>p.name),
+datasets:[{
+data:pic.map(p=>p.total),
+backgroundColor:colors.blue
+}]
+},
+options:{
+indexAxis:"y",
+maintainAspectRatio:false,
+plugins:{
+legend:{display:false},
+title:{display:true,text:"Top PIC"},
+datalabels:{anchor:"end",align:"right"}
+},
+scales:{x:{display:false}}
+}
+});
+
+
+/* DEFAULTER */
+
+const top=getTopDefaulters(data);
+
+defaulterChartObj=new Chart(defaulterChart,{
+type:"bar",
+plugins:[ChartDataLabels],
+data:{
+labels:top.map(t=>t.name),
+datasets:[{
+data:top.map(t=>t.amount),
+backgroundColor:colors.red
+}]
+},
+options:{
+indexAxis:"y",
+maintainAspectRatio:false,
+plugins:{
+legend:{display:false},
+title:{display:true,text:"Top Defaulters"},
+datalabels:{anchor:"end",align:"right"}
+},
+scales:{x:{display:false}}
+}
+});
+
+}
+
+
+/* DRAWER */
+
+let drawerPIC,drawerCustomerName;
+
+function openDrawer(pic,cust,tot,fcst){
+
+drawerPIC=pic;
+drawerCustomerName=cust;
+
+drawerCustomer.innerText=cust;
+drawerTotal.innerText="Total: ₹"+fmt(tot);
+drawerInput.value=fcst;
+
+forecastDrawer.classList.remove("hidden");
+
+}
+
+function closeDrawer(){
+forecastDrawer.classList.add("hidden");
+}
+
+function saveDrawerForecast(){
+saveForecast(drawerPIC,drawerCustomerName,drawerInput.value);
+closeDrawer();
+}
+
+
+/* SAVE FORECAST */
+
+function saveForecast(pic,cust,val){
+
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+action:"updateForecast",
+salesPIC:pic,
+customer:cust,
+forecast:n(val)
+})
+})
+.then(()=>{
+
+preloadedData.forEach(p=>{
+if(p.salesPIC===pic)
+Object.values(p.customers).forEach(c=>{
+if(c.customerName===cust)
+c.forecast=n(val);
+});
+});
+
+render(preloadedData);
+updateSummary(preloadedData);
+renderDashboard(preloadedData);
+
+toast.style.display="block";
+setTimeout(()=>toast.style.display="none",2000);
+
+});
+
+}
 
 </script>
 
