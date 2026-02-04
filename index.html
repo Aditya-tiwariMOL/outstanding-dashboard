@@ -9,349 +9,357 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 <style>
-:root {
-  --mol-blue:#1f4ea3;
-  --bg:#f4f6fb;
-  --card:#fff;
-  --success:#1a7f37;
-  --danger:#ef4444;
-  --grid:rgba(0,0,0,.06);
+:root{
+--mol-blue:#1f4ea3;
+--bg:#f4f6fb;
+--success:#1a7f37;
+--danger:#ef4444;
+--grid:rgba(0,0,0,.06);
 }
 
-body {
-  margin:0;
-  font-family:'Segoe UI', Arial, sans-serif;
-  background:var(--bg);
-  color:#333;
+body{
+margin:0;
+font-family:'Segoe UI',Arial,sans-serif;
+background:var(--bg);
+color:#333;
 }
 
-/* ---------------- LOGIN ---------------- */
+/* LOGIN */
 
-.login-overlay {
-  position:fixed;
-  inset:0;
-  background:#f4f6fb;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
+.login-overlay{
+position:fixed;
+inset:0;
+background:#f4f6fb;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
 }
 
-.login-box {
-  background:#fff;
-  padding:30px;
-  border-radius:10px;
-  width:90%;
-  max-width:360px;
-  text-align:center;
-  box-shadow:0 10px 30px rgba(0,0,0,.15);
+.login-box{
+background:#fff;
+padding:30px;
+border-radius:10px;
+max-width:360px;
+width:90%;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,.15);
 }
 
-.login-box img { max-width:150px; }
+.login-box img{max-width:150px;}
 
-.login-box h2 {
-  font-size:16px;
-  color:var(--mol-blue);
+.login-box h2{
+font-size:16px;
+color:var(--mol-blue);
 }
 
 .login-box input,
-.login-box button {
-  width:100%;
-  max-width:260px;
-  margin:12px auto;
-  padding:10px;
-  font-size:15px;
+.login-box button{
+width:100%;
+max-width:260px;
+margin:12px auto;
+padding:10px;
+font-size:15px;
 }
 
-.login-box button {
-  background:var(--mol-blue);
-  color:#fff;
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
+.login-box button{
+background:var(--mol-blue);
+color:#fff;
+border:none;
+border-radius:4px;
+cursor:pointer;
 }
 
-.login-error {
-  color:#c62828;
-  font-size:12px;
-  display:none;
+.login-error{
+color:#c62828;
+font-size:12px;
+display:none;
 }
 
-/* ---------------- HEADER ---------------- */
+/* HEADER */
 
-.header-wrap {
-  text-align:center;
-  margin:16px 0;
+.header-wrap{
+text-align:center;
+margin:16px 0;
 }
 
-.header-wrap h1 {
-  margin:0;
-  font-size:20px;
-  color:var(--mol-blue);
+.header-wrap h1{
+margin:0;
+font-size:20px;
+color:var(--mol-blue);
 }
 
-.summary .amount {
-  font-size:17px;
-  font-weight:600;
+.summary .amount{
+font-size:17px;
+font-weight:600;
 }
 
-.summary .date {
-  font-size:11px;
-  color:#777;
+.summary .date{
+font-size:11px;
+color:#777;
 }
 
-/* ---------------- TABLE ---------------- */
+/* TABLE */
 
-.table-wrapper {
-  overflow-x:auto;
-  padding:0 12px 30px;
+.table-wrapper{
+overflow-x:auto;
+padding:0 12px 30px;
 }
 
-.row {
-  display:grid;
-  grid-template-columns:2fr 1.1fr 1fr 0.9fr 0.9fr 0.9fr 0.9fr 1fr;
-  gap:6px;
-  padding:10px;
-  min-width:900px;
-  background:#fff;
-  border-bottom:1px solid var(--grid);
-  font-size:18px;
+.row{
+display:grid;
+grid-template-columns:2fr 1.1fr 1fr .9fr .9fr .9fr .9fr 1fr;
+gap:6px;
+padding:10px;
+min-width:900px;
+background:#fff;
+border-bottom:1px solid var(--grid);
+font-size:18px;
 }
 
-.row > div {
-  border-right:1px solid var(--grid);
-  padding-right:6px;
+.row>div{
+border-right:1px solid var(--grid);
+padding-right:6px;
 }
 
-.row > div:last-child {
-  border-right:none;
+.row>div:last-child{border-right:none;}
+
+.header{
+background:var(--mol-blue);
+color:#fff;
+font-weight:bold;
+border-radius:6px;
 }
 
-.header {
-  background:var(--mol-blue);
-  color:#fff;
-  font-weight:bold;
-  border-radius:6px;
+.card{
+background:#fff;
+border-radius:6px;
+margin-top:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
 }
 
-.card {
-  background:#fff;
-  border-radius:6px;
-  margin-top:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
+.customer{background:#eef3ff;}
+
+.invoice{
+padding-left:18px;
+background:#E5FDEB;
+border-left:3px solid rgba(26,127,55,.18);
+font-size:16px;
 }
 
-.customer { background:#eef3ff; }
+.hidden{display:none;}
 
-.invoice {
-  padding-left:18px;
-  background:#E5FDEB;
-  border-left:3px solid rgba(26,127,55,.18);
-  font-size:16px;
+.on-account{
+color:var(--success);
+font-weight:bold;
 }
 
-.hidden { display:none; }
-
-.on-account {
-  color:var(--success);
-  font-weight:bold;
+.overdue{
+color:var(--danger);
+font-weight:bold;
 }
 
-.overdue {
-  color:var(--danger);
-  font-weight:bold;
+/* DASHBOARD */
+
+#dashboard{
+padding:20px 12px 50px;
+max-width:1200px;
+margin:0 auto;
 }
 
-/* ---------------- DASHBOARD ---------------- */
-
-#dashboard {
-  padding:20px 12px 50px;
-  max-width:1200px;
-  margin:0 auto;
+#dashboard h2{
+text-align:center;
+color:var(--mol-blue);
+margin-bottom:25px;
+font-weight:600;
 }
 
-#dashboard h2 {
-  text-align:center;
-  color:var(--mol-blue);
-  margin-bottom:25px;
-  font-weight:600;
+.dashboard-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+margin-bottom:20px;
 }
 
-/* Balanced Grid */
-.dashboard-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-  margin-bottom:20px;
+.chart-box{
+background:#fff;
+padding:16px;
+border-radius:10px;
+box-shadow:0 2px 8px rgba(0,0,0,.06);
+border:1px solid rgba(0,0,0,.04);
+height:320px;
 }
 
-/* Normal Size Charts */
-.chart-box {
-  background:#fff;
-  padding:16px;
-  border-radius:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,.06);
-  border:1px solid rgba(0,0,0,.04);
-
-  height:320px;        /* KEY FIX */
-  max-height:320px;
+.chart-box.tall{
+height:380px;
 }
 
-.chart-box.tall {
-  height:380px;
-  max-height:380px;
+.chart-box canvas{
+width:100%!important;
+height:100%!important;
 }
 
-.chart-box canvas {
-  width:100% !important;
-  height:100% !important;
+@media(max-width:768px){
+
+.row{
+grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px;
+min-width:670px;
+font-size:15px;
 }
 
-/* ---------------- MOBILE ---------------- */
-
-@media (max-width:768px){
-
-  .row {
-    grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px;
-    min-width:670px;
-    font-size:15px;
-  }
-
-  .dashboard-grid {
-    grid-template-columns:1fr;
-  }
-
-  .chart-box {
-    height:300px;
-  }
-
-  .chart-box.tall {
-    height:350px;
-  }
+.dashboard-grid{
+grid-template-columns:1fr;
 }
 
-/* ---------------- DRAWER ---------------- */
+.chart-box{height:300px;}
+.chart-box.tall{height:350px;}
 
-.drawer {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.35);
-  z-index:10000;
 }
 
-.drawer.hidden { display:none; }
+/* DRAWER */
 
-.drawer-content {
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#fff;
-  padding:16px;
-  border-radius:14px 14px 0 0;
-  max-height:90vh;
-  overflow-y:auto;
+.drawer{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.35);
+z-index:10000;
 }
 
-.drawer-actions {
-  display:flex;
-  gap:10px;
-  margin-top:10px;
+.drawer.hidden{display:none;}
+
+.drawer-content{
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+background:#fff;
+padding:16px;
+border-radius:14px 14px 0 0;
+max-height:90vh;
+overflow-y:auto;
 }
 
-.drawer-actions button {
-  flex:1;
-  padding:10px;
-  font-size:15px;
+.drawer-actions{
+display:flex;
+gap:10px;
+margin-top:10px;
 }
 
-.drawer-actions .primary {
-  background:var(--mol-blue);
-  color:#fff;
-  border:none;
+.drawer-actions button{
+flex:1;
+padding:10px;
+font-size:15px;
 }
 
-.toast {
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--mol-blue);
-  color:#fff;
-  padding:10px 18px;
-  border-radius:20px;
-  display:none;
+.drawer-actions .primary{
+background:var(--mol-blue);
+color:#fff;
+border:none;
+}
+
+.toast{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+background:var(--mol-blue);
+color:#fff;
+padding:10px 18px;
+border-radius:20px;
+display:none;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 
 <div class="login-overlay" id="loginOverlay">
-  <div class="login-box">
-    <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png">
-    <h2>MOL LOGISTICS (INDIA) PVT LTD</h2>
-    <input type="password" id="pwd" placeholder="Enter access code">
-    <button onclick="checkPassword()">Submit</button>
-    <div class="login-error" id="loginError">Invalid access code</div>
-  </div>
+<div class="login-box">
+<img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png">
+<h2>MOL LOGISTICS (INDIA) PVT LTD</h2>
+<input type="password" id="pwd" placeholder="Enter access code">
+<button onclick="checkPassword()">Submit</button>
+<div class="login-error" id="loginError">Invalid access code</div>
+</div>
 </div>
 
-<!-- ================= APP ================= -->
+<!-- APP -->
 
 <div id="appContainer" style="display:none;">
 
-<!-- HEADER -->
 <div class="header-wrap">
-  <h1>Outstanding Receivables</h1>
-  <div class="summary">
-    <div class="amount" id="netOutstanding">—</div>
-    <div class="date" id="lastUpdated">—</div>
-  </div>
+<h1>Outstanding Receivables</h1>
+<div class="summary">
+<div class="amount" id="netOutstanding">—</div>
+<div class="date" id="lastUpdated">—</div>
+</div>
 </div>
 
-<!-- TABLE -->
 <div class="table-wrapper">
-  <div class="row header">
-    <div>Name</div><div>Total OS</div><div>On Acc</div>
-    <div>90+</div><div>60+</div><div>30+</div><div>1+</div><div>Fcst</div>
-  </div>
-  <div id="app"></div>
+
+<div class="row header">
+<div>Name</div><div>Total OS</div><div>On Acc</div>
+<div>90+</div><div>60+</div><div>30+</div><div>1+</div><div>Fcst</div>
+</div>
+
+<div id="app"></div>
+
 </div>
 
 <!-- DASHBOARD -->
+
 <div id="dashboard">
 
 <h2>Dashboard Summary</h2>
 
 <div class="dashboard-grid">
 
-  <div class="chart-box">
-    <canvas id="ageingChart"></canvas>
-  </div>
+<div class="chart-box">
+<canvas id="ageingChart"></canvas>
+</div>
 
-  <div class="chart-box">
-    <canvas id="picChart"></canvas>
-  </div>
+<div class="chart-box">
+<canvas id="picChart"></canvas>
+</div>
 
 </div>
 
 <div class="chart-box tall">
-  <canvas id="defaulterChart"></canvas>
+<canvas id="defaulterChart"></canvas>
+</div>
+
+</div>
+
+</div>
+
+<!-- DRAWER -->
+
+<div id="forecastDrawer" class="drawer hidden">
+
+<div class="drawer-content">
+
+<div id="drawerCustomer" style="font-weight:bold;">—</div>
+<div id="drawerTotal" style="color:#666;font-size:13px;margin-bottom:10px;">—</div>
+
+<input type="number" id="drawerInput"
+style="width:100%;padding:10px;"
+placeholder="Enter forecast">
+
+<div class="drawer-actions">
+<button onclick="closeDrawer()">Cancel</button>
+<button class="primary" onclick="saveDrawerForecast()">Save</button>
 </div>
 
 </div>
 </div>
 
-<div id="forecastDrawer" class="drawer hidden"></div>
 <div class="toast" id="toast">Forecast updated</div>
-
 
 <script>
 
-/* ================= CONFIG ================= */
+/* CONFIG */
 
 let preloadedData=null;
 let ageingChartObj=null;
@@ -363,252 +371,442 @@ const API_URL="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5
 const PASSWORD_HASH="9f7259520fecfc4f2ae2c2627cd625197070aa7a73d90938c680f8b5aaba747a";
 
 const isMobile=window.innerWidth<=768;
+
 const dataPromise=fetch(API_URL).then(r=>r.json());
 
 const n=v=>Number(String(v||0).replace(/,/g,""));
 const fmt=v=>isMobile&&n(v)>=1000?Math.round(n(v)/1000)+"K":n(v).toLocaleString();
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-/* ================= LOGIN ================= */
+/* LOGIN */
 
 async function sha256(t){
-  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
-  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
+return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
 async function checkPassword(){
 
-  if(await sha256(pwd.value.trim())!==PASSWORD_HASH){
-    loginError.style.display="block";
-    return;
-  }
-
-  loginOverlay.style.display="none";
-  appContainer.style.display="block";
-
-  if(!preloadedData) preloadedData=await dataPromise;
-
-  render(preloadedData);
-  updateSummary(preloadedData);
-  renderDashboard(preloadedData);
+if(await sha256(pwd.value.trim())!==PASSWORD_HASH){
+loginError.style.display="block";
+return;
 }
 
-/* ================= SUMMARY ================= */
+loginOverlay.style.display="none";
+appContainer.style.display="block";
+
+if(!preloadedData) preloadedData=await dataPromise;
+
+render(preloadedData);
+updateSummary(preloadedData);
+renderDashboard(preloadedData);
+
+}
+
+/* SUMMARY */
 
 function updateSummary(data){
 
-  let t=0,o=0;
+let t=0,o=0;
 
-  data.forEach(p=>{
-    t+=sum(p.totals);
-    Object.values(p.customers).forEach(c=>o+=n(c.onAccount));
-  });
+data.forEach(p=>{
+t+=sum(p.totals);
+Object.values(p.customers).forEach(c=>o+=n(c.onAccount));
+});
 
-  netOutstanding.innerText="Net Outstanding: ₹"+fmt(t-o);
-  lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
+netOutstanding.innerText="Net Outstanding: ₹"+fmt(t-o);
+lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
+
 }
 
-/* ================= CHART HELPERS ================= */
+/* TABLE */
+
+function render(data){
+
+app.innerHTML="";
+
+let openPIC=null;
+let openCustomer=null;
+
+data.forEach(pic=>{
+
+const card=document.createElement("div");
+card.className="card";
+
+const picRow=document.createElement("div");
+picRow.className="row";
+
+picRow.innerHTML=`
+<div>${pic.salesPIC}</div>
+<div>${fmt(sum(pic.totals))}</div>
+<div></div>
+<div class="overdue">${fmt(pic.totals["90+"])}</div>
+<div>${fmt(pic.totals["61-90"])}</div>
+<div>${fmt(pic.totals["31-60"])}</div>
+<div>${fmt(pic.totals["1-30"])}</div>
+<div></div>
+`;
+
+const wrap=document.createElement("div");
+wrap.className="hidden";
+
+picRow.onclick=()=>{
+
+if(openPIC&&openPIC!==wrap)
+openPIC.classList.add("hidden");
+
+wrap.classList.toggle("hidden");
+
+openPIC=wrap.classList.contains("hidden")?null:wrap;
+};
+
+Object.values(pic.customers).forEach(c=>{
+
+const r=document.createElement("div");
+r.className="row customer";
+
+const invWrap=document.createElement("div");
+invWrap.className="hidden";
+
+r.innerHTML=`
+<div>${c.customerName}</div>
+<div>${fmt(sum(c.totals))}</div>
+<div class="on-account">${fmt(c.onAccount)}</div>
+<div class="overdue">${fmt(c.totals["90+"])}</div>
+<div>${fmt(c.totals["61-90"])}</div>
+<div>${fmt(c.totals["31-60"])}</div>
+<div>${fmt(c.totals["1-30"])}</div>
+
+<div>
+${
+isMobile?
+
+`<span onclick="event.stopPropagation();
+openDrawer('${pic.salesPIC}','${c.customerName}',
+'${sum(c.totals)}','${c.forecast||""}')">
+${c.forecast?fmt(c.forecast):'Add'}
+</span>`:
+
+`<input type="text"
+value="${c.forecast||''}"
+onchange="saveForecast('${pic.salesPIC}',
+'${c.customerName}',this.value)">`
+}
+</div>
+`;
+
+r.onclick=()=>{
+
+if(openCustomer&&openCustomer!==invWrap)
+openCustomer.classList.add("hidden");
+
+invWrap.classList.toggle("hidden");
+
+openCustomer=invWrap.classList.contains("hidden")?null:invWrap;
+};
+
+c.invoices.forEach(i=>{
+
+const inv=document.createElement("div");
+inv.className="row invoice";
+
+inv.innerHTML=`
+<div>${i.invoiceNo}</div>
+<div>${fmt(i.total)}</div>
+<div></div>
+<div>${fmt(i.ageing["90+"]||0)}</div>
+<div>${fmt(i.ageing["61-90"]||0)}</div>
+<div>${fmt(i.ageing["31-60"]||0)}</div>
+<div>${fmt(i.ageing["1-30"]||0)}</div>
+<div></div>
+`;
+
+invWrap.appendChild(inv);
+});
+
+wrap.appendChild(r);
+wrap.appendChild(invWrap);
+
+});
+
+card.appendChild(picRow);
+card.appendChild(wrap);
+
+app.appendChild(card);
+
+});
+
+}
+
+/* CHART HELPERS */
 
 function getAgeingTotals(data){
 
-  let a1=0,a2=0,a3=0,a4=0;
+let a1=0,a2=0,a3=0,a4=0;
 
-  data.forEach(p=>{
-    a4+=n(p.totals["90+"]);
-    a3+=n(p.totals["61-90"]);
-    a2+=n(p.totals["31-60"]);
-    a1+=n(p.totals["1-30"]);
-  });
+data.forEach(p=>{
+a4+=n(p.totals["90+"]);
+a3+=n(p.totals["61-90"]);
+a2+=n(p.totals["31-60"]);
+a1+=n(p.totals["1-30"]);
+});
 
-  return[a1,a2,a3,a4];
+return[a1,a2,a3,a4];
 }
 
 function getPICOutstanding(data){
 
-  return data.map(p=>({
-    name:p.salesPIC,
-    total:sum(p.totals)
-  }))
-  .sort((a,b)=>b.total-a.total)
-  .slice(0,10);
+return data.map(p=>({
+name:p.salesPIC,
+total:sum(p.totals)
+}))
+.sort((a,b)=>b.total-a.total)
+.slice(0,10);
+
 }
 
 function getTopDefaulters(data){
 
-  const list=[];
+const list=[];
 
-  data.forEach(p=>{
-    Object.values(p.customers).forEach(c=>{
-      if(n(c.totals["90+"])>0){
-        list.push({
-          name:c.customerName,
-          amount:n(c.totals["90+"])
-        });
-      }
-    });
-  });
+data.forEach(p=>{
+Object.values(p.customers).forEach(c=>{
+if(n(c.totals["90+"])>0){
+list.push({
+name:c.customerName,
+amount:n(c.totals["90+"])
+});
+}
+});
+});
 
-  return list.sort((a,b)=>b.amount-a.amount).slice(0,10);
+return list.sort((a,b)=>b.amount-a.amount).slice(0,10);
+
 }
 
-/* ================= DASHBOARD ================= */
+/* DASHBOARD */
 
 function renderDashboard(data){
 
-  if(ageingChartObj) ageingChartObj.destroy();
-  if(picChartObj) picChartObj.destroy();
-  if(defaulterChartObj) defaulterChartObj.destroy();
+if(ageingChartObj)ageingChartObj.destroy();
+if(picChartObj)picChartObj.destroy();
+if(defaulterChartObj)defaulterChartObj.destroy();
 
-  const labelSize = isMobile ? 11 : 13;
-  const titleSize = isMobile ? 15 : 17;
-  const nameLimit = isMobile ? 10 : 18;
+const labelSize=isMobile?11:13;
+const titleSize=isMobile?15:17;
+const nameLimit=isMobile?10:18;
 
-  /* BLUE SHADES */
-  const blues = [
-    '#60a5fa',
-    '#3b82f6',
-    '#2563eb',
-    '#1e40af'
-  ];
+const blues=['#60a5fa','#3b82f6','#2563eb','#1e40af'];
 
-  /* AGEING DONUT */
+/* DONUT */
 
-  const [a1,a2,a3,a4]=getAgeingTotals(data);
-  const total=a1+a2+a3+a4;
+const[a1,a2,a3,a4]=getAgeingTotals(data);
+const total=a1+a2+a3+a4;
 
-  ageingChartObj=new Chart(ageingChart,{
+ageingChartObj=new Chart(ageingChart,{
 
-    type:"doughnut",
-    plugins:[ChartDataLabels],
+type:"doughnut",
+plugins:[ChartDataLabels],
 
-    data:{
-      labels:["1-30","31-60","61-90","90+"],
-      datasets:[{
-        data:[a1,a2,a3,a4],
-        backgroundColor:blues,
-        borderWidth:3,
-        borderColor:"#fff"
-      }]
-    },
+data:{
+labels:["1-30","31-60","61-90","90+"],
+datasets:[{
+data:[a1,a2,a3,a4],
+backgroundColor:blues,
+borderWidth:3,
+borderColor:"#fff"
+}]
+},
 
-    options:{
-      maintainAspectRatio:false,
-      cutout:"55%",
+options:{
+maintainAspectRatio:false,
+cutout:"55%",
 
-      plugins:{
-        legend:{
-          position:"bottom",
-          labels:{font:{size:labelSize}}
-        },
+plugins:{
 
-        title:{
-          display:true,
-          text:"Ageing Distribution",
-          font:{size:titleSize,weight:"bold"}
-        },
+legend:{
+position:"bottom",
+labels:{font:{size:labelSize}}
+},
 
-        datalabels:{
-          color:"#fff",
-          font:{size:labelSize,weight:"bold"},
-          formatter:v=>((v/total)*100).toFixed(1)+"%"
-        }
-      }
-    }
-  });
+title:{
+display:true,
+text:"Ageing Distribution",
+font:{size:titleSize,weight:"bold"}
+},
 
-  /* PIC BAR */
+datalabels:{
+color:"#fff",
+font:{size:labelSize,weight:"bold"},
+formatter:v=>((v/total)*100).toFixed(1)+"%"
+}
 
-  const pic=getPICOutstanding(data);
+}
+}
 
-  picChartObj=new Chart(picChart,{
+});
 
-    type:"bar",
-    plugins:[ChartDataLabels],
+/* PIC */
 
-    data:{
-      labels:pic.map(p=>p.name.substring(0,nameLimit)),
-      datasets:[{
-        data:pic.map(p=>p.total),
-        backgroundColor:'#2563eb',
-        borderRadius:4
-      }]
-    },
+const pic=getPICOutstanding(data);
 
-    options:{
-      maintainAspectRatio:false,
-      indexAxis:'y',
+picChartObj=new Chart(picChart,{
 
-      plugins:{
-        legend:{display:false},
+type:"bar",
+plugins:[ChartDataLabels],
 
-        title:{
-          display:true,
-          text:"Top 10 Sales PIC",
-          font:{size:titleSize,weight:"bold"}
-        },
+data:{
+labels:pic.map(p=>p.name.substring(0,nameLimit)),
+datasets:[{
+data:pic.map(p=>p.total),
+backgroundColor:'#2563eb',
+borderRadius:4
+}]
+},
 
-        datalabels:{
-          color:'#444',
-          anchor:'end',
-          align:'right',
-          formatter:v=>`₹${Math.round(v/1000)}K`
-        }
-      },
+options:{
+maintainAspectRatio:false,
+indexAxis:'y',
 
-      scales:{
-        x:{display:false},
-        y:{grid:{display:false}}
-      }
-    }
-  });
+plugins:{
 
-  /* DEFAULTERS */
+legend:{display:false},
 
-  const top=getTopDefaulters(data);
+title:{
+display:true,
+text:"Top 10 Sales PIC",
+font:{size:titleSize,weight:"bold"}
+},
 
-  defaulterChartObj=new Chart(defaulterChart,{
+datalabels:{
+color:'#444',
+anchor:'end',
+align:'right',
+formatter:v=>`₹${Math.round(v/1000)}K`
+}
 
-    type:"bar",
-    plugins:[ChartDataLabels],
+},
 
-    data:{
-      labels:top.map(t=>t.name.substring(0,nameLimit)),
-      datasets:[{
-        data:top.map(t=>t.amount),
-        backgroundColor:'#ef4444',
-        borderRadius:4
-      }]
-    },
+scales:{
+x:{display:false},
+y:{grid:{display:false}}
+}
 
-    options:{
-      maintainAspectRatio:false,
-      indexAxis:"y",
+}
 
-      plugins:{
-        legend:{display:false},
+});
 
-        title:{
-          display:true,
-          text:"Top 10 Defaulters (90+ Days)",
-          font:{size:titleSize,weight:"bold"},
-          color:'#ef4444'
-        },
+/* DEFAULTERS */
 
-        datalabels:{
-          color:'#ef4444',
-          anchor:'end',
-          align:'right',
-          formatter:v=>`₹${Math.round(v/1000)}K`
-        }
-      },
+const top=getTopDefaulters(data);
 
-      scales:{
-        x:{display:false},
-        y:{grid:{display:false}}
-      }
-    }
-  });
+defaulterChartObj=new Chart(defaulterChart,{
+
+type:"bar",
+plugins:[ChartDataLabels],
+
+data:{
+labels:top.map(t=>t.name.substring(0,nameLimit)),
+datasets:[{
+data:top.map(t=>t.amount),
+backgroundColor:'#ef4444',
+borderRadius:4
+}]
+},
+
+options:{
+maintainAspectRatio:false,
+indexAxis:'y',
+
+plugins:{
+
+legend:{display:false},
+
+title:{
+display:true,
+text:"Top 10 Defaulters (90+ Days)",
+font:{size:titleSize,weight:"bold"},
+color:'#ef4444'
+},
+
+datalabels:{
+color:'#ef4444',
+anchor:'end',
+align:'right',
+formatter:v=>`₹${Math.round(v/1000)}K`
+}
+
+},
+
+scales:{
+x:{display:false},
+y:{grid:{display:false}}
+}
+
+}
+
+});
+
+}
+
+/* DRAWER */
+
+let drawerPIC,drawerCustomerName;
+
+function openDrawer(pic,cust,tot,fcst){
+
+drawerPIC=pic;
+drawerCustomerName=cust;
+
+drawerCustomer.innerText=cust;
+drawerTotal.innerText="Total: ₹"+fmt(tot);
+
+drawerInput.value=fcst;
+
+forecastDrawer.classList.remove("hidden");
+}
+
+function closeDrawer(){
+forecastDrawer.classList.add("hidden");
+}
+
+function saveDrawerForecast(){
+saveForecast(drawerPIC,drawerCustomerName,drawerInput.value);
+closeDrawer();
+}
+
+function saveForecast(pic,cust,val){
+
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+action:"updateForecast",
+salesPIC:pic,
+customer:cust,
+forecast:n(val)
+})
+})
+.then(()=>{
+
+preloadedData.forEach(p=>{
+if(p.salesPIC===pic){
+Object.values(p.customers).forEach(c=>{
+if(c.customerName===cust){
+c.forecast=n(val);
+}
+});
+}
+});
+
+render(preloadedData);
+updateSummary(preloadedData);
+renderDashboard(preloadedData);
+
+toast.style.display="block";
+setTimeout(()=>toast.style.display="none",2000);
+
+});
+
 }
 
 </script>
