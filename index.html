@@ -72,7 +72,7 @@ body {
   min-width:900px;
   background:#fff;
   border-bottom:1px solid var(--grid);
-  font-size:18px; /* Standard Desktop Font */
+  font-size:18px; 
 }
 .row > div { border-right:1px solid var(--grid); padding-right:6px; }
 .row > div:last-child { border-right:none; }
@@ -103,8 +103,8 @@ body {
 @media (max-width:768px) {
   .row { grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px; min-width:670px; font-size:15px; }
   .dashboard-grid { grid-template-columns: 1fr; }
-  .chart-box { min-height: 400px; }
-  .chart-box.tall { min-height: 520px; }
+  .chart-box { min-height: 420px; }
+  .chart-box.tall { min-height: 550px; }
 }
 
 /* DRAWER & TOAST */
@@ -188,7 +188,6 @@ const n=v=>Number(String(v||0).replace(/,/g,""));
 const fmt=v=>isMobile&&n(v)>=1000?Math.round(n(v)/1000)+"K":n(v).toLocaleString();
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-/* SECURITY */
 async function sha256(t){
   const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
   return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
@@ -206,7 +205,6 @@ async function checkPassword(){
   renderDashboard(preloadedData);
 }
 
-/* DATA HELPERS */
 function updateSummary(data){
   let t=0,o=0;
   data.forEach(p=>{
@@ -229,18 +227,16 @@ function getTopDefaulters(data){
   return list.sort((a,b)=>b.amount-a.amount).slice(0,10);
 }
 
-/* CHART RENDERING */
 function renderDashboard(data){
   if(ageingChartObj) ageingChartObj.destroy();
   if(picChartObj) picChartObj.destroy();
   if(defaulterChartObj) defaulterChartObj.destroy();
 
-  // FONT SCALING: Laptop +30%, Mobile +20%
   const labelSize = isMobile ? 12 : 17;
   const titleSize = isMobile ? 18 : 22;
   const colors = { blue:'#3b82f6', red:'#ef4444', orange:'#f59e0b', yellow:'#eab308', green:'#22c55e' };
 
-  // 1. AGEING DOUGHNUT (Thickened)
+  // 1. AGEING DOUGHNUT
   const [a1,a2,a3,a4] = getAgeingTotals(data);
   const totalAge = a1+a2+a3+a4;
   ageingChartObj = new Chart(document.getElementById('ageingChart'),{
@@ -251,7 +247,8 @@ function renderDashboard(data){
       datasets:[{ data:[a1,a2,a3,a4], backgroundColor:[colors.green, colors.yellow, colors.orange, colors.red], borderWidth:4, borderColor:'#fff' }]
     },
     options:{
-      maintainAspectRatio:false, cutout:"55%",
+      maintainAspectRatio:false, 
+      cutout:"50%", 
       plugins:{
         legend:{ position:"bottom", labels:{ usePointStyle:true, padding:15, font:{size: labelSize} } },
         title:{ display:true, text:'Ageing Distribution', font:{size: titleSize, weight:'bold'} },
@@ -260,14 +257,14 @@ function renderDashboard(data){
     }
   });
 
-  // 2. PIC BAR (Stacked Labels for Mobile)
+  // 2. PIC BAR (Names Outside)
   const pic = getPICOutstanding(data);
   picChartObj = new Chart(document.getElementById('picChart'),{
     type:"bar",
     plugins:[ChartDataLabels],
     data:{ labels: pic.map(p=>p.name), datasets:[{ data: pic.map(p=>p.total), backgroundColor: colors.blue, borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] },
     options:{
-      maintainAspectRatio:false, indexAxis:'y', layout:{ padding:{ right: 70, top: isMobile ? 25 : 0 } },
+      maintainAspectRatio:false, indexAxis:'y', layout:{ padding:{ right: 80 } },
       plugins:{
         legend:{ display:false },
         title:{ display:true, text:"Top 10 Sales PIC", font:{size: titleSize, weight:'bold'}, padding:15 },
@@ -279,28 +276,19 @@ function renderDashboard(data){
       },
       scales:{ 
         x:{ display:false }, 
-        y:{ 
-            grid:{display:false}, 
-            ticks:{ 
-                font:{size: labelSize, weight:'600'}, 
-                padding: 10,
-                mirror: isMobile, // Names move above bars on mobile
-                labelOffset: isMobile ? -22 : 0, 
-                align: isMobile ? 'start' : 'center'
-            } 
-        } 
+        y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:10 } } 
       }
     }
   });
 
-  // 3. DEFAULTERS (Stacked Labels for Mobile)
+  // 3. DEFAULTERS (Names Outside)
   const top = getTopDefaulters(data);
   defaulterChartObj = new Chart(document.getElementById('defaulterChart'),{
     type:"bar",
     plugins:[ChartDataLabels],
     data:{ labels: top.map(t=>t.name), datasets:[{ data: top.map(t=>t.amount), backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] },
     options:{
-      maintainAspectRatio:false, indexAxis:"y", layout:{ padding:{ right: 70, top: isMobile ? 25 : 0 } },
+      maintainAspectRatio:false, indexAxis:"y", layout:{ padding:{ right: 80 } },
       plugins:{
         legend:{ display:false },
         title:{ display:true, text:"Top 10 Defaulters (90+ Days)", font:{size: titleSize, weight:'bold', color:colors.red}, padding:15 },
@@ -312,22 +300,12 @@ function renderDashboard(data){
       },
       scales:{ 
         x:{ display:false }, 
-        y:{ 
-            grid:{display:false}, 
-            ticks:{ 
-                font:{size: labelSize, weight:'600'}, 
-                padding: 10,
-                mirror: isMobile,
-                labelOffset: isMobile ? -22 : 0,
-                align: isMobile ? 'start' : 'center'
-            } 
-        } 
+        y:{ grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:10 } } 
       }
     }
   });
 }
 
-/* TABLE RENDERING */
 function render(data){
   app.innerHTML=""; let openPIC=null, openCustomer=null;
   data.forEach(pic=>{
@@ -347,7 +325,6 @@ function render(data){
   });
 }
 
-/* FORECAST ACTIONS */
 let drawerPIC, drawerCustomerName;
 function openDrawer(pic,cust,tot,fcst){ drawerPIC=pic; drawerCustomerName=cust; drawerCustomer.innerText=cust; drawerTotal.innerText="Total: ₹"+fmt(tot); drawerInput.value=fcst; forecastDrawer.classList.remove("hidden"); }
 function closeDrawer(){ forecastDrawer.classList.add("hidden"); }
