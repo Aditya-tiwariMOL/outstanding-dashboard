@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Outstanding Receivables</title>
+<title>MOL Outstanding Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
@@ -25,7 +25,7 @@ body {
   color: #333;
 }
 
-/* LOGIN */
+/* LOGIN SECTION */
 .login-overlay {
   position:fixed;
   inset:0;
@@ -56,13 +56,13 @@ body {
 }
 .login-error { color:#c62828; font-size:12px; display:none; }
 
-/* HEADER */
+/* HEADER & SUMMARY */
 .header-wrap { text-align:center; margin:16px 0 14px; }
 .header-wrap h1 { margin:0; font-size:20px; color:var(--mol-blue); font-weight:600; }
 .summary .amount { font-size:17px; font-weight:600; }
 .summary .date { font-size:11px; color:#777; }
 
-/* TABLE */
+/* TABLE STYLES */
 .table-wrapper { overflow-x:auto; padding:0 12px 30px; }
 .row {
   display:grid;
@@ -72,7 +72,7 @@ body {
   min-width:900px;
   background:#fff;
   border-bottom:1px solid var(--grid);
-  font-size:18px;
+  font-size:18px; /* Standard Desktop Font */
 }
 .row > div { border-right:1px solid var(--grid); padding-right:6px; }
 .row > div:last-child { border-right:none; }
@@ -85,7 +85,7 @@ body {
 .on-account { color:var(--success); font-weight:bold; }
 .overdue { color:var(--danger); font-weight:bold; }
 
-/* DASHBOARD STYLES */
+/* DASHBOARD LAYOUT */
 #dashboard { padding: 20px 12px 60px; max-width: 1200px; margin: 0 auto; }
 .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 .chart-box { 
@@ -96,15 +96,15 @@ body {
     border: 1px solid rgba(0,0,0,0.03);
     display: flex;
     flex-direction: column;
-    min-height: 400px;
+    min-height: 420px;
 }
 .chart-box.tall { min-height: 550px; }
 
 @media (max-width:768px) {
   .row { grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px; min-width:670px; font-size:15px; }
   .dashboard-grid { grid-template-columns: 1fr; }
-  .chart-box { min-height: 380px; }
-  .chart-box.tall { min-height: 500px; }
+  .chart-box { min-height: 400px; }
+  .chart-box.tall { min-height: 520px; }
 }
 
 /* DRAWER & TOAST */
@@ -188,6 +188,7 @@ const n=v=>Number(String(v||0).replace(/,/g,""));
 const fmt=v=>isMobile&&n(v)>=1000?Math.round(n(v)/1000)+"K":n(v).toLocaleString();
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
+/* SECURITY */
 async function sha256(t){
   const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
   return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
@@ -205,6 +206,7 @@ async function checkPassword(){
   renderDashboard(preloadedData);
 }
 
+/* DATA HELPERS */
 function updateSummary(data){
   let t=0,o=0;
   data.forEach(p=>{
@@ -213,88 +215,6 @@ function updateSummary(data){
   });
   netOutstanding.innerText="Net Outstanding: ₹"+fmt(t-o);
   lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
-}
-
-function renderDashboard(data){
-  if(ageingChartObj) ageingChartObj.destroy();
-  if(picChartObj) picChartObj.destroy();
-  if(defaulterChartObj) defaulterChartObj.destroy();
-
-  // Desktop +30% (base 13px -> ~17px), Mobile +20% (base 10px -> 12px)
-  const labelSize = isMobile ? 12 : 17;
-  const titleSize = isMobile ? 18 : 22;
-  const colors = { blue:'#3b82f6', red:'#ef4444', orange:'#f59e0b', yellow:'#eab308', green:'#22c55e' };
-
-  // 1. AGEING DOUGHNUT
-  const [a1,a2,a3,a4] = getAgeingTotals(data);
-  const totalAge = a1+a2+a3+a4;
-  ageingChartObj = new Chart(document.getElementById('ageingChart'),{
-    type:"doughnut",
-    plugins:[ChartDataLabels],
-    data:{
-      labels:["1-30 Days","31-60 Days","61-90 Days","90+ Days"],
-      datasets:[{ data:[a1,a2,a3,a4], backgroundColor:[colors.green, colors.yellow, colors.orange, colors.red], borderWidth:4, borderColor:'#fff' }]
-    },
-    options:{
-      maintainAspectRatio:false, 
-      cutout:"50%", // Thicker ring
-      plugins:{
-        legend:{ position:"bottom", labels:{ usePointStyle:true, padding:15, font:{size: labelSize} } },
-        title:{ display:true, text:'Ageing Distribution', font:{size: titleSize, weight:'bold'} },
-        datalabels:{ color:"#fff", font:{weight:'bold', size: labelSize}, formatter:(val)=>(((val/totalAge)*100).toFixed(1))+"%" }
-      }
-    }
-  });
-
-  // 2. PIC BAR
-  const pic = getPICOutstanding(data);
-  picChartObj = new Chart(document.getElementById('picChart'),{
-    type:"bar",
-    plugins:[ChartDataLabels],
-    data:{ labels: pic.map(p=>p.name), datasets:[{ data: pic.map(p=>p.total), backgroundColor: colors.blue, borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] },
-    options:{
-      maintainAspectRatio:false, indexAxis:'y', layout:{ padding:{ right: 80, left: isMobile?10:0 } },
-      plugins:{
-        legend:{ display:false },
-        title:{ display:true, text:"Top 10 Sales PIC", font:{size: titleSize, weight:'bold'}, padding:15 },
-        datalabels:{
-          display: true, 
-          color: (ctx)=>isMobile?'#fff':'#444', 
-          anchor: (ctx)=>isMobile?'start':'end', 
-          align:'right', 
-          offset: (ctx)=>isMobile?10:5,
-          font:{ size: labelSize, weight:'600' },
-          formatter: (v, ctx)=> isMobile ? `${ctx.chart.data.labels[ctx.dataIndex]} (₹${Math.round(v/1000)}K)` : `₹${Math.round(v/1000)}K`
-        }
-      },
-      scales:{ x:{ display:false }, y:{ display: !isMobile, grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:10 } } }
-    }
-  });
-
-  // 3. DEFAULTERS
-  const top = getTopDefaulters(data);
-  defaulterChartObj = new Chart(document.getElementById('defaulterChart'),{
-    type:"bar",
-    plugins:[ChartDataLabels],
-    data:{ labels: top.map(t=>t.name), datasets:[{ data: top.map(t=>t.amount), backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] },
-    options:{
-      maintainAspectRatio:false, indexAxis:"y", layout:{ padding:{ right: 80, left: isMobile?10:0 } },
-      plugins:{
-        legend:{ display:false },
-        title:{ display:true, text:"Top 10 Defaulters (90+ Days)", font:{size: titleSize, weight:'bold', color:colors.red}, padding:15 },
-        datalabels:{
-          display: true, 
-          color: (ctx)=>isMobile?'#fff':colors.red, 
-          anchor: (ctx)=>isMobile?'start':'end', 
-          align:'right', 
-          offset: (ctx)=>isMobile?10:5,
-          font:{ size: labelSize, weight:'600' },
-          formatter: (v, ctx)=> isMobile ? `${ctx.chart.data.labels[ctx.dataIndex]} (₹${Math.round(v/1000)}K)` : `₹${Math.round(v/1000)}K`
-        }
-      },
-      scales:{ x:{ display:false }, y:{ display: !isMobile, grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:10 } } }
-    }
-  });
 }
 
 function getAgeingTotals(data){
@@ -309,6 +229,105 @@ function getTopDefaulters(data){
   return list.sort((a,b)=>b.amount-a.amount).slice(0,10);
 }
 
+/* CHART RENDERING */
+function renderDashboard(data){
+  if(ageingChartObj) ageingChartObj.destroy();
+  if(picChartObj) picChartObj.destroy();
+  if(defaulterChartObj) defaulterChartObj.destroy();
+
+  // FONT SCALING: Laptop +30%, Mobile +20%
+  const labelSize = isMobile ? 12 : 17;
+  const titleSize = isMobile ? 18 : 22;
+  const colors = { blue:'#3b82f6', red:'#ef4444', orange:'#f59e0b', yellow:'#eab308', green:'#22c55e' };
+
+  // 1. AGEING DOUGHNUT (Thickened)
+  const [a1,a2,a3,a4] = getAgeingTotals(data);
+  const totalAge = a1+a2+a3+a4;
+  ageingChartObj = new Chart(document.getElementById('ageingChart'),{
+    type:"doughnut",
+    plugins:[ChartDataLabels],
+    data:{
+      labels:["1-30 Days","31-60 Days","61-90 Days","90+ Days"],
+      datasets:[{ data:[a1,a2,a3,a4], backgroundColor:[colors.green, colors.yellow, colors.orange, colors.red], borderWidth:4, borderColor:'#fff' }]
+    },
+    options:{
+      maintainAspectRatio:false, cutout:"55%",
+      plugins:{
+        legend:{ position:"bottom", labels:{ usePointStyle:true, padding:15, font:{size: labelSize} } },
+        title:{ display:true, text:'Ageing Distribution', font:{size: titleSize, weight:'bold'} },
+        datalabels:{ color:"#fff", font:{weight:'bold', size: labelSize}, formatter:(val)=>(((val/totalAge)*100).toFixed(1))+"%" }
+      }
+    }
+  });
+
+  // 2. PIC BAR (Stacked Labels for Mobile)
+  const pic = getPICOutstanding(data);
+  picChartObj = new Chart(document.getElementById('picChart'),{
+    type:"bar",
+    plugins:[ChartDataLabels],
+    data:{ labels: pic.map(p=>p.name), datasets:[{ data: pic.map(p=>p.total), backgroundColor: colors.blue, borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] },
+    options:{
+      maintainAspectRatio:false, indexAxis:'y', layout:{ padding:{ right: 70, top: isMobile ? 25 : 0 } },
+      plugins:{
+        legend:{ display:false },
+        title:{ display:true, text:"Top 10 Sales PIC", font:{size: titleSize, weight:'bold'}, padding:15 },
+        datalabels:{
+          display: true, color: '#444', anchor: 'end', align:'right', offset: 5,
+          font:{ size: labelSize, weight:'600' },
+          formatter: (v)=> `₹${Math.round(v/1000)}K`
+        }
+      },
+      scales:{ 
+        x:{ display:false }, 
+        y:{ 
+            grid:{display:false}, 
+            ticks:{ 
+                font:{size: labelSize, weight:'600'}, 
+                padding: 10,
+                mirror: isMobile, // Names move above bars on mobile
+                labelOffset: isMobile ? -22 : 0, 
+                align: isMobile ? 'start' : 'center'
+            } 
+        } 
+      }
+    }
+  });
+
+  // 3. DEFAULTERS (Stacked Labels for Mobile)
+  const top = getTopDefaulters(data);
+  defaulterChartObj = new Chart(document.getElementById('defaulterChart'),{
+    type:"bar",
+    plugins:[ChartDataLabels],
+    data:{ labels: top.map(t=>t.name), datasets:[{ data: top.map(t=>t.amount), backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] },
+    options:{
+      maintainAspectRatio:false, indexAxis:"y", layout:{ padding:{ right: 70, top: isMobile ? 25 : 0 } },
+      plugins:{
+        legend:{ display:false },
+        title:{ display:true, text:"Top 10 Defaulters (90+ Days)", font:{size: titleSize, weight:'bold', color:colors.red}, padding:15 },
+        datalabels:{
+          display: true, color: colors.red, anchor: 'end', align:'right', offset: 5,
+          font:{ size: labelSize, weight:'600' },
+          formatter: (v)=> `₹${Math.round(v/1000)}K`
+        }
+      },
+      scales:{ 
+        x:{ display:false }, 
+        y:{ 
+            grid:{display:false}, 
+            ticks:{ 
+                font:{size: labelSize, weight:'600'}, 
+                padding: 10,
+                mirror: isMobile,
+                labelOffset: isMobile ? -22 : 0,
+                align: isMobile ? 'start' : 'center'
+            } 
+        } 
+      }
+    }
+  });
+}
+
+/* TABLE RENDERING */
 function render(data){
   app.innerHTML=""; let openPIC=null, openCustomer=null;
   data.forEach(pic=>{
@@ -328,6 +347,8 @@ function render(data){
   });
 }
 
+/* FORECAST ACTIONS */
+let drawerPIC, drawerCustomerName;
 function openDrawer(pic,cust,tot,fcst){ drawerPIC=pic; drawerCustomerName=cust; drawerCustomer.innerText=cust; drawerTotal.innerText="Total: ₹"+fmt(tot); drawerInput.value=fcst; forecastDrawer.classList.remove("hidden"); }
 function closeDrawer(){ forecastDrawer.classList.add("hidden"); }
 function saveDrawerForecast(){ saveForecast(drawerPIC,drawerCustomerName,drawerInput.value); closeDrawer(); }
