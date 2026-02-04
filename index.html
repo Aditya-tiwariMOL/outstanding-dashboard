@@ -77,32 +77,13 @@ body {
 .row > div { border-right:1px solid var(--grid); padding-right:6px; }
 .row > div:last-child { border-right:none; }
 
-.header {
-  background:var(--mol-blue);
-  color:#fff;
-  font-weight:bold;
-  border-radius:6px;
-}
-.card {
-  background:#fff;
-  border-radius:6px;
-  margin-top:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-}
+.header { background:var(--mol-blue); color:#fff; font-weight:bold; border-radius:6px; }
+.card { background:#fff; border-radius:6px; margin-top:10px; box-shadow:0 2px 6px rgba(0,0,0,.08); }
 .customer { background:#eef3ff; }
-.invoice {
-  padding-left:18px;
-  background:#E5FDEB;
-  border-left:3px solid rgba(26,127,55,.18);
-  font-size:16px;
-}
+.invoice { padding-left:18px; background:#E5FDEB; border-left:3px solid rgba(26,127,55,.18); font-size:16px; }
 .hidden { display:none; }
 .on-account { color:var(--success); font-weight:bold; }
 .overdue { color:var(--danger); font-weight:bold; }
-
-/* FORECAST */
-.editable-value { color:var(--mol-blue); border-bottom:1px dashed rgba(31,78,163,.4); cursor:pointer; }
-.editable-placeholder { color:#999; font-style:italic; cursor:pointer; }
 
 /* DASHBOARD STYLES */
 #dashboard { padding: 20px 12px 60px; max-width: 1200px; margin: 0 auto; }
@@ -117,23 +98,20 @@ body {
     flex-direction: column;
     min-height: 400px;
 }
-.chart-box.tall { min-height: 520px; }
+.chart-box.tall { min-height: 550px; }
 
 @media (max-width:768px) {
   .row { grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px; min-width:670px; font-size:15px; }
   .dashboard-grid { grid-template-columns: 1fr; }
-  .chart-box { min-height: 350px; }
-  .chart-box.tall { min-height: 480px; }
+  .chart-box { min-height: 380px; }
+  .chart-box.tall { min-height: 500px; }
 }
 
 /* DRAWER & TOAST */
 .drawer { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:10000; }
 .drawer.hidden { display:none; }
 .drawer-content { position:absolute; bottom:0; left:0; right:0; background:#fff; padding:16px; border-radius:14px 14px 0 0; max-height:90vh; overflow-y:auto; }
-.drawer-title { font-size:16px; font-weight:bold; }
-.drawer-sub { font-size:13px; color:#666; margin-bottom:12px; }
-.drawer-content input { width:100%; padding:10px; font-size:16px; margin-bottom:14px; }
-.drawer-actions { display:flex; gap:10px; }
+.drawer-actions { display:flex; gap:10px; margin-top:10px; }
 .drawer-actions button { flex:1; padding:10px; font-size:15px; }
 .drawer-actions .primary { background:var(--mol-blue); color:#fff; border:none; }
 .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--mol-blue); color:#fff; padding:10px 18px; border-radius:20px; display:none; }
@@ -153,7 +131,6 @@ body {
 </div>
 
 <div id="appContainer" style="display:none;">
-
   <div class="header-wrap">
     <h1>Outstanding Receivables</h1>
     <div class="summary">
@@ -184,14 +161,13 @@ body {
       <canvas id="defaulterChart"></canvas>
     </div>
   </div>
-
 </div>
 
 <div id="forecastDrawer" class="drawer hidden">
   <div class="drawer-content">
-    <div class="drawer-title" id="drawerCustomer">—</div>
-    <div class="drawer-sub" id="drawerTotal">—</div>
-    <input type="number" id="drawerInput" placeholder="Enter forecast amount">
+    <div id="drawerCustomer" style="font-weight:bold;">—</div>
+    <div id="drawerTotal" style="color:#666; font-size:13px; margin-bottom:10px;">—</div>
+    <input type="number" id="drawerInput" style="width:100%; padding:10px; box-sizing:border-box;" placeholder="Enter forecast">
     <div class="drawer-actions">
       <button onclick="closeDrawer()">Cancel</button>
       <button class="primary" onclick="saveDrawerForecast()">Save</button>
@@ -202,19 +178,9 @@ body {
 <div class="toast" id="toast">Forecast updated</div>
 
 <script>
-/* GLOBAL */
-let openCustomer=null;
-let drawerPIC=null;
-let drawerCustomerName=null;
-let preloadedData=null;
-
-let ageingChartObj=null;
-let picChartObj=null;
-let defaulterChartObj=null;
-
+let preloadedData=null, ageingChartObj=null, picChartObj=null, defaulterChartObj=null;
 const API_URL="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 const PASSWORD_HASH="9f7259520fecfc4f2ae2c2627cd625197070aa7a73d90938c680f8b5aaba747a";
-
 const isMobile=window.innerWidth<=768;
 const dataPromise=fetch(API_URL).then(r=>r.json());
 
@@ -222,17 +188,14 @@ const n=v=>Number(String(v||0).replace(/,/g,""));
 const fmt=v=>isMobile&&n(v)>=1000?Math.round(n(v)/1000)+"K":n(v).toLocaleString();
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-/* HASH */
 async function sha256(t){
   const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
   return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
-/* LOGIN */
 async function checkPassword(){
   if(await sha256(pwd.value.trim())!==PASSWORD_HASH){
-    loginError.style.display="block";
-    return;
+    loginError.style.display="block"; return;
   }
   loginOverlay.style.display="none";
   appContainer.style.display="block";
@@ -242,7 +205,6 @@ async function checkPassword(){
   renderDashboard(preloadedData);
 }
 
-/* SUMMARY */
 function updateSummary(data){
   let t=0,o=0;
   data.forEach(p=>{
@@ -253,276 +215,127 @@ function updateSummary(data){
   lastUpdated.innerText="Last refreshed: "+new Date().toLocaleString();
 }
 
-/* DRAWER */
-function openDrawer(pic,customer,total,forecast){
-  if(!isMobile) return;
-  drawerPIC=pic;
-  drawerCustomerName=customer;
-  drawerCustomer.innerText=customer;
-  drawerTotal.innerText="Total OS: ₹"+fmt(total);
-  drawerInput.value=forecast||"";
-  forecastDrawer.classList.remove("hidden");
-  requestAnimationFrame(()=>drawerInput.focus());
-}
-
-function closeDrawer(){ forecastDrawer.classList.add("hidden"); }
-function saveDrawerForecast(){ saveForecast(drawerPIC,drawerCustomerName,drawerInput.value); closeDrawer(); }
-
-/* DASHBOARD HELPERS */
-function getAgeingTotals(data){
-  let a1=0,a2=0,a3=0,a4=0;
-  data.forEach(p=>{
-    a4+=n(p.totals["90+"]);
-    a3+=n(p.totals["61-90"]);
-    a2+=n(p.totals["31-60"]);
-    a1+=n(p.totals["1-30"]);
-  });
-  return[a1,a2,a3,a4];
-}
-
-function getPICOutstanding(data){
-  const list = data.map(p=>({ name: p.salesPIC, total: sum(p.totals) }));
-  list.sort((a,b)=>b.total-a.total);
-  return list.slice(0,10);
-}
-
-function getTopDefaulters(data){
-  const list=[];
-  data.forEach(p=>{
-    Object.values(p.customers).forEach(c=>{
-      const amt=n(c.totals["90+"]||0);
-      if(amt>0){ list.push({name:c.customerName,amount:amt}); }
-    });
-  });
-  list.sort((a,b)=>b.amount-a.amount);
-  return list.slice(0,10);
-}
-
-/* DASHBOARD RENDERING */
 function renderDashboard(data){
   if(ageingChartObj) ageingChartObj.destroy();
   if(picChartObj) picChartObj.destroy();
   if(defaulterChartObj) defaulterChartObj.destroy();
 
-  const colors = {
-    blue: '#3b82f6',
-    red: '#ef4444',
-    orange: '#f59e0b',
-    yellow: '#eab308',
-    green: '#22c55e'
-  };
+  // Desktop +30% (base 13px -> ~17px), Mobile +20% (base 10px -> 12px)
+  const labelSize = isMobile ? 12 : 17;
+  const titleSize = isMobile ? 18 : 22;
+  const colors = { blue:'#3b82f6', red:'#ef4444', orange:'#f59e0b', yellow:'#eab308', green:'#22c55e' };
 
-  /* 1. AGEING DOUGHNUT */
+  // 1. AGEING DOUGHNUT
   const [a1,a2,a3,a4] = getAgeingTotals(data);
   const totalAge = a1+a2+a3+a4;
-
   ageingChartObj = new Chart(document.getElementById('ageingChart'),{
     type:"doughnut",
     plugins:[ChartDataLabels],
     data:{
       labels:["1-30 Days","31-60 Days","61-90 Days","90+ Days"],
-      datasets:[{
-        data:[a1,a2,a3,a4],
-        backgroundColor:[colors.green, colors.yellow, colors.orange, colors.red],
-        borderWidth:4, borderColor:'#fff'
-      }]
+      datasets:[{ data:[a1,a2,a3,a4], backgroundColor:[colors.green, colors.yellow, colors.orange, colors.red], borderWidth:4, borderColor:'#fff' }]
     },
     options:{
-      maintainAspectRatio:false, cutout:"70%",
+      maintainAspectRatio:false, 
+      cutout:"50%", // Thicker ring
       plugins:{
-        legend:{ position:"bottom", labels:{ usePointStyle:true, padding:15, font:{size:11} } },
-        title: { display:true, text:'Ageing Distribution', font:{size:15, weight:'bold'} },
-        datalabels:{
-          color:"#fff", font:{weight:'bold', size:10},
-          formatter:(val)=>{
-            let pct = ((val/totalAge)*100).toFixed(1);
-            return pct > 5 ? pct+"%" : "";
-          }
-        }
+        legend:{ position:"bottom", labels:{ usePointStyle:true, padding:15, font:{size: labelSize} } },
+        title:{ display:true, text:'Ageing Distribution', font:{size: titleSize, weight:'bold'} },
+        datalabels:{ color:"#fff", font:{weight:'bold', size: labelSize}, formatter:(val)=>(((val/totalAge)*100).toFixed(1))+"%" }
       }
     }
   });
 
-  /* 2. PIC BAR (Top 10) - Adaptive Thickness */
+  // 2. PIC BAR
   const pic = getPICOutstanding(data);
   picChartObj = new Chart(document.getElementById('picChart'),{
     type:"bar",
     plugins:[ChartDataLabels],
-    data:{
-      labels: pic.map(p=>p.name),
-      datasets:[{
-        data: pic.map(p=>p.total),
-        backgroundColor: colors.blue, 
-        borderRadius:4,
-        categoryPercentage: 0.8, 
-        barPercentage: 0.9
-      }]
-    },
+    data:{ labels: pic.map(p=>p.name), datasets:[{ data: pic.map(p=>p.total), backgroundColor: colors.blue, borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] },
     options:{
-      maintainAspectRatio:false,
-      indexAxis: 'y',
-      layout: { padding: { right: 50 } },
+      maintainAspectRatio:false, indexAxis:'y', layout:{ padding:{ right: 80, left: isMobile?10:0 } },
       plugins:{
         legend:{ display:false },
-        title:{ display:true, text:"Top 10 Sales PIC", font:{size:15, weight:'bold'}, padding:15 },
+        title:{ display:true, text:"Top 10 Sales PIC", font:{size: titleSize, weight:'bold'}, padding:15 },
         datalabels:{
-          anchor:"end", align:"right", color:"#444", font:{size:10, weight:'600'},
-          formatter:(v)=>"₹"+Math.round(v/1000)+"K"
+          display: true, 
+          color: (ctx)=>isMobile?'#fff':'#444', 
+          anchor: (ctx)=>isMobile?'start':'end', 
+          align:'right', 
+          offset: (ctx)=>isMobile?10:5,
+          font:{ size: labelSize, weight:'600' },
+          formatter: (v, ctx)=> isMobile ? `${ctx.chart.data.labels[ctx.dataIndex]} (₹${Math.round(v/1000)}K)` : `₹${Math.round(v/1000)}K`
         }
       },
-      scales:{
-        x:{ display:false },
-        y:{ 
-          grid:{display:false}, 
-          ticks:{ font:{size:11, weight:'500'}, padding: 10 } 
-        }
-      }
+      scales:{ x:{ display:false }, y:{ display: !isMobile, grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:10 } } }
     }
   });
 
-  /* 3. TOP DEFAULTERS (Top 10) - Adaptive Thickness */
+  // 3. DEFAULTERS
   const top = getTopDefaulters(data);
   defaulterChartObj = new Chart(document.getElementById('defaulterChart'),{
     type:"bar",
     plugins:[ChartDataLabels],
-    data:{
-      labels: top.map(t=>t.name),
-      datasets:[{
-        data: top.map(t=>t.amount),
-        backgroundColor: 'rgba(239, 68, 68, 0.8)', 
-        borderRadius:4,
-        categoryPercentage: 0.8,
-        barPercentage: 0.9
-      }]
-    },
+    data:{ labels: top.map(t=>t.name), datasets:[{ data: top.map(t=>t.amount), backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius:4, categoryPercentage:0.8, barPercentage:0.9 }] },
     options:{
-      maintainAspectRatio:false,
-      indexAxis:"y",
-      layout:{ padding:{ right:60 } },
+      maintainAspectRatio:false, indexAxis:"y", layout:{ padding:{ right: 80, left: isMobile?10:0 } },
       plugins:{
         legend:{ display:false },
-        title:{ display:true, text:"Top 10 Defaulters (90+ Days)", font:{size:15, weight:'bold', color:colors.red}, padding:15 },
+        title:{ display:true, text:"Top 10 Defaulters (90+ Days)", font:{size: titleSize, weight:'bold', color:colors.red}, padding:15 },
         datalabels:{
-          color:colors.red, anchor:"end", align:"right", font:{size:10, weight:'600'},
-          formatter:(v)=>"₹"+Math.round(v/1000)+"K"
+          display: true, 
+          color: (ctx)=>isMobile?'#fff':colors.red, 
+          anchor: (ctx)=>isMobile?'start':'end', 
+          align:'right', 
+          offset: (ctx)=>isMobile?10:5,
+          font:{ size: labelSize, weight:'600' },
+          formatter: (v, ctx)=> isMobile ? `${ctx.chart.data.labels[ctx.dataIndex]} (₹${Math.round(v/1000)}K)` : `₹${Math.round(v/1000)}K`
         }
       },
-      scales:{
-        x:{ display:false },
-        y:{ 
-            grid:{display:false}, 
-            ticks:{ font:{size:11, weight:'500'}, padding: 10 } 
-        }
-      }
+      scales:{ x:{ display:false }, y:{ display: !isMobile, grid:{display:false}, ticks:{ font:{size: labelSize, weight:'500'}, padding:10 } } }
     }
   });
 }
 
-/* RENDER TABLE */
+function getAgeingTotals(data){
+  let a1=0,a2=0,a3=0,a4=0;
+  data.forEach(p=>{ a4+=n(p.totals["90+"]); a3+=n(p.totals["61-90"]); a2+=n(p.totals["31-60"]); a1+=n(p.totals["1-30"]); });
+  return[a1,a2,a3,a4];
+}
+function getPICOutstanding(data){ return data.map(p=>({ name: p.salesPIC, total: sum(p.totals) })).sort((a,b)=>b.total-a.total).slice(0,10); }
+function getTopDefaulters(data){
+  const list=[];
+  data.forEach(p=>{ Object.values(p.customers).forEach(c=>{ if(n(c.totals["90+"])>0) list.push({name:c.customerName, amount:n(c.totals["90+"])}); }); });
+  return list.sort((a,b)=>b.amount-a.amount).slice(0,10);
+}
+
 function render(data){
-  app.innerHTML="";
-  let openPIC=null;
-  openCustomer=null;
-
+  app.innerHTML=""; let openPIC=null, openCustomer=null;
   data.forEach(pic=>{
-    const card=document.createElement("div");
-    card.className="card";
-    const picRow=document.createElement("div");
-    picRow.className="row";
-    picRow.innerHTML=`
-      <div>${pic.salesPIC}</div>
-      <div>${fmt(sum(pic.totals))}</div>
-      <div></div>
-      <div class="overdue">${fmt(pic.totals["90+"])}</div>
-      <div>${fmt(pic.totals["61-90"])}</div>
-      <div>${fmt(pic.totals["31-60"])}</div>
-      <div>${fmt(pic.totals["1-30"])}</div>
-      <div></div>`;
-
-    const wrap=document.createElement("div");
-    wrap.className="hidden";
-
-    picRow.onclick=()=>{
-      if(openPIC&&openPIC!==wrap) openPIC.classList.add("hidden");
-      wrap.classList.toggle("hidden");
-      openPIC=wrap.classList.contains("hidden")?null:wrap;
-      openCustomer=null;
-    };
-
+    const card=document.createElement("div"); card.className="card";
+    const picRow=document.createElement("div"); picRow.className="row";
+    picRow.innerHTML=`<div>${pic.salesPIC}</div><div>${fmt(sum(pic.totals))}</div><div></div><div class="overdue">${fmt(pic.totals["90+"])}</div><div>${fmt(pic.totals["61-90"])}</div><div>${fmt(pic.totals["31-60"])}</div><div>${fmt(pic.totals["1-30"])}</div><div></div>`;
+    const wrap=document.createElement("div"); wrap.className="hidden";
+    picRow.onclick=()=>{ if(openPIC&&openPIC!==wrap) openPIC.classList.add("hidden"); wrap.classList.toggle("hidden"); openPIC=wrap.classList.contains("hidden")?null:wrap; };
     Object.values(pic.customers).forEach(c=>{
-      const r=document.createElement("div");
-      r.className="row customer";
-      const invoiceWrap=document.createElement("div");
-      invoiceWrap.className="hidden";
-
-      r.innerHTML=`
-        <div>${c.customerName}</div>
-        <div>${fmt(sum(c.totals))}</div>
-        <div class="on-account">${fmt(c.onAccount)}</div>
-        <div class="overdue">${fmt(c.totals["90+"])}</div>
-        <div>${fmt(c.totals["61-90"])}</div>
-        <div>${fmt(c.totals["31-60"])}</div>
-        <div>${fmt(c.totals["1-30"])}</div>
-        <div>
-          ${isMobile
-            ? `<span class="${c.forecast?'editable-value':'editable-placeholder'}"
-                onclick="event.stopPropagation();
-                openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">
-                ${c.forecast?fmt(c.forecast):'Add'}
-              </span>`
-            : `<input type="text" value="${c.forecast||''}" placeholder="Enter"
-                onclick="event.stopPropagation()"
-                onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)"
-                style="width:100%;padding:6px;font-size:14px;box-sizing:border-box;">`
-          }
-        </div>`;
-
-      r.onclick=()=>{
-        if(openCustomer&&openCustomer!==invoiceWrap){ openCustomer.classList.add("hidden"); }
-        invoiceWrap.classList.toggle("hidden");
-        openCustomer=invoiceWrap.classList.contains("hidden")?null:invoiceWrap;
-      };
-
-      c.invoices.forEach(i=>{
-        const inv=document.createElement("div");
-        inv.className="row invoice";
-        inv.innerHTML=`
-          <div>${i.invoiceNo}</div>
-          <div>${fmt(i.total)}</div>
-          <div></div>
-          <div>${fmt(i.ageing["90+"]||0)}</div>
-          <div>${fmt(i.ageing["61-90"]||0)}</div>
-          <div>${fmt(i.ageing["31-60"]||0)}</div>
-          <div>${fmt(i.ageing["1-30"]||0)}</div>
-          <div></div>`;
-        invoiceWrap.appendChild(inv);
-      });
-      wrap.appendChild(r);
-      wrap.appendChild(invoiceWrap);
+      const r=document.createElement("div"); r.className="row customer"; const invWrap=document.createElement("div"); invWrap.className="hidden";
+      r.innerHTML=`<div>${c.customerName}</div><div>${fmt(sum(c.totals))}</div><div class="on-account">${fmt(c.onAccount)}</div><div class="overdue">${fmt(c.totals["90+"])}</div><div>${fmt(c.totals["61-90"])}</div><div>${fmt(c.totals["31-60"])}</div><div>${fmt(c.totals["1-30"])}</div><div>${isMobile?`<span class="${c.forecast?'editable-value':'editable-placeholder'}" onclick="event.stopPropagation(); openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">${c.forecast?fmt(c.forecast):'Add'}</span>`:`<input type="text" value="${c.forecast||''}" onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)" style="width:100%;">`}</div>`;
+      r.onclick=()=>{ if(openCustomer&&openCustomer!==invWrap) openCustomer.classList.add("hidden"); invWrap.classList.toggle("hidden"); openCustomer=invWrap.classList.contains("hidden")?null:invWrap; };
+      c.invoices.forEach(i=>{ const inv=document.createElement("div"); inv.className="row invoice"; inv.innerHTML=`<div>${i.invoiceNo}</div><div>${fmt(i.total)}</div><div></div><div>${fmt(i.ageing["90+"]||0)}</div><div>${fmt(i.ageing["61-90"]||0)}</div><div>${fmt(i.ageing["31-60"]||0)}</div><div>${fmt(i.ageing["1-30"]||0)}</div><div></div>`; invWrap.appendChild(inv); });
+      wrap.appendChild(r); wrap.appendChild(invWrap);
     });
-    card.appendChild(picRow);
-    card.appendChild(wrap);
-    app.appendChild(card);
+    card.appendChild(picRow); card.appendChild(wrap); app.appendChild(card);
   });
 }
 
-/* SAVE FORECAST */
-function saveForecast(pic,customer,value){
-  const val=n(value);
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({ action:"updateForecast", salesPIC:pic, customer, forecast:val })
-  }).then(()=>{
-    preloadedData.forEach(p=>{
-      if(p.salesPIC===pic){
-        Object.values(p.customers).forEach(c=>{ if(c.customerName===customer) c.forecast=val; });
-      }
-    });
-    render(preloadedData);
-    updateSummary(preloadedData);
-    renderDashboard(preloadedData);
-    toast.style.display="block";
-    setTimeout(()=>toast.style.display="none",2000);
+function openDrawer(pic,cust,tot,fcst){ drawerPIC=pic; drawerCustomerName=cust; drawerCustomer.innerText=cust; drawerTotal.innerText="Total: ₹"+fmt(tot); drawerInput.value=fcst; forecastDrawer.classList.remove("hidden"); }
+function closeDrawer(){ forecastDrawer.classList.add("hidden"); }
+function saveDrawerForecast(){ saveForecast(drawerPIC,drawerCustomerName,drawerInput.value); closeDrawer(); }
+function saveForecast(pic,cust,val){
+  fetch(API_URL,{ method:"POST", body:JSON.stringify({ action:"updateForecast", salesPIC:pic, customer:cust, forecast:n(val) }) }).then(()=>{
+    preloadedData.forEach(p=>{ if(p.salesPIC===pic) Object.values(p.customers).forEach(c=>{ if(c.customerName===cust) c.forecast=n(val); }); });
+    render(preloadedData); updateSummary(preloadedData); renderDashboard(preloadedData);
+    toast.style.display="block"; setTimeout(()=>toast.style.display="none",2000);
   });
 }
 </script>
