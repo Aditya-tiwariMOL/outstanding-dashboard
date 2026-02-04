@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+
 :root {
   --mol-blue: #1f4ea3;
   --mol-light: #eef3ff;
@@ -26,381 +27,925 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
   background: var(--bg);
   color: var(--text-main);
-  line-height: 1.5;
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
-/* LOGIN SECTION */
-.login-overlay {
-  position: fixed; inset: 0; background: var(--bg);
-  display: flex; align-items: center; justify-content: center; z-index: 9999;
-}
-.login-box {
-  background: #fff; padding: 40px; border-radius: 12px;
-  width: 90%; max-width: 400px; text-align: center;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-}
-.login-box img { max-width: 180px; margin-bottom: 20px; }
-.login-box h2 { font-size: 18px; color: var(--mol-blue); margin-bottom: 24px; font-weight: 700; }
-.login-box input {
-  width: 100%; padding: 12px; margin-bottom: 16px;
-  border: 1px solid #ddd; border-radius: 6px; font-size: 16px;
-}
-.login-box button {
-  width: 100%; padding: 12px; background: var(--mol-blue);
-  color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;
+/* LOGIN */
+
+.login-overlay{
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
 }
 
-/* STANDARDIZED HEADER */
-.header-wrap {
-  background: #fff; padding: 20px; border-bottom: 1px solid var(--grid);
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 25px; gap: 15px;
+.login-box{
+  background:#fff;
+  padding:40px;
+  border-radius:12px;
+  width:90%;
+  max-width:400px;
+  text-align:center;
+  box-shadow:0 20px 25px rgba(0,0,0,.1);
 }
-.title-area h1 { margin: 0; font-size: 22px; color: var(--mol-blue); font-weight: 700; }
-.date-status { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-.date-status::before { content: ''; width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block; }
 
-.summary-badge {
-  background: var(--mol-light); padding: 10px 20px; border-radius: 10px;
-  border: 1px solid rgba(31, 78, 163, 0.15); min-width: 220px; text-align: right;
+.login-box img{max-width:180px;margin-bottom:20px;}
+
+.login-box input{
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border:1px solid #ddd;
+  border-radius:6px;
 }
-.summary-label { font-size: 11px; color: var(--mol-blue); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-.amount-highlight { font-size: 22px; font-weight: 800; color: var(--mol-blue); }
 
-/* DATA TABLE */
-.table-wrapper { 
-    overflow-x: auto; 
-    padding: 0 20px 40px; 
-    -webkit-overflow-scrolling: touch; 
+.login-box button{
+  width:100%;
+  padding:12px;
+  background:var(--mol-blue);
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  font-weight:600;
 }
-.row {
-  display: grid; grid-template-columns: 2fr 1.2fr 1fr 0.9fr 0.9fr 0.9fr 0.9fr 1.2fr;
-  gap: 10px; padding: 14px; min-width: 1000px;
-  background: #fff; border-bottom: 1px solid var(--grid); font-size: 15px; align-items: center;
-  cursor: pointer;
+
+
+/* HEADER */
+
+.header-wrap{
+  background:#fff;
+  padding:20px;
+  border-bottom:1px solid var(--grid);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
 }
-.row > div { border-right: 1px solid var(--grid); padding-right: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row > div:last-child { border-right: none; }
 
-.header { background: var(--mol-blue); color: #fff; font-weight: 600; border-radius: 8px 8px 0 0; cursor: default; }
-.card { background: #fff; border-radius: 8px; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;}
+.title-area h1{
+  margin:0;
+  color:var(--mol-blue);
+  font-size:22px;
+}
 
-/* Sub-row Styling */
-.customer { background: #fcfdfe; font-weight: 500; }
-.invoice { background: #f0fdf4; padding-left: 25px; font-size: 14px; border-left: 4px solid #bbf7d0; color: #475569; }
+.date-status{
+  font-size:13px;
+  color:var(--text-muted);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
 
-.on-account { color: var(--success); font-weight: 700; }
-.overdue { color: var(--danger); font-weight: 700; }
+.date-status::before{
+  content:'';
+  width:8px;
+  height:8px;
+  background:var(--success);
+  border-radius:50%;
+}
 
-/* Forecast Interaction */
-.editable-placeholder { color: var(--mol-blue); text-decoration: underline; font-size: 12px; cursor: pointer; }
-.editable-value { font-weight: 700; color: var(--mol-blue); border-bottom: 1px dashed var(--mol-blue); cursor: pointer; }
-.forecast-input { width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+.summary-badge{
+  background:var(--mol-light);
+  padding:10px 20px;
+  border-radius:10px;
+  border:1px solid rgba(31,78,163,.15);
+  text-align:right;
+  min-width:220px;
+}
+
+.summary-label{
+  font-size:11px;
+  font-weight:800;
+  color:var(--mol-blue);
+}
+
+.amount-highlight{
+  font-size:22px;
+  font-weight:800;
+  color:var(--mol-blue);
+}
+
+
+/* TABLE */
+
+.table-wrapper{
+  overflow-x:auto;
+  padding:0 20px 40px;
+  -webkit-overflow-scrolling:touch;
+}
+
+.row{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr .8fr .8fr .8fr .8fr 1fr;
+  gap:10px;
+  padding:14px;
+  min-width:1000px;
+  background:#fff;
+  border-bottom:1px solid var(--grid);
+  align-items:center;
+  cursor:pointer;
+}
+
+.row > div{
+  border-right:1px solid var(--grid);
+  padding-right:6px;
+}
+
+.row > div:last-child{border-right:none;}
+
+.header{
+  background:var(--mol-blue);
+  color:#fff;
+  font-weight:600;
+  border-radius:8px 8px 0 0;
+  cursor:default;
+}
+
+.card{
+  background:#fff;
+  border-radius:8px;
+  margin-top:10px;
+  box-shadow:0 1px 3px rgba(0,0,0,.1);
+  overflow:hidden;
+}
+
+.customer{background:#fcfdfe;}
+.invoice{
+  background:#f0fdf4;
+  padding-left:25px;
+  border-left:4px solid #bbf7d0;
+}
+
+.on-account{color:var(--success);font-weight:700;}
+.overdue{color:var(--danger);font-weight:700;}
+
+.editable-placeholder{
+  color:var(--mol-blue);
+  text-decoration:underline;
+  font-size:12px;
+}
+
+.editable-value{
+  color:var(--mol-blue);
+  font-weight:700;
+  border-bottom:1px dashed var(--mol-blue);
+}
+
 
 /* DASHBOARD */
-#dashboard { padding: 0 20px 60px; max-width: 1300px; margin: 0 auto; }
-.section-title { text-align: center; color: var(--mol-blue); font-size: 20px; font-weight: 700; margin-bottom: 25px; }
-.dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-.chart-box { 
-    background: #fff; padding: 25px; border-radius: 12px; 
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid var(--grid);
-    height: 450px; display: flex; flex-direction: column;
+#dashboard{
+  padding:0 20px 60px;
+  max-width:1300px;
+  margin:auto;
 }
+
+.section-title{
+  text-align:center;
+  color:var(--mol-blue);
+  font-weight:700;
+  margin-bottom:25px;
+}
+
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:1fr 1.2fr;
+  gap:20px;
+}
+
+.chart-box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  border:1px solid var(--grid);
+  height:400px;
+}
+
 
 /* DRAWER */
-.drawer { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 10000; }
-.drawer-content { 
-    position: absolute; bottom: 0; left: 0; right: 0; 
-    background: #fff; padding: 25px; border-radius: 20px 20px 0 0; 
-    max-height: 80vh; overflow-y: auto; box-shadow: 0 -10px 25px rgba(0,0,0,0.1);
-}
-.drawer-actions { display: flex; gap: 12px; margin-top: 20px; }
-.drawer-actions button { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-weight: 600; cursor: pointer; }
-.drawer-actions .primary { background: var(--mol-blue); color: #fff; border: none; }
 
-/* MOBILE RESPONSIVENESS */
-@media (max-width: 768px) {
-  .header-wrap { flex-direction: column; text-align: center; padding: 15px; gap: 12px; align-items: center; }
-  .summary-badge { width: 100%; text-align: center; min-width: unset; }
-  .dashboard-grid { grid-template-columns: 1fr; }
-  .row { font-size: 13px; min-width: 920px; grid-template-columns: 180px 100px 80px 80px 80px 80px 80px 100px; }
-  .chart-box { height: 400px; padding: 15px; }
+.drawer{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  z-index:10000;
 }
 
-.hidden { display: none; }
-.toast { 
-    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
-    background: #1e293b; color: #fff; padding: 14px 28px; border-radius: 12px; 
-    display: none; z-index: 10001; font-weight: 600; box-shadow: 0 10px 15px rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.1);
+.drawer-content{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  padding:25px;
+  border-radius:20px 20px 0 0;
+  max-height:80vh;
+  overflow:auto;
 }
+
+.drawer-actions{
+  display:flex;
+  gap:12px;
+  margin-top:20px;
+}
+
+.drawer-actions button{
+  flex:1;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-weight:600;
+}
+
+.drawer-actions .primary{
+  background:var(--mol-blue);
+  color:#fff;
+  border:none;
+}
+
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--mol-blue);
+  color:#fff;
+  padding:12px 24px;
+  border-radius:30px;
+  display:none;
+  z-index:10001;
+  font-weight:600;
+}
+
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+  .header-wrap{
+    flex-direction:column;
+    text-align:center;
+    padding:12px 15px;
+    gap:8px;
+  }
+
+  .title-area,
+  .summary-badge{
+    width:100%;
+    text-align:center;
+  }
+
+  .row{
+    font-size:13px;
+    min-width:900px;
+    grid-template-columns:
+    160px 90px 80px 70px 70px 70px 70px 100px;
+  }
+
+  .dashboard-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+.hidden{display:none;}
+
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
+
 <div class="login-overlay" id="loginOverlay">
+
   <div class="login-box">
+
     <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png">
-    <h2>MOL Receivables Dashboard</h2>
+
+    <h2>MOL Receivables Access</h2>
+
     <input type="password" id="pwd" placeholder="Enter Access Code">
+
     <button onclick="checkPassword()">Log In</button>
-    <div id="loginError" style="color:var(--danger); font-size:13px; margin-top:10px; display:none;">Invalid credentials</div>
+
+    <div id="loginError" style="color:var(--danger);display:none;font-size:13px;">
+      Invalid credentials
+    </div>
+
   </div>
+
 </div>
+
 
 <div id="appContainer" style="display:none;">
-  <div class="header-wrap">
-    <div class="title-area">
-      <h1>Outstanding Receivables</h1>
-      <div class="date-status" id="lastUpdated">Updating...</div>
-    </div>
-    <div class="summary-badge">
-      <span class="summary-label">Total Net Outstanding</span>
-      <div class="amount-highlight" id="netOutstanding">₹0</div>
-    </div>
+
+
+<!-- HEADER -->
+
+<div class="header-wrap">
+
+  <div class="title-area">
+    <h1>Outstanding Receivables</h1>
+    <div class="date-status" id="lastUpdated">Updating...</div>
   </div>
 
-  <div class="table-wrapper">
-    <div class="row header">
-      <div>Account Name</div><div>Total OS</div><div>On Acc</div>
-      <div>90+</div><div>60+</div><div>30+</div><div>1+</div><div>Forecast</div>
-    </div>
-    <div id="app"></div>
+  <div class="summary-badge">
+    <div class="summary-label">Total Net Outstanding</div>
+    <div class="amount-highlight" id="netOutstanding">₹0</div>
   </div>
 
-  <div id="dashboard">
-    <h2 class="section-title">Visual Analytics</h2>
-    <div class="dashboard-grid">
-      <div class="chart-box"><canvas id="ageingChart"></canvas></div>
-      <div class="chart-box"><canvas id="picChart"></canvas></div>
-    </div>
-    <div class="chart-box" style="margin-top:20px; height: 550px;"><canvas id="defaulterChart"></canvas></div>
-  </div>
 </div>
+
+
+<!-- TABLE -->
+
+<div class="table-wrapper">
+
+  <div class="row header">
+    <div>Account Name</div>
+    <div>Total OS</div>
+    <div>On Acc</div>
+    <div>90+</div>
+    <div>60+</div>
+    <div>30+</div>
+    <div>1+</div>
+    <div>Forecast</div>
+  </div>
+
+  <div id="app"></div>
+
+</div>
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboard">
+
+  <h2 class="section-title">Visual Analytics</h2>
+
+  <div class="dashboard-grid">
+
+    <div class="chart-box">
+      <canvas id="ageingChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <canvas id="picChart"></canvas>
+    </div>
+
+  </div>
+
+  <div class="chart-box" style="margin-top:20px;height:500px;">
+    <canvas id="defaulterChart"></canvas>
+  </div>
+
+</div>
+
+</div>
+
+
+<!-- DRAWER -->
 
 <div id="forecastDrawer" class="drawer hidden">
+
   <div class="drawer-content">
-    <div id="drawerCustomer" style="font-weight:800; font-size: 18px; color: var(--mol-blue);">—</div>
-    <div id="drawerTotal" style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">—</div>
-    <input type="number" id="drawerInput" style="width:100%; padding:14px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px;" placeholder="Enter forecast amount">
+
+    <div id="drawerCustomer"
+      style="font-weight:800;font-size:18px;color:var(--mol-blue);"></div>
+
+    <div id="drawerTotal"
+      style="color:var(--text-muted);margin-bottom:15px;"></div>
+
+    <input type="number" id="drawerInput"
+      style="width:100%;padding:14px;border:1px solid #ddd;border-radius:10px;"
+      placeholder="Enter forecast">
+
     <div class="drawer-actions">
+
       <button onclick="closeDrawer()">Cancel</button>
-      <button class="primary" onclick="saveDrawerForecast()">Save Forecast</button>
+
+      <button class="primary" onclick="saveDrawerForecast()">Save</button>
+
     </div>
+
   </div>
+
 </div>
 
-<div class="toast" id="toast">✅ Forecast updated successfully</div>
+
+<div class="toast" id="toast"></div>
+
 
 <script>
-let preloadedData=null, ageingChartObj=null, picChartObj=null, defaulterChartObj=null;
+
+let preloadedData=null;
+
 const API_URL="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+
 const PASSWORD_HASH="9f7259520fecfc4f2ae2c2627cd625197070aa7a73d90938c680f8b5aaba747a";
+
 const isMobile=window.innerWidth<=768;
 
 const n=v=>Number(String(v||0).replace(/,/g,""));
+
 const fmt=v=>n(v).toLocaleString('en-IN');
+
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
-const wrapLabel = (str) => {
-    if (!str) return "";
-    const words = str.split(' ');
-    return words.length <= 2 ? str : [words.slice(0, 2).join(' '), words.slice(2, 4).join(' ') + (words.length > 4 ? '..' : '')];
-};
+
+/* HELPERS */
+
+function stopEvent(e){ e.stopPropagation(); }
+
+function showToast(msg){
+
+  const t=document.getElementById('toast');
+
+  t.innerText=msg;
+  t.style.display="block";
+  t.style.opacity="1";
+
+  setTimeout(()=>{t.style.opacity="0"},2000);
+
+  setTimeout(()=>{
+    t.style.display="none";
+    t.style.opacity="1";
+  },2500);
+}
+
+
+/* LOGIN */
 
 async function sha256(t){
-  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
-  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+  const b=await crypto.subtle.digest("SHA-256",
+  new TextEncoder().encode(t));
+
+  return [...new Uint8Array(b)]
+  .map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
 async function checkPassword(){
-  const input = document.getElementById('pwd').value;
-  if(await sha256(input.trim()) !== PASSWORD_HASH){
-    document.getElementById('loginError').style.display="block"; return;
+
+  const input=document.getElementById('pwd').value;
+
+  if(await sha256(input.trim())!==PASSWORD_HASH){
+    document.getElementById('loginError').style.display="block";
+    return;
   }
-  document.getElementById('loginOverlay').style.display="none";
-  document.getElementById('appContainer').style.display="block";
-  const data = await fetch(API_URL).then(r=>r.json());
-  preloadedData = data;
+
+  loginOverlay.style.display="none";
+  appContainer.style.display="block";
+
+  const data=await fetch(API_URL).then(r=>r.json());
+
+  preloadedData=data;
+
   render(data);
   updateSummary(data);
   renderDashboard(data);
 }
 
+
+/* SUMMARY */
+
 function updateSummary(data){
-  let t=0, o=0;
+
+  let t=0,o=0;
+
   data.forEach(p=>{
-    t += sum(p.totals);
-    Object.values(p.customers).forEach(c => o += n(c.onAccount));
+    t+=sum(p.totals);
+
+    Object.values(p.customers)
+    .forEach(c=>o+=n(c.onAccount));
   });
-  document.getElementById('netOutstanding').innerText = "₹" + fmt(t-o);
-  document.getElementById('lastUpdated').innerText = "Refreshed: " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+  netOutstanding.innerText="₹"+fmt(t-o);
+
+  lastUpdated.innerText=
+  "Refreshed: "+
+  new Date().toLocaleTimeString([],{
+    hour:'2-digit',
+    minute:'2-digit'
+  });
 }
+
+
+/* DASHBOARD */
 
 function renderDashboard(data){
-  const labelCfg = { color: '#1e293b', font: { size: isMobile ? 10 : 12, weight: '700' }};
 
-  // 1. Ageing
-  const a = [0,0,0,0];
-  data.forEach(p=>{ a[0]+=n(p.totals["1-30"]); a[1]+=n(p.totals["31-60"]); a[2]+=n(p.totals["61-90"]); a[3]+=n(p.totals["90+"]); });
-  ageingChartObj = new Chart(document.getElementById('ageingChart'), {
-    type: 'doughnut', plugins: [ChartDataLabels],
-    data: { labels: ["1-30", "31-60", "61-90", "90+"], datasets: [{ data: a, backgroundColor: ['#16a34a','#eab308','#f97316','#dc2626'], borderWidth: 2 }] },
-    options: { 
-        maintainAspectRatio: false, 
-        layout: { padding: 10 },
-        plugins: { 
-            title: { display: true, text: 'Ageing Distribution', font: {size: 16, weight: 'bold'} }, 
-            legend: { position: 'bottom' }, 
-            datalabels: { color: '#fff', formatter: (v, c) => ((v/c.dataset.data.reduce((x,y)=>x+y,0))*100).toFixed(1) + '%' } 
-        } 
+  const labelCfg={
+    color:'#444',
+    font:{size:isMobile?10:12,weight:'600'}
+  };
+
+
+  /* PIC CHART */
+
+  const picData=data.map(p=>({
+    name:p.salesPIC,
+    val:sum(p.totals)
+  }))
+  .sort((a,b)=>b.val-a.val)
+  .slice(0,10);
+
+
+  new Chart(picChart,{
+    type:'bar',
+    plugins:[ChartDataLabels],
+
+    data:{
+      labels:picData.map(d=>d.name),
+      datasets:[{
+        data:picData.map(d=>d.val),
+        backgroundColor:'#1f4ea3'
+      }]
+    },
+
+    options:{
+      indexAxis:'y',
+      maintainAspectRatio:false,
+
+      layout:{
+        padding:{right:30}
+      },
+
+      scales:{
+        x:{display:false},
+        y:{grid:{display:false}}
+      },
+
+      plugins:{
+        legend:{display:false},
+
+        title:{
+          display:true,
+          text:'Performance by PIC'
+        },
+
+        datalabels:{
+          ...labelCfg,
+          anchor:'end',
+          align:'right',
+          formatter:v=>'₹'+(v/1000).toFixed(0)+'K'
+        }
+      }
     }
   });
 
-  // 2. PIC Bar
-  const picData = data.map(p=>({name: p.salesPIC, val: sum(p.totals)})).sort((a,b)=>b.val-a.val).slice(0,10);
-  picChartObj = new Chart(document.getElementById('picChart'), {
-    type: 'bar', plugins: [ChartDataLabels],
-    data: { labels: picData.map(d=>wrapLabel(d.name)), datasets: [{ data: picData.map(d=>d.val), backgroundColor: '#1f4ea3', borderRadius: 4 }] },
-    options: { 
-        indexAxis: 'y', 
-        maintainAspectRatio: false, 
-        layout: { padding: { right: 70 } },
-        scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { weight: '600' } } } }, 
-        plugins: { 
-            legend: { display: false }, 
-            title: { display: true, text: 'Top Performance by PIC', font: {size: 16, weight: 'bold'} }, 
-            datalabels: { ...labelCfg, anchor: 'end', align: 'right', offset: 4, formatter: v => '₹' + fmt(v) } 
-        } 
+
+  /* AGEING */
+
+  const a=[0,0,0,0];
+
+  data.forEach(p=>{
+    a[0]+=n(p.totals["1-30"]);
+    a[1]+=n(p.totals["31-60"]);
+    a[2]+=n(p.totals["61-90"]);
+    a[3]+=n(p.totals["90+"]);
+  });
+
+
+  new Chart(ageingChart,{
+    type:'doughnut',
+    plugins:[ChartDataLabels],
+
+    data:{
+      labels:["1-30","31-60","61-90","90+"],
+      datasets:[{
+        data:a,
+        backgroundColor:['#1f4ea3','#3b82f6','#60a5fa','#93c5fd']
+      }]
+    },
+
+    options:{
+      maintainAspectRatio:false,
+
+      plugins:{
+        legend:{position:'bottom'},
+
+        title:{
+          display:true,
+          text:'Ageing Distribution'
+        },
+
+        datalabels:{
+          color:'#fff',
+          formatter:(v,c)=>{
+            return ((v/c.dataset.data.reduce((x,y)=>x+y,0))*100)
+            .toFixed(0)+'%';
+          }
+        }
+      }
     }
   });
 
-  // 3. Defaulters
-  const defs = [];
-  data.forEach(p=>Object.values(p.customers).forEach(c=>{ if(n(c.totals["90+"])>0) defs.push({n:c.customerName, v:n(c.totals["90+"])}); }));
-  const topDefs = defs.sort((a,b)=>b.v-a.v).slice(0,10);
-  defaulterChartObj = new Chart(document.getElementById('defaulterChart'), {
-    type: 'bar', plugins: [ChartDataLabels],
-    data: { labels: topDefs.map(d=>wrapLabel(d.n)), datasets: [{ data: topDefs.map(d=>d.v), backgroundColor: '#dc2626', borderRadius: 4 }] },
-    options: { 
-        indexAxis: 'y', 
-        maintainAspectRatio: false, 
-        layout: { padding: { right: 80, top: 20 } },
-        scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { weight: '600' } } } }, 
-        plugins: { 
-            legend: { display: false }, 
-            title: { display: true, text: 'Top 10 Defaulters (90+ Days)', font: {size: 16, weight: 'bold'}, color: '#dc2626' }, 
-            datalabels: { ...labelCfg, color: '#dc2626', anchor: 'end', align: 'right', offset: 4, formatter: v => '₹' + fmt(v) } 
-        } 
+
+  /* DEFAULTERS */
+
+  const defs=[];
+
+  data.forEach(p=>{
+    Object.values(p.customers).forEach(c=>{
+      if(n(c.totals["90+"])>0){
+        defs.push({
+          n:c.customerName,
+          v:n(c.totals["90+"])
+        });
+      }
+    });
+  });
+
+  const topDefs=defs.sort((a,b)=>b.v-a.v).slice(0,10);
+
+
+  new Chart(defaulterChart,{
+    type:'bar',
+    plugins:[ChartDataLabels],
+
+    data:{
+      labels:topDefs.map(d=>d.n),
+      datasets:[{
+        data:topDefs.map(d=>d.v),
+        backgroundColor:'#dc2626'
+      }]
+    },
+
+    options:{
+      indexAxis:'y',
+      maintainAspectRatio:false,
+
+      layout:{
+        padding:{right:30}
+      },
+
+      scales:{
+        x:{display:false},
+        y:{grid:{display:false}}
+      },
+
+      plugins:{
+        legend:{display:false},
+
+        title:{
+          display:true,
+          text:'Top 10 Defaulters (90+ Days)',
+          color:'#dc2626'
+        },
+
+        datalabels:{
+          ...labelCfg,
+          anchor:'end',
+          align:'right',
+          formatter:v=>'₹'+fmt(v)
+        }
+      }
     }
   });
+
 }
 
-function render(data){
-  const app = document.getElementById('app');
-  app.innerHTML = "";
-  let openPIC = null, openCustomer = null;
 
-  data.forEach(pic => {
-    const card = document.createElement('div'); card.className = "card";
-    const picRow = document.createElement('div'); picRow.className = "row";
-    picRow.innerHTML = `
-      <div style="font-weight:700; color:var(--mol-blue)">${pic.salesPIC}</div>
-      <div>${fmt(sum(pic.totals))}</div><div>-</div>
+/* TABLE */
+
+function render(data){
+
+  app.innerHTML="";
+
+  let openPIC=null,openCust=null;
+
+  data.forEach(pic=>{
+
+    const card=document.createElement('div');
+    card.className="card";
+
+
+    const picRow=document.createElement('div');
+    picRow.className="row";
+
+
+    picRow.innerHTML=`
+
+      <div style="font-weight:700;color:var(--mol-blue)">
+      ${pic.salesPIC}</div>
+
+      <div>${fmt(sum(pic.totals))}</div>
+      <div>-</div>
+
       <div class="overdue">${fmt(pic.totals["90+"])}</div>
-      <div>${fmt(pic.totals["61-90"])}</div><div>${fmt(pic.totals["31-60"])}</div>
-      <div>${fmt(pic.totals["1-30"])}</div><div>-</div>
+      <div>${fmt(pic.totals["61-90"])}</div>
+      <div>${fmt(pic.totals["31-60"])}</div>
+      <div>${fmt(pic.totals["1-30"])}</div>
+      <div>-</div>
     `;
 
-    const picWrap = document.createElement('div'); picWrap.className = "hidden";
-    picRow.onclick = () => {
-      if(openPIC && openPIC !== picWrap) openPIC.classList.add('hidden');
+
+    const picWrap=document.createElement('div');
+    picWrap.className="hidden";
+
+
+    picRow.onclick=()=>{
+
+      if(openPIC && openPIC!==picWrap)
+        openPIC.classList.add('hidden');
+
       picWrap.classList.toggle('hidden');
-      openPIC = picWrap.classList.contains('hidden') ? null : picWrap;
+
+      openPIC=picWrap.classList.contains('hidden')
+      ?null:picWrap;
     };
 
-    Object.values(pic.customers).forEach(c => {
-      const custRow = document.createElement('div'); custRow.className = "row customer";
-      const invWrap = document.createElement('div'); invWrap.className = "hidden";
-      
-      custRow.innerHTML = `
+
+    Object.values(pic.customers).forEach(c=>{
+
+
+      const custRow=document.createElement('div');
+      custRow.className="row customer";
+
+      const invWrap=document.createElement('div');
+      invWrap.className="hidden";
+
+
+      custRow.innerHTML=`
+
         <div>${c.customerName}</div>
+
         <div>${fmt(sum(c.totals))}</div>
-        <div class="on-account">${c.onAccount ? fmt(c.onAccount) : '-'}</div>
+
+        <div class="on-account">${fmt(c.onAccount)}</div>
+
         <div class="overdue">${fmt(c.totals["90+"])}</div>
-        <div>${fmt(c.totals["61-90"])}</div><div>${fmt(c.totals["31-60"])}</div>
+
+        <div>${fmt(c.totals["61-90"])}</div>
+        <div>${fmt(c.totals["31-60"])}</div>
         <div>${fmt(c.totals["1-30"])}</div>
-        <div>${isMobile ? `<span class="${c.forecast?'editable-value':'editable-placeholder'}" onclick="event.stopPropagation(); openDrawer('${pic.salesPIC}','${c.customerName}','${sum(c.totals)}','${c.forecast||""}')">${c.forecast?fmt(c.forecast):'Add'}</span>` : `<input type="text" class="forecast-input" value="${c.forecast||''}" onclick="event.stopPropagation()" onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)" placeholder="₹0">`}</div>
+
+        <div>
+
+        ${isMobile?
+
+        `<span
+          class="${c.forecast?'editable-value':'editable-placeholder'}"
+          onclick="stopEvent(event);
+          openDrawer('${pic.salesPIC}',
+          '${c.customerName}',
+          '${sum(c.totals)}',
+          '${c.forecast||""}')">
+
+          ${c.forecast?fmt(c.forecast):'Add'}
+
+        </span>`
+
+
+        :
+
+        `<input type="text"
+          value="${c.forecast||''}"
+          onchange="saveForecast(
+          '${pic.salesPIC}',
+          '${c.customerName}',
+          this.value)">`
+        }
+
+        </div>
       `;
 
-      custRow.onclick = (e) => {
+
+      custRow.onclick=e=>{
+
         e.stopPropagation();
-        if(openCustomer && openCustomer !== invWrap) openCustomer.classList.add('hidden');
+
+        if(openCust && openCust!==invWrap)
+          openCust.classList.add('hidden');
+
         invWrap.classList.toggle('hidden');
-        openCustomer = invWrap.classList.contains('hidden') ? null : invWrap;
+
+        openCust=invWrap.classList.contains('hidden')
+        ?null:invWrap;
       };
 
-      c.invoices.forEach(i => {
-        const invRow = document.createElement('div'); invRow.className = "row invoice";
-        invRow.innerHTML = `
-          <div>Inv: ${i.invoiceNo}</div><div>${fmt(i.total)}</div><div>-</div>
-          <div class="${i.ageing['90+']?'overdue':''}">${fmt(i.ageing['90+']||0)}</div>
-          <div>${fmt(i.ageing['61-90']||0)}</div><div>${fmt(i.ageing['31-60']||0)}</div>
-          <div>${fmt(i.ageing['1-30']||0)}</div><div>-</div>
+
+      c.invoices.forEach(i=>{
+
+        const invRow=document.createElement('div');
+        invRow.className="row invoice";
+
+
+        invRow.innerHTML=`
+
+          <div>Inv: ${i.invoiceNo}</div>
+          <div>${fmt(i.total)}</div>
+          <div>-</div>
+
+          <div class="${i.ageing['90+']?'overdue':''}">
+          ${fmt(i.ageing['90+']||0)}</div>
+
+          <div>${fmt(i.ageing['61-90']||0)}</div>
+          <div>${fmt(i.ageing['31-60']||0)}</div>
+          <div>${fmt(i.ageing['1-30']||0)}</div>
+          <div>-</div>
         `;
+
         invWrap.appendChild(invRow);
       });
 
+
       picWrap.appendChild(custRow);
       picWrap.appendChild(invWrap);
+
     });
+
 
     card.appendChild(picRow);
     card.appendChild(picWrap);
+
     app.appendChild(card);
+
   });
 }
 
-let drawerPIC, drawerCustomerName;
-function openDrawer(pic, cust, tot, fcst){
-  drawerPIC = pic; drawerCustomerName = cust;
-  document.getElementById('drawerCustomer').innerText = cust;
-  document.getElementById('drawerTotal').innerText = "Outstanding: ₹" + fmt(tot);
-  document.getElementById('drawerInput').value = fcst;
-  document.getElementById('forecastDrawer').classList.remove('hidden');
+
+/* DRAWER */
+
+let drawerPIC,drawerCust;
+
+function openDrawer(pic,cust,tot,fc){
+
+  drawerPIC=pic;
+  drawerCust=cust;
+
+  drawerCustomer.innerText=cust;
+
+  drawerTotal.innerText=
+  "Outstanding: ₹"+fmt(tot);
+
+  drawerInput.value=fc;
+
+  forecastDrawer.classList.remove('hidden');
 }
 
-function closeDrawer(){ document.getElementById('forecastDrawer').classList.add('hidden'); }
+function closeDrawer(){
+  forecastDrawer.classList.add('hidden');
+}
 
 function saveDrawerForecast(){
-  saveForecast(drawerPIC, drawerCustomerName, document.getElementById('drawerInput').value);
+
+  saveForecast(
+    drawerPIC,
+    drawerCust,
+    drawerInput.value
+  );
+
   closeDrawer();
 }
 
-function saveForecast(pic, cust, val){
-  fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "updateForecast", salesPIC: pic, customer: cust, forecast: n(val) })
-  }).then(() => {
-    preloadedData.forEach(p => {
-      if(p.salesPIC === pic) Object.values(p.customers).forEach(c => { if(c.customerName === cust) c.forecast = n(val); });
+
+/* SAVE */
+
+function saveForecast(pic,cust,val){
+
+  fetch(API_URL,{
+    method:'POST',
+    body:JSON.stringify({
+      action:'updateForecast',
+      salesPIC:pic,
+      customer:cust,
+      forecast:n(val)
+    })
+  })
+
+  .then(()=>{
+
+    preloadedData.forEach(p=>{
+      if(p.salesPIC===pic){
+
+        Object.values(p.customers)
+        .forEach(c=>{
+          if(c.customerName===cust)
+            c.forecast=n(val);
+        });
+      }
     });
-    render(preloadedData); updateSummary(preloadedData); renderDashboard(preloadedData);
-    showToast();
+
+    render(preloadedData);
+    updateSummary(preloadedData);
+    renderDashboard(preloadedData);
+
+    showToast("Forecast updated successfully");
+
   });
 }
 
-function showToast() {
-    const t = document.getElementById('toast'); 
-    t.style.display="block";
-    setTimeout(() => t.style.display="none", 2500);
-}
 </script>
+
 </body>
 </html>
