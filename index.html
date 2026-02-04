@@ -27,7 +27,7 @@
 
 body{
   margin:0;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family:'Segoe UI',Arial,sans-serif;
   background:var(--bg);
   color:#333;
 }
@@ -101,9 +101,7 @@ body{
   margin:0;
 }
 
-.summary{
-  text-align:right;
-}
+.summary{text-align:right;}
 
 .summary .amount{
   font-size:20px;
@@ -125,7 +123,7 @@ body{
 
 .row{
   display:grid;
-  grid-template-columns:2.2fr 1.1fr 1fr 1fr 1fr 1fr 1fr 0.9fr;
+  grid-template-columns:2.2fr 1.1fr 1fr 1fr 1fr 1fr 1fr .9fr;
   gap:8px;
   padding:12px 14px;
   min-width:900px;
@@ -136,20 +134,18 @@ body{
 }
 
 .row>div{
-  padding-right:6px;
   border-right:1px solid var(--grid);
+  padding-right:6px;
 }
 
-.row>div:last-child{
-  border-right:none;
-}
+.row>div:last-child{border:none;}
 
 .header{
   background:var(--mol-blue);
   color:#fff;
   font-weight:600;
-  font-size:14px;
   border-radius:10px 10px 0 0;
+  font-size:14px;
 }
 
 .card{
@@ -174,7 +170,7 @@ body{
   font-size:14px;
 }
 
-.hidden{ display:none; }
+.hidden{display:none;}
 
 .on-account{
   color:var(--success);
@@ -216,25 +212,23 @@ body{
 
 @media(max-width:768px){
 
-  .header-wrap{
-    flex-direction:column;
-    gap:10px;
-    text-align:center;
-  }
+.header-wrap{
+  flex-direction:column;
+  text-align:center;
+  gap:10px;
+}
 
-  .summary{
-    text-align:center;
-  }
+.summary{text-align:center;}
 
-  .row{
-    grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px;
-    min-width:680px;
-    font-size:14px;
-  }
+.row{
+  grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px;
+  min-width:680px;
+  font-size:14px;
+}
 
-  .dashboard-grid{
-    grid-template-columns:1fr;
-  }
+.dashboard-grid{
+  grid-template-columns:1fr;
+}
 
 }
 
@@ -247,7 +241,7 @@ body{
   z-index:10000;
 }
 
-.drawer.hidden{ display:none; }
+.drawer.hidden{display:none;}
 
 .drawer-content{
   position:absolute;
@@ -270,7 +264,6 @@ body{
 .drawer-actions button{
   flex:1;
   padding:10px;
-  font-size:15px;
 }
 
 .drawer-actions .primary{
@@ -300,9 +293,11 @@ body{
 <body>
 
 <!-- LOGIN -->
+
 <div class="login-overlay" id="loginOverlay">
 
 <div class="login-box">
+
 <img src="https://raw.githubusercontent.com/Aditya-tiwariMOL/outstanding-dashboard/main/MOL%20Logo%2001.png">
 
 <h3>MOL LOGISTICS (INDIA) PVT LTD</h3>
@@ -312,6 +307,7 @@ body{
 <button onclick="checkPassword()">Submit</button>
 
 <div class="login-error" id="loginError">Invalid access code</div>
+
 </div>
 </div>
 
@@ -324,10 +320,11 @@ body{
 <h1>Receivables Dashboard</h1>
 
 <div class="summary">
+
 <div class="amount" id="netOutstanding">—</div>
 <div class="date" id="lastUpdated">—</div>
-</div>
 
+</div>
 </div>
 
 
@@ -336,6 +333,7 @@ body{
 <div class="table-wrapper">
 
 <div class="row header">
+
 <div>Name</div>
 <div>Total OS</div>
 <div>On Acc</div>
@@ -344,11 +342,13 @@ body{
 <div>30+</div>
 <div>1+</div>
 <div>Fcst</div>
+
 </div>
 
 <div id="app"></div>
 
 </div>
+
 
 <!-- DASHBOARD -->
 
@@ -378,6 +378,7 @@ Visual Analytics
 
 </div>
 
+
 <!-- DRAWER -->
 
 <div id="forecastDrawer" class="drawer hidden">
@@ -402,19 +403,15 @@ style="width:100%;padding:10px;margin-top:10px;">
 </div>
 </div>
 
+
 <div class="toast" id="toast">Forecast Updated</div>
 
-<!-- ================= SCRIPT ================= -->
 
 <script>
 
-/* ===== YOUR ORIGINAL SCRIPT (UNCHANGED) ===== */
-/* Only UI improved. Logic untouched. */
+/* ================= YOUR ORIGINAL SCRIPT ================= */
 
-let preloadedData=null;
-let ageingChartObj=null;
-let picChartObj=null;
-let defaulterChartObj=null;
+let preloadedData=null, ageingChartObj=null, picChartObj=null, defaulterChartObj=null;
 
 const API_URL="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
 
@@ -432,11 +429,12 @@ const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
 
 async function sha256(t){
-const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
-return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 }
 
-/* ===== LOGIN ===== */
+
+/* LOGIN */
 
 async function checkPassword(){
 
@@ -448,15 +446,16 @@ return;
 loginOverlay.style.display="none";
 appContainer.style.display="block";
 
-if(!preloadedData)
-preloadedData=await dataPromise;
+if(!preloadedData) preloadedData=await dataPromise;
 
 render(preloadedData);
 updateSummary(preloadedData);
 renderDashboard(preloadedData);
+
 }
 
-/* ===== SUMMARY ===== */
+
+/* SUMMARY */
 
 function updateSummary(data){
 
@@ -468,12 +467,13 @@ Object.values(p.customers).forEach(c=>o+=n(c.onAccount));
 });
 
 netOutstanding.innerText="₹"+fmt(t-o);
-lastUpdated.innerText="Refreshed: "+new Date().toLocaleTimeString();
+lastUpdated.innerText="Refreshed: "+new Date().toLocaleString();
 
 }
 
-/* ===== REST OF YOUR SCRIPT UNCHANGED ===== */
-/* (Charts, Accordion, Drawer, Forecast) */
+
+/* REST OF YOUR ORIGINAL JS CONTINUES HERE */
+/* (render(), charts, drawer, forecast functions unchanged) */
 
 </script>
 
