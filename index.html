@@ -115,13 +115,14 @@ body {
     border: 1px solid rgba(0,0,0,0.03);
     display: flex;
     flex-direction: column;
-    min-height: 350px;
+    min-height: 400px;
 }
 .chart-box.tall { min-height: 520px; }
 
 @media (max-width:768px) {
   .row { grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px; min-width:670px; font-size:15px; }
   .dashboard-grid { grid-template-columns: 1fr; }
+  .chart-box { min-height: 350px; }
   .chart-box.tall { min-height: 480px; }
 }
 
@@ -170,7 +171,7 @@ body {
   </div>
 
   <div id="dashboard">
-    <h2 style="text-align:center;color:#1f4ea3;margin-bottom:25px;">Dashboard Summary</h2>
+    <h2 style="text-align:center;color:#1f4ea3;margin-bottom:25px; font-weight: 600;">Dashboard Summary</h2>
     <div class="dashboard-grid">
       <div class="chart-box">
         <canvas id="ageingChart"></canvas>
@@ -179,7 +180,7 @@ body {
         <canvas id="picChart"></canvas>
       </div>
     </div>
-    <div class="chart-box tall" style="margin-top:16px;">
+    <div class="chart-box tall" style="margin-top:20px;">
       <canvas id="defaulterChart"></canvas>
     </div>
   </div>
@@ -342,7 +343,7 @@ function renderDashboard(data){
     }
   });
 
-  /* 2. PIC BAR (Top 10) */
+  /* 2. PIC BAR (Top 10) - Adaptive Thickness */
   const pic = getPICOutstanding(data);
   picChartObj = new Chart(document.getElementById('picChart'),{
     type:"bar",
@@ -351,12 +352,16 @@ function renderDashboard(data){
       labels: pic.map(p=>p.name),
       datasets:[{
         data: pic.map(p=>p.total),
-        backgroundColor: colors.blue, borderRadius:5, barThickness:14
+        backgroundColor: colors.blue, 
+        borderRadius:4,
+        categoryPercentage: 0.8, 
+        barPercentage: 0.9
       }]
     },
     options:{
       maintainAspectRatio:false,
       indexAxis: 'y',
+      layout: { padding: { right: 50 } },
       plugins:{
         legend:{ display:false },
         title:{ display:true, text:"Top 10 Sales PIC", font:{size:15, weight:'bold'}, padding:15 },
@@ -367,12 +372,15 @@ function renderDashboard(data){
       },
       scales:{
         x:{ display:false },
-        y:{ grid:{display:false}, ticks:{ font:{size:10} } }
+        y:{ 
+          grid:{display:false}, 
+          ticks:{ font:{size:11, weight:'500'}, padding: 10 } 
+        }
       }
     }
   });
 
-  /* 3. TOP DEFAULTERS (Top 10) */
+  /* 3. TOP DEFAULTERS (Top 10) - Adaptive Thickness */
   const top = getTopDefaulters(data);
   defaulterChartObj = new Chart(document.getElementById('defaulterChart'),{
     type:"bar",
@@ -381,13 +389,16 @@ function renderDashboard(data){
       labels: top.map(t=>t.name),
       datasets:[{
         data: top.map(t=>t.amount),
-        backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius:5, barThickness:14
+        backgroundColor: 'rgba(239, 68, 68, 0.8)', 
+        borderRadius:4,
+        categoryPercentage: 0.8,
+        barPercentage: 0.9
       }]
     },
     options:{
       maintainAspectRatio:false,
       indexAxis:"y",
-      layout:{ padding:{ right:50 } },
+      layout:{ padding:{ right:60 } },
       plugins:{
         legend:{ display:false },
         title:{ display:true, text:"Top 10 Defaulters (90+ Days)", font:{size:15, weight:'bold', color:colors.red}, padding:15 },
@@ -398,7 +409,10 @@ function renderDashboard(data){
       },
       scales:{
         x:{ display:false },
-        y:{ grid:{display:false}, ticks:{ font:{size:10} } }
+        y:{ 
+            grid:{display:false}, 
+            ticks:{ font:{size:11, weight:'500'}, padding: 10 } 
+        }
       }
     }
   });
