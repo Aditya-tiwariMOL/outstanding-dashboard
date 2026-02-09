@@ -908,7 +908,7 @@ options:{
 maintainAspectRatio:false,
 indexAxis:'y',
 
-layout:{padding:{right:20}},
+layout:{padding:{right:40}},
 
 plugins:{
 
@@ -930,8 +930,16 @@ formatter:v=>`₹${Math.round(v/1000)}K`
 },
 
 scales:{
-x:{display:false},
-y:{grid:{display:false}}
+
+  x:{
+    display:false,
+    grace:'15%'   // prevents stretching
+  },
+
+  y:{
+    grid:{display:false}
+  }
+
 }
 
 }
