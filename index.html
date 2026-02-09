@@ -434,6 +434,18 @@ display:none;
 
 <h2>Dashboard Summary</h2>
 
+<div style="display:flex;gap:10px;justify-content:center;margin-bottom:15px;">
+
+<select id="regionFilter" onchange="applyFilters()">
+<option value="">All Regions</option>
+</select>
+
+<select id="categoryFilter" onchange="applyFilters()">
+<option value="">All Category</option>
+</select>
+
+</div>
+
 <div class="dashboard-grid">
 
 <div class="chart-box">
@@ -522,9 +534,13 @@ appContainer.style.display="block";
 
 if(!preloadedData) preloadedData=await dataPromise;
 
-render(preloadedData);
-updateSummary(preloadedData);
-renderDashboard(preloadedData);
+setupFilters(preloadedData);
+
+filteredData=[...preloadedData];
+
+render(filteredData);
+updateSummary(filteredData);
+renderDashboard(filteredData);
 
 }
 
@@ -1001,6 +1017,58 @@ setTimeout(()=>toast.style.display="none",2000);
 });
 }
 
+  let filteredData=null;
+
+function setupFilters(data){
+
+const rSet=new Set();
+const cSet=new Set();
+
+data.forEach(p=>{
+Object.values(p.customers).forEach(c=>{
+if(c.region)rSet.add(c.region);
+if(c.category)cSet.add(c.category);
+});
+});
+
+regionFilter.innerHTML='<option value="">All Regions</option>';
+categoryFilter.innerHTML='<option value="">All Category</option>';
+
+rSet.forEach(r=>{
+regionFilter.innerHTML+=`<option>${r}</option>`;
+});
+
+cSet.forEach(c=>{
+categoryFilter.innerHTML+=`<option>${c}</option>`;
+});
+}
+
+function applyFilters(){
+
+const r=regionFilter.value;
+const c=categoryFilter.value;
+
+filteredData=preloadedData.map(p=>{
+
+const cust={};
+
+Object.values(p.customers).forEach(x=>{
+
+if((!r||x.region===r)&&(!c||x.category===c)){
+cust[x.customerName]=x;
+}
+
+});
+
+return {...p,customers:cust};
+
+}).filter(p=>Object.keys(p.customers).length);
+
+render(filteredData);
+updateSummary(filteredData);
+renderDashboard(filteredData);
+}
+  
 </script>
 </body>
 </html>
