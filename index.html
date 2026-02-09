@@ -86,6 +86,7 @@ display:none;
 display:flex;
 justify-content:space-between;
 align-items:center;
+flex-wrap:wrap;
 
 background:#fff;
 padding:18px 20px;
@@ -111,6 +112,7 @@ margin-top:6px;
 .kpi-right{
 display:flex;
 gap:12px;
+flex-wrap:wrap;
 }
 
 .kpi-card{
@@ -137,6 +139,21 @@ color:#1e40af;
 margin-top:4px;
 }
 
+/* FILTERS */
+
+.filters{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.filters select{
+padding:6px 8px;
+border-radius:6px;
+border:1px solid #cbd5e1;
+font-size:13px;
+}
+
 /* TABLE */
 
 .table-wrapper{
@@ -146,13 +163,14 @@ padding:0 12px 30px;
 
 .row{
 display:grid;
-grid-template-columns:2fr 1.1fr 1fr .9fr .9fr .9fr .9fr 1fr;
+grid-template-columns:
+2fr 1.1fr 1fr .9fr .9fr .9fr .9fr 1fr 1.5fr;
 gap:6px;
 padding:10px;
-min-width:900px;
+min-width:1100px;
 background:#fff;
 border-bottom:1px solid var(--grid);
-font-size:18px;
+font-size:17px;
 }
 
 .row>div{
@@ -182,7 +200,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.08);
 padding-left:18px;
 background:#E5FDEB;
 border-left:3px solid rgba(26,127,55,.18);
-font-size:16px;
+font-size:15px;
 }
 
 .hidden{display:none;}
@@ -197,15 +215,15 @@ color:var(--danger);
 font-weight:bold;
 }
 
-/* Forecast Input */
+/* Inputs */
 
-.row input[type="text"]{
-height:36px;
-padding:6px 10px;
-font-size:14px;
+.row input{
+height:34px;
+padding:6px 8px;
+font-size:13px;
 border-radius:6px;
 border:1px solid #cbd5e1;
-box-sizing:border-box;
+width:100%;
 }
 
 /* DASHBOARD */
@@ -267,9 +285,7 @@ padding:10px 8px;
 }
 
 .row{
-grid-template-columns:150px 80px 75px 65px 65px 65px 65px 90px;
-min-width:670px;
-font-size:15px;
+font-size:14px;
 }
 
 .dashboard-grid{
@@ -330,28 +346,7 @@ padding:10px 18px;
 border-radius:20px;
 display:none;
 }
-/* ===== MOBILE KPI FIX ===== */
 
-@media(max-width:768px){
-
-  .kpi-right{
-    display:flex;
-    width:100%;
-    gap:10px;
-  }
-
-  .kpi-card{
-    min-width:0 !important;
-    width:50%;
-    flex:1;
-    box-sizing:border-box;
-  }
-
-  .kpi-value{
-    font-size:16px;
-  }
-
-}
 </style>
 </head>
 
@@ -387,6 +382,17 @@ display:none;
 <div class="kpi-left">
 <h1>Outstanding Receivables</h1>
 <div class="updated" id="lastUpdated">—</div>
+
+<div class="filters">
+<select id="regionFilter" onchange="applyFilters()">
+<option value="">All Regions</option>
+</select>
+
+<select id="categoryFilter" onchange="applyFilters()">
+<option value="">All Categories</option>
+</select>
+</div>
+
 </div>
 
 <div class="kpi-right">
@@ -410,7 +416,8 @@ display:none;
 
 <div class="row header">
 <div>Name</div><div>Total OS</div><div>On Acc</div>
-<div>90+</div><div>60+</div><div>30+</div><div>1+</div><div>Fcst</div>
+<div>90+</div><div>60+</div><div>30+</div><div>1+</div>
+<div>Fcst</div><div>Remark</div>
 </div>
 
 <div id="app"></div>
@@ -443,48 +450,21 @@ display:none;
 
 </div>
 
-<!-- DRAWER -->
-
-<div id="forecastDrawer" class="drawer hidden">
-
-<div class="drawer-content">
-
-<div id="drawerCustomer" style="font-weight:bold;">—</div>
-<div id="drawerTotal" style="color:#666;font-size:13px;margin-bottom:10px;">—</div>
-
-<input type="number" id="drawerInput"
-style="width:100%;padding:10px;"
-placeholder="Enter forecast">
-
-<div class="drawer-actions">
-<button onclick="closeDrawer()">Cancel</button>
-<button class="primary" onclick="saveDrawerForecast()">Save</button>
-</div>
-
-</div>
-</div>
-
-<div class="toast" id="toast">Forecast updated</div>
+<div class="toast" id="toast">Updated</div>
 
 <script>
 
 /* CONFIG */
 
 let preloadedData=null;
-let ageingChartObj=null;
-let picChartObj=null;
-let defaulterChartObj=null;
+let filteredData=null;
 
-const API_URL="https://script.google.com/macros/s/AKfycbzmQV1ULJx-CZyqWanibqRuj5UV5qSmChaTFoCzIrNUBIRF9ST6tVr1JQ8w-GxdR1oB/exec";
+const API_URL="YOUR_WEBAPP_URL";
 
-const PASSWORD_HASH="9f7259520fecfc4f2ae2c2627cd625197070aa7a73d90938c680f8b5aaba747a";
+/* HELPERS */
 
-const isMobile=window.innerWidth<=768;
-
-const dataPromise=fetch(API_URL).then(r=>r.json());
-
-const n=v=>Number(String(v||0).replace(/,/g,""));
-const fmt=v=>isMobile&&n(v)>=1000?Math.round(n(v)/1000)+"K":n(v).toLocaleString();
+const n=v=>Number(v||0);
+const fmt=v=>n(v).toLocaleString();
 const sum=t=>n(t["90+"])+n(t["61-90"])+n(t["31-60"])+n(t["1-30"]);
 
 /* LOGIN */
@@ -497,18 +477,68 @@ return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
 async function checkPassword(){
 
 if(await sha256(pwd.value.trim())!==PASSWORD_HASH){
-loginError.style.display="block";
-return;
+loginError.style.display="block";return;
 }
 
 loginOverlay.style.display="none";
 appContainer.style.display="block";
 
-if(!preloadedData) preloadedData=await dataPromise;
+preloadedData=await fetch(API_URL).then(r=>r.json());
 
-render(preloadedData);
-updateSummary(preloadedData);
-renderDashboard(preloadedData);
+setupFilters(preloadedData);
+
+filteredData=[...preloadedData];
+
+renderAll();
+
+}
+
+/* FILTERS */
+
+function setupFilters(data){
+
+const regions=new Set();
+const cats=new Set();
+
+data.forEach(p=>{
+Object.values(p.customers).forEach(c=>{
+if(c.region)regions.add(c.region);
+if(c.category)cats.add(c.category);
+});
+});
+
+regions.forEach(r=>{
+regionFilter.innerHTML+=`<option>${r}</option>`;
+});
+
+cats.forEach(c=>{
+categoryFilter.innerHTML+=`<option>${c}</option>`;
+});
+
+}
+
+function applyFilters(){
+
+const r=regionFilter.value;
+const c=categoryFilter.value;
+
+filteredData=preloadedData.map(p=>{
+
+const custs={};
+
+Object.values(p.customers).forEach(x=>{
+
+if((!r||x.region===r)&&(!c||x.category===c)){
+custs[x.customerName]=x;
+}
+
+});
+
+return {...p,customers:custs};
+
+}).filter(p=>Object.keys(p.customers).length);
+
+renderAll();
 
 }
 
@@ -519,27 +549,26 @@ function updateSummary(data){
 let t=0,o=0,f=0;
 
 data.forEach(p=>{
-
 t+=sum(p.totals);
 
 Object.values(p.customers).forEach(c=>{
 o+=n(c.onAccount);
-f+=n(c.forecast||0);
+f+=n(c.forecast);
 });
-
 });
 
 netOutstanding.innerText="₹"+fmt(t-o);
 forecastOutstanding.innerText="₹"+fmt(f);
 
-const now=new Date();
-
-if(window.innerWidth<=768){
-lastUpdated.innerText=now.toLocaleDateString();
-}else{
-lastUpdated.innerText="Last refreshed: "+now.toLocaleString();
+lastUpdated.innerText=new Date().toLocaleString();
 }
 
+/* RENDER */
+
+function renderAll(){
+render(filteredData);
+updateSummary(filteredData);
+renderDashboard(filteredData);
 }
 
 /* TABLE */
@@ -547,7 +576,6 @@ lastUpdated.innerText="Last refreshed: "+now.toLocaleString();
 function render(data){
 
 app.innerHTML="";
-let openPIC=null,openCustomer=null;
 
 data.forEach(pic=>{
 
@@ -561,85 +589,46 @@ picRow.innerHTML=`
 <div>${pic.salesPIC}</div>
 <div>${fmt(sum(pic.totals))}</div>
 <div></div>
-<div class="overdue">${fmt(pic.totals["90+"])}</div>
+<div>${fmt(pic.totals["90+"])}</div>
 <div>${fmt(pic.totals["61-90"])}</div>
 <div>${fmt(pic.totals["31-60"])}</div>
 <div>${fmt(pic.totals["1-30"])}</div>
-<div></div>
+<div></div><div></div>
 `;
 
 const wrap=document.createElement("div");
 wrap.className="hidden";
 
-picRow.onclick=()=>{
-if(openPIC&&openPIC!==wrap)openPIC.classList.add("hidden");
-wrap.classList.toggle("hidden");
-openPIC=wrap.classList.contains("hidden")?null:wrap;
-};
+picRow.onclick=()=>wrap.classList.toggle("hidden");
 
 Object.values(pic.customers).forEach(c=>{
 
 const r=document.createElement("div");
 r.className="row customer";
 
-const invWrap=document.createElement("div");
-invWrap.className="hidden";
-
 r.innerHTML=`
+
 <div>${c.customerName}</div>
 <div>${fmt(sum(c.totals))}</div>
 <div class="on-account">${fmt(c.onAccount)}</div>
-<div class="overdue">${fmt(c.totals["90+"])}</div>
+<div>${fmt(c.totals["90+"])}</div>
 <div>${fmt(c.totals["61-90"])}</div>
 <div>${fmt(c.totals["31-60"])}</div>
 <div>${fmt(c.totals["1-30"])}</div>
 
 <div>
-${
-isMobile?
-`<span onclick="event.stopPropagation();
-openDrawer('${pic.salesPIC}','${c.customerName}',
-'${sum(c.totals)}','${c.forecast||""}')">
-${c.forecast?fmt(c.forecast):'Add'}
-</span>`:
+<input value="${c.forecast||''}"
+onchange="saveForecast('${pic.salesPIC}','${c.customerName}',this.value)">
+</div>
 
-`<input type="text"
-value="${c.forecast||''}"
-onclick="event.stopPropagation()"
-onfocus="event.stopPropagation()"
-onchange="saveForecast('${pic.salesPIC}',
-'${c.customerName}',this.value)">`
-}
+<div>
+<input maxlength="60"
+value="${c.remark||''}"
+onchange="saveRemark('${pic.salesPIC}','${c.customerName}',this.value)">
 </div>
 `;
 
-r.onclick=()=>{
-if(openCustomer&&openCustomer!==invWrap)openCustomer.classList.add("hidden");
-invWrap.classList.toggle("hidden");
-openCustomer=invWrap.classList.contains("hidden")?null:invWrap;
-};
-
-c.invoices.forEach(i=>{
-
-const inv=document.createElement("div");
-inv.className="row invoice";
-
-inv.innerHTML=`
-<div>${i.invoiceNo}</div>
-<div>${fmt(i.total)}</div>
-<div></div>
-<div>${fmt(i.ageing["90+"]||0)}</div>
-<div>${fmt(i.ageing["61-90"]||0)}</div>
-<div>${fmt(i.ageing["31-60"]||0)}</div>
-<div>${fmt(i.ageing["1-30"]||0)}</div>
-<div></div>
-`;
-
-invWrap.appendChild(inv);
-});
-
 wrap.appendChild(r);
-wrap.appendChild(invWrap);
 
 });
 
@@ -651,250 +640,7 @@ app.appendChild(card);
 
 }
 
-/* DASHBOARD */
-
-function getAgeingTotals(data){
-
-let a1=0,a2=0,a3=0,a4=0;
-
-data.forEach(p=>{
-a4+=n(p.totals["90+"]);
-a3+=n(p.totals["61-90"]);
-a2+=n(p.totals["31-60"]);
-a1+=n(p.totals["1-30"]);
-});
-
-return[a1,a2,a3,a4];
-}
-
-function getPICOutstanding(data){
-return data.map(p=>({name:p.salesPIC,total:sum(p.totals)}))
-.sort((a,b)=>b.total-a.total)
-.slice(0,10);
-}
-
-function getTopDefaulters(data){
-
-const list=[];
-
-data.forEach(p=>{
-Object.values(p.customers).forEach(c=>{
-if(n(c.totals["90+"])>0){
-list.push({name:c.customerName,amount:n(c.totals["90+"])});
-}
-});
-});
-
-return list.sort((a,b)=>b.amount-a.amount).slice(0,10);
-}
-
-function renderDashboard(data){
-
-if(ageingChartObj)ageingChartObj.destroy();
-if(picChartObj)picChartObj.destroy();
-if(defaulterChartObj)defaulterChartObj.destroy();
-
-const labelSize=isMobile?11:13;
-const titleSize=isMobile?15:17;
-const nameLimit=isMobile?10:18;
-
-const blues=['#60a5fa','#3b82f6','#2563eb','#1e40af'];
-
-/* DONUT */
-
-const[a1,a2,a3,a4]=getAgeingTotals(data);
-const total=a1+a2+a3+a4;
-
-ageingChartObj=new Chart(ageingChart,{
-
-type:"doughnut",
-plugins:[ChartDataLabels],
-
-data:{
-labels:["1-30","31-60","61-90","90+"],
-datasets:[{
-data:[a1,a2,a3,a4],
-backgroundColor:blues,
-borderWidth:3,
-borderColor:"#fff"
-}]
-},
-
-options:{
-maintainAspectRatio:false,
-cutout:"55%",
-
-plugins:{
-
-legend:{position:"bottom"},
-
-title:{
-display:true,
-text:"Ageing Distribution",
-font:{size:titleSize,weight:"bold"}
-},
-
-datalabels:{
-color:"#fff",
-formatter:v=>((v/total)*100).toFixed(1)+"%"
-}
-
-}
-}
-
-});
-
-/* PIC */
-
-const pic=getPICOutstanding(data);
-
-picChartObj=new Chart(picChart,{
-
-type:"bar",
-plugins:[ChartDataLabels],
-
-data:{
-labels:pic.map(p=>p.name.substring(0,nameLimit)),
-datasets:[{
-data:pic.map(p=>p.total),
-backgroundColor:'#2563eb',
-borderRadius:4
-}]
-},
-
-options:{
-maintainAspectRatio:false,
-indexAxis:'y',
-
-layout:{padding:{right:20}},
-
-plugins:{
-
-legend:{display:false},
-
-title:{
-display:true,
-text:"Top 10 Sales PIC",
-font:{size:titleSize,weight:"bold"}
-},
-
-datalabels:{
-color:'#444',
-anchor:'end',
-align:'right',
-formatter:v=>`₹${Math.round(v/1000)}K`
-}
-
-},
-
-scales:{
-x:{display:false},
-y:{grid:{display:false}}
-}
-
-}
-
-});
-
-/* DEFAULTERS */
-
-const top=getTopDefaulters(data);
-
-defaulterChartObj=new Chart(defaulterChart,{
-
-type:"bar",
-plugins:[ChartDataLabels],
-
-data:{
-
-labels: top.map(t=>{
-
-const words=t.name.split(" ");
-
-if(words.length<=4){
-
-const l1=words.slice(0,2).join(" ");
-const l2=words.slice(2).join(" ");
-
-return l2?[l1,l2]:[l1];
-}
-
-const l1=words.slice(0,2).join(" ");
-const l2=words.slice(2,4).join(" ")+"...";
-
-return[l1,l2];
-
-}),
-
-datasets:[{
-data:top.map(t=>t.amount),
-backgroundColor:'#ef4444',
-borderRadius:4
-}]
-},
-
-options:{
-maintainAspectRatio:false,
-indexAxis:'y',
-
-layout:{padding:{right:20}},
-
-plugins:{
-
-legend:{display:false},
-
-title:{
-display:true,
-text:"Top 10 Defaulters (90+ Days)",
-font:{size:titleSize,weight:"bold"},
-color:'#ef4444'
-},
-
-datalabels:{
-color:'#ef4444',
-anchor:'end',
-align:'right',
-formatter:v=>`₹${Math.round(v/1000)}K`
-}
-
-},
-
-scales:{
-x:{display:false},
-y:{grid:{display:false}}
-}
-
-}
-
-});
-
-}
-
-/* DRAWER */
-
-let drawerPIC,drawerCustomerName;
-
-function openDrawer(pic,cust,tot,fcst){
-
-drawerPIC=pic;
-drawerCustomerName=cust;
-
-drawerCustomer.innerText=cust;
-drawerTotal.innerText="Total: ₹"+fmt(tot);
-
-drawerInput.value=fcst;
-
-forecastDrawer.classList.remove("hidden");
-}
-
-function closeDrawer(){
-forecastDrawer.classList.add("hidden");
-}
-
-function saveDrawerForecast(){
-saveForecast(drawerPIC,drawerCustomerName,drawerInput.value);
-closeDrawer();
-}
+/* API */
 
 function saveForecast(pic,cust,val){
 
@@ -906,26 +652,31 @@ salesPIC:pic,
 customer:cust,
 forecast:n(val)
 })
-})
-.then(()=>{
+}).then(()=>reload());
 
-preloadedData.forEach(p=>{
-if(p.salesPIC===pic){
-Object.values(p.customers).forEach(c=>{
-if(c.customerName===cust)c.forecast=n(val);
-});
 }
-});
 
-render(preloadedData);
-updateSummary(preloadedData);
-renderDashboard(preloadedData);
+function saveRemark(pic,cust,val){
 
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+action:"updateRemark",
+salesPIC:pic,
+customer:cust,
+remark:val.substring(0,60)
+})
+}).then(()=>reload());
+
+}
+
+function reload(){
+fetch(API_URL).then(r=>r.json()).then(d=>{
+preloadedData=d;
+applyFilters();
 toast.style.display="block";
-setTimeout(()=>toast.style.display="none",2000);
-
+setTimeout(()=>toast.style.display="none",1500);
 });
-
 }
 
 </script>
