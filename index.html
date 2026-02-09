@@ -362,6 +362,83 @@ display:none;
   }
 
 }
+  /* FILTER BAR */
+
+.filter-bar{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
+
+  margin:15px 0 20px;
+  flex-wrap:wrap;
+}
+
+.filter-box{
+  display:flex;
+  align-items:center;
+  gap:6px;
+
+  background:#f1f5ff;
+  padding:6px 10px;
+  border-radius:20px;
+
+  border:1px solid rgba(31,78,163,0.15);
+}
+
+.filter-box span{
+  font-size:12px;
+  color:#475569;
+  font-weight:500;
+}
+
+.filter-box select{
+  border:none;
+  background:transparent;
+
+  font-size:13px;
+  font-weight:600;
+  color:#1f4ea3;
+
+  cursor:pointer;
+  outline:none;
+}
+
+.filter-clear{
+  background:#1f4ea3;
+  color:#fff;
+
+  border:none;
+  border-radius:20px;
+
+  padding:6px 14px;
+  font-size:12px;
+  font-weight:600;
+
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.filter-clear:hover{
+  background:#183d82;
+}
+
+@media(max-width:768px){
+
+  .filter-bar{
+    gap:8px;
+  }
+
+  .filter-box{
+    padding:5px 8px;
+  }
+
+  .filter-clear{
+    padding:5px 10px;
+    font-size:11px;
+  }
+}
+
 </style>
 </head>
 
@@ -434,15 +511,25 @@ display:none;
 
 <h2>Dashboard Summary</h2>
 
-<div style="display:flex;gap:10px;justify-content:center;margin-bottom:15px;">
+<div class="filter-bar">
 
-<select id="regionFilter" onchange="applyFilters()">
-<option value="">All Regions</option>
-</select>
+  <div class="filter-box">
+    <span>Region</span>
+    <select id="regionFilter" onchange="applyFilters()">
+      <option value="">All</option>
+    </select>
+  </div>
 
-<select id="categoryFilter" onchange="applyFilters()">
-<option value="">All Category</option>
-</select>
+  <div class="filter-box">
+    <span>Category</span>
+    <select id="categoryFilter" onchange="applyFilters()">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <button class="filter-clear" onclick="clearFilters()">
+    Clear
+  </button>
 
 </div>
 
@@ -1067,6 +1154,14 @@ return {...p,customers:cust};
 render(filteredData);
 updateSummary(filteredData);
 renderDashboard(filteredData);
+}
+
+  function clearFilters(){
+
+  regionFilter.value="";
+  categoryFilter.value="";
+
+  applyFilters();
 }
   
 </script>
