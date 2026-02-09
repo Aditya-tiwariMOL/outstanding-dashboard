@@ -1010,8 +1010,16 @@ formatter:v=>`₹${Math.round(v/1000)}K`
 },
 
 scales:{
-x:{display:false},
-y:{grid:{display:false}}
+
+  x:{
+    display:false,
+    grace:'15%'
+  },
+
+  y:{
+    grid:{display:false}
+  }
+
 }
 
 }
