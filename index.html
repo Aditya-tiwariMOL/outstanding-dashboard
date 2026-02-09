@@ -1063,9 +1063,7 @@ if(c.customerName===cust)c.forecast=n(val);
 }
 });
 
-render(preloadedData);
-updateSummary(preloadedData);
-renderDashboard(preloadedData);
+applyFilters();
 
 toast.style.display="block";
 setTimeout(()=>toast.style.display="none",2000);
@@ -1094,9 +1092,7 @@ if(c.customerName===cust)c.remark=val;
 }
 });
 
-render(preloadedData);
-updateSummary(preloadedData);
-renderDashboard(preloadedData);
+applyFilters();
 
 toast.style.display="block";
 setTimeout(()=>toast.style.display="none",2000);
