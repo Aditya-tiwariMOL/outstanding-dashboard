@@ -678,7 +678,7 @@ picRow.className="row";
 
 picRow.innerHTML=`
 <div>${pic.salesPIC}</div>
-<div>${fmt(sum(pic.totals))}</div>
+<div>${fmt(sum(pic.totals) - getPICOnAccount(pic))}</div>
 <div></div>
 <div class="overdue">${fmt(pic.totals["90+"])}</div>
 <div>${fmt(pic.totals["61-90"])}</div>
@@ -706,7 +706,7 @@ invWrap.className="hidden";
 
 r.innerHTML=`
 <div>${c.customerName}</div>
-<div>${fmt(sum(c.totals))}</div>
+<div>${fmt(sum(c.totals) - n(c.onAccount))}</div>
 <div class="on-account">${fmt(c.onAccount)}</div>
 <div class="overdue">${fmt(c.totals["90+"])}</div>
 <div>${fmt(c.totals["61-90"])}</div>
@@ -1175,6 +1175,18 @@ renderDashboard(filteredData);
 
   applyFilters();
 }
+
+  function getPICOnAccount(pic){
+
+  let total = 0;
+
+  Object.values(pic.customers).forEach(c=>{
+    total += n(c.onAccount);
+  });
+
+  return total;
+}
+
   
 </script>
 </body>
