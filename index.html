@@ -1061,13 +1061,27 @@ closeDrawer();
 
 function saveForecast(pic,cust,val){
 
+let rowIndex=null;
+
+// Find rowIndex from loaded data
+preloadedData.forEach(p=>{
+  if(p.salesPIC===pic){
+    Object.values(p.customers).forEach(c=>{
+      if(c.customerName===cust){
+        rowIndex=c.rowIndex;
+      }
+    });
+  }
+});
+
 fetch(API_URL,{
 method:"POST",
 body:JSON.stringify({
 action:"updateForecast",
 salesPIC:pic,
 customer:cust,
-forecast:n(val)
+forecast:n(val),
+rowIndex:rowIndex   // ✅ SEND ROW NUMBER
 })
 })
 .then(()=>{
@@ -1080,12 +1094,15 @@ if(c.customerName===cust)c.forecast=n(val);
 }
 });
 
-applyFilters();
+render(preloadedData);
+updateSummary(preloadedData);
+renderDashboard(preloadedData);
 
 toast.style.display="block";
 setTimeout(()=>toast.style.display="none",2000);
 
 });
+
 }
 
 function saveRemark(pic,cust,val){
