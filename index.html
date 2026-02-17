@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" href="OS.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -679,7 +678,7 @@ picRow.className="row";
 
 picRow.innerHTML=`
 <div>${pic.salesPIC}</div>
-<div>${fmt(sum(pic.totals) - getPICOnAccount(pic))}</div>
+<div>${fmt(sum(pic.totals))}</div>
 <div></div>
 <div class="overdue">${fmt(pic.totals["90+"])}</div>
 <div>${fmt(pic.totals["61-90"])}</div>
@@ -707,7 +706,7 @@ invWrap.className="hidden";
 
 r.innerHTML=`
 <div>${c.customerName}</div>
-<div>${fmt(sum(c.totals) - n(c.onAccount))}</div>
+<div>${fmt(sum(c.totals))}</div>
 <div class="on-account">${fmt(c.onAccount)}</div>
 <div class="overdue">${fmt(c.totals["90+"])}</div>
 <div>${fmt(c.totals["61-90"])}</div>
@@ -1059,72 +1058,35 @@ saveRemark(drawerPIC,drawerCustomerName,drawerRemark.value);
 closeDrawer();
 }
 
-function saveForecast(pic, cust, val){
+function saveForecast(pic,cust,val){
 
-  let rowIndex = null;
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+action:"updateForecast",
+salesPIC:pic,
+customer:cust,
+forecast:n(val)
+})
+})
+.then(()=>{
 
-  // Find row index
-  preloadedData.forEach(p=>{
-    if(p.salesPIC===pic){
-      Object.values(p.customers).forEach(c=>{
-        if(c.customerName===cust){
-          rowIndex = c.rowIndex;
-        }
-      });
-    }
-  });
-
-  console.log("ROW:", rowIndex);
-
-  fetch(API_URL,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      action:"updateForecast",
-      salesPIC:pic,
-      customer:cust,
-      forecast:n(val),
-      rowIndex:rowIndex
-    })
-  })
-  .then(r => r.json())          // ✅ IMPORTANT
-  .then(res => {
-
-    console.log("SERVER:", res);
-
-    if(res.status !== "success"){
-      alert("Update failed: " + (res.message||"Unknown"));
-      return;
-    }
-
-    // Update local data
-    preloadedData.forEach(p=>{
-      if(p.salesPIC===pic){
-        Object.values(p.customers).forEach(c=>{
-          if(c.customerName===cust){
-            c.forecast = n(val);
-          }
-        });
-      }
-    });
-
-    applyFilters();             // re-render properly
-    updateSummary(filteredData);
-    renderDashboard(filteredData);
-
-    toast.innerText="Forecast updated";
-    toast.style.display="block";
-    setTimeout(()=>toast.style.display="none",2000);
-
-  })
-  .catch(err=>{
-    console.error("FETCH ERROR:",err);
-    alert("Network / Script Error");
-  });
-
+preloadedData.forEach(p=>{
+if(p.salesPIC===pic){
+Object.values(p.customers).forEach(c=>{
+if(c.customerName===cust)c.forecast=n(val);
+});
 }
+});
+
+applyFilters();
+
+toast.style.display="block";
+setTimeout(()=>toast.style.display="none",2000);
+
+});
+}
+
 function saveRemark(pic,cust,val){
 
 fetch(API_URL,{
@@ -1213,18 +1175,6 @@ renderDashboard(filteredData);
 
   applyFilters();
 }
-
-  function getPICOnAccount(pic){
-
-  let total = 0;
-
-  Object.values(pic.customers).forEach(c=>{
-    total += n(c.onAccount);
-  });
-
-  return total;
-}
-
   
 </script>
 </body>
