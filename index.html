@@ -1074,15 +1074,18 @@ preloadedData.forEach(p=>{
   }
 });
 
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({
-action:"updateForecast",
-salesPIC:pic,
-customer:cust,
-forecast:n(val),
-rowIndex:rowIndex   // ✅ SEND ROW NUMBER
-})
+fetch(API_URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    action: "updateForecast",
+    salesPIC: pic,
+    customer: cust,
+    forecast: n(val),
+    rowIndex: rowIndex
+  })
 })
 .then(()=>{
 
