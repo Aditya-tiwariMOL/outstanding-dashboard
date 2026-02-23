@@ -645,7 +645,11 @@ let t=0,o=0,f=0;
 
 data.forEach(p=>{
 
-t+=sum(p.totals);
+t +=
+  n(p.totals["90+"]) +
+  n(p.totals["61-90"]) +
+  n(p.totals["31-60"]) +
+  n(p.totals["1-30"]);
 
 Object.values(p.customers).forEach(c=>{
 o+=n(c.onAccount);
