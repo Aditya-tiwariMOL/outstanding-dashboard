@@ -587,7 +587,6 @@ placeholder="Enter remark">
 /* CONFIG */
 
 let preloadedData=null;
-let pressTimer = null;
 let ageingChartObj=null;
 let picChartObj=null;
 let defaulterChartObj=null;
@@ -702,7 +701,7 @@ Object.values(pic.customers).forEach(c=>{
 
 const r=document.createElement("div");
 r.className="row customer";
-enableCustomerLongPress(r, c.customerName);
+
 const invWrap=document.createElement("div");
 invWrap.className="hidden";
 
@@ -1029,37 +1028,7 @@ scales:{
 });
 
 }
-function enableCustomerLongPress(element, customerName){
 
-  element.addEventListener("mousedown", start);
-  element.addEventListener("touchstart", start);
-
-  element.addEventListener("mouseup", cancel);
-  element.addEventListener("mouseleave", cancel);
-  element.addEventListener("touchend", cancel);
-
-  function start(){
-    pressTimer = setTimeout(()=>{
-      downloadCustomer(customerName);
-    },3000);
-  }
-
-  function cancel(){
-    clearTimeout(pressTimer);
-  }
-}
-
-function downloadCustomer(customer){
-
-  const url =
-    API_URL +
-    "?download=customer&customer=" +
-    encodeURIComponent(customer);
-
-  window.location.href = url;
-}
-
-  
 /* DRAWER */
 
 let drawerPIC,drawerCustomerName;
