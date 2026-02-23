@@ -607,7 +607,16 @@ const sum = (t, onAcc = 0) =>
   n(t["31-60"]) +
   n(t["1-30"]) -
   n(onAcc);
+function getPICOnAccount(pic){
 
+  let total = 0;
+
+  Object.values(pic.customers).forEach(c=>{
+    total += n(c.onAccount);
+  });
+
+  return total;
+}
 /* LOGIN */
 
 async function sha256(t){
@@ -688,7 +697,7 @@ picRow.className="row";
 
 picRow.innerHTML=`
 <div>${pic.salesPIC}</div>
-<div>${fmt(sum(pic.totals))}</div>
+<div>${fmt(sum(pic.totals, getPICOnAccount(pic)))}</div>
 <div></div>
 <div class="overdue">${fmt(pic.totals["90+"])}</div>
 <div>${fmt(pic.totals["61-90"])}</div>
