@@ -1090,8 +1090,6 @@ function saveForecast(pic,cust,val){
     }
   });
 
-  applyFilters();
-
   // 2️⃣ Show success popup instantly
   toast.style.display="block";
   setTimeout(()=>toast.style.display="none",1200);
@@ -1129,8 +1127,6 @@ if(c.customerName===cust)c.remark=val;
 });
 }
 });
-
-applyFilters();
 
 toast.style.display="block";
 setTimeout(()=>toast.style.display="none",2000);
