@@ -1089,6 +1089,8 @@ function saveForecast(pic,cust,val){
       });
     }
   });
+    // Update header KPI
+  updateSummary(filteredData);
 
   // 2️⃣ Show success popup instantly
   toast.style.display="block";
